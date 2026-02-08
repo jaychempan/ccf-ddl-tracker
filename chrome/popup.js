@@ -101,6 +101,7 @@ function applyTranslations() {
   }
 
   const locale = currentLang === "en" ? "en-US" : "zh-CN";
+  document.documentElement.setAttribute("lang", locale);
   dateInput?.setAttribute("lang", locale);
   timeInput?.setAttribute("lang", locale);
 }
