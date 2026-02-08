@@ -22,8 +22,8 @@ Conference data is synchronized from the official **CCFDDL** repository to ensur
 📌 Data source synced from the official CCFDDL repository:
 [https://github.com/ccfddl/ccf-deadlines](https://github.com/ccfddl/ccf-deadlines)
 
-<img width="442" height="653" alt="Snipaste_2026-02-08_12-51-14" src="https://github.com/user-attachments/assets/df9dd755-0d3e-476d-902c-36ef460837e6" />
-<img width="381" height="614" alt="Snipaste_2026-02-08_12-51-54" src="https://github.com/user-attachments/assets/b0537a5c-ce59-4f53-81bb-4dce5547d29d" />
+<img width="399" height="643" alt="111" src="https://github.com/user-attachments/assets/4e8f42bb-f0c1-4333-8886-cec648cae39c" />
+<img width="356" height="602" alt="222" src="https://github.com/user-attachments/assets/7b7ba68f-3afd-4d80-80ee-0e6a78af8332" />
 
 
 ---
