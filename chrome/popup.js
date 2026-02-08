@@ -97,8 +97,12 @@ function applyTranslations() {
   });
 
   if (langToggle) {
-    langToggle.textContent = currentLang === "zh" ? "EN" : "中文";
+    langToggle.textContent = currentLang === "zh" ? "EN" : "ZH";
   }
+
+  const locale = currentLang === "en" ? "en-US" : "zh-CN";
+  dateInput?.setAttribute("lang", locale);
+  timeInput?.setAttribute("lang", locale);
 }
 
 function setLanguage(lang) {
@@ -125,7 +129,7 @@ function daysLeft(datetime) {
   const ts = toTimestamp(datetime);
   if (ts === null) return null;
   const diff = ts - Date.now();
-  return Math.ceil(diff / MS_PER_DAY);
+  return Math.max(0, Math.floor(diff / MS_PER_DAY));
 }
 
 function formatDate(datetime) {
