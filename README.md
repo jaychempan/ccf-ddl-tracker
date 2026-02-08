@@ -1,5 +1,5 @@
 <div align="center">
-<img src="assets/ccf-ddl-tracker-logo.png" alt="Image" width="70">
+<img src="assets/ccf-ddl-tracker-logo.png" alt="Image" width="100">
 </p>
 
 <p align="center">
