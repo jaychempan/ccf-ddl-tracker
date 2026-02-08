@@ -1,4 +1,8 @@
 <div align="center">
+<img src="assets/ccf-ddl-tracker-logo.png" alt="Image" width="70">
+</p>
+
+<p align="center">
 
 # CCF DDL Tracker 🚀
 
