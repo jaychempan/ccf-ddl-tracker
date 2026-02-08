@@ -1,4 +1,3 @@
-<div align="center">
 <img src="assets/ccf-ddl-tracker-logo.png" alt="Image" width="100">
 </p>
 
@@ -13,6 +12,20 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 </div>
 
 ---
+
+## 更新日志 / Changelog
+
+### v1.0.1
+
+**中文**
+- 修复了日期无法自动更新的问题  
+- 新增手动刷新按钮，支持用户主动触发更新  
+- 优化剩余天数的计算逻辑，使**当日截止的任务正确显示为 0 天**
+
+**English**
+- Fixed an issue where dates could not be updated automatically  
+- Added a manual refresh button to allow users to trigger updates manually  
+- Improved the remaining days calculation logic so that **tasks due today are correctly displayed as 0 days**<div align="center">
 
 ## English
 
