@@ -5,6 +5,8 @@ CCF DDL Tracker 是一个 **轻量、实用的 Chrome 浏览器插件**，用于
 
 📌 **数据来源同步自官方 CCFDDL 仓库 ｜ 插件同步至CCFDDL 仓库**：  https://github.com/ccfddl/ccf-deadlines
 
+<img width="442" height="653" alt="Snipaste_2026-02-08_12-51-14" src="https://github.com/user-attachments/assets/df9dd755-0d3e-476d-902c-36ef460837e6" />
+<img width="381" height="614" alt="Snipaste_2026-02-08_12-51-54" src="https://github.com/user-attachments/assets/b0537a5c-ce59-4f53-81bb-4dce5547d29d" />
 
 ---
 
