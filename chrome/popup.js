@@ -1,5 +1,6 @@
 const STORAGE_KEY = "deadlines";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 60 * 1000;
 
 const form = document.getElementById("deadline-form");
 const titleInput = document.getElementById("title");
@@ -17,6 +18,7 @@ const langToggle = document.getElementById("lang-toggle");
 let ccfddlItems = [];
 let currentLang = "zh";
 const LANG_STORAGE_KEY = "language";
+let refreshTimer = null;
 
 const translations = {
   zh: {
@@ -479,6 +481,19 @@ function loadDeadlines() {
   });
 }
 
+function startAutoRefresh() {
+  if (refreshTimer) return;
+  refreshTimer = setInterval(loadDeadlines, REFRESH_INTERVAL_MS);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      loadDeadlines();
+    }
+  });
+
+  window.addEventListener("focus", loadDeadlines);
+}
+
 function saveDeadlines(deadlines) {
   chrome.storage.local.set({ [STORAGE_KEY]: deadlines }, () => {
     render(deadlines);
@@ -527,6 +542,7 @@ chrome.storage.local.get({ [LANG_STORAGE_KEY]: "zh" }, (result) => {
   applyTranslations();
   renderCcfddlList(ccfddlItems);
   loadDeadlines();
+  startAutoRefresh();
 });
 
 loadCcfddlBtn.addEventListener("click", loadCcfddlData);
