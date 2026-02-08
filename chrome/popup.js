@@ -14,6 +14,7 @@ const ccfddlSearchInput = document.getElementById("ccfddl-search");
 const ccfddlList = document.getElementById("ccfddl-list");
 const ccfddlEmpty = document.getElementById("ccfddl-empty");
 const langToggle = document.getElementById("lang-toggle");
+const refreshDeadlinesBtn = document.getElementById("refresh-deadlines");
 
 let ccfddlItems = [];
 let currentLang = "zh";
@@ -42,6 +43,7 @@ const translations = {
       "优先使用 GitHub 仓库的最新会议信息，失败时再回退到 CCFDDL ICS。",
     my_section: "我的 DDL",
     empty_state: "还没有添加任何截止日期。",
+    refresh_button: "刷新",
     add_item: "添加",
     delete_item: "删除",
     remaining: (days) => `剩余 ${days} 天`,
@@ -68,6 +70,7 @@ const translations = {
       "Prefer GitHub repository data, with an ICS fallback if needed.",
     my_section: "My DDLs",
     empty_state: "No deadlines yet.",
+    refresh_button: "Refresh",
     add_item: "Add",
     delete_item: "Delete",
     remaining: (days) => `${days} days left`,
@@ -547,3 +550,4 @@ chrome.storage.local.get({ [LANG_STORAGE_KEY]: "zh" }, (result) => {
 
 loadCcfddlBtn.addEventListener("click", loadCcfddlData);
 ccfddlSearchInput.addEventListener("input", filterCcfddlList);
+refreshDeadlinesBtn.addEventListener("click", loadDeadlines);
