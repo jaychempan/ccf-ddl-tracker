@@ -9,13 +9,14 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 
 [English](#english) · [中文](#中文)
 
+</div>
+
+
 <div align="center">
 <video width="400" controls>
 <source src="assets/demo.mp4" type="video/mp4">
 您的浏览器不支持视频标签。
 </video>
-</div>
-
 </div>
 
 ---
