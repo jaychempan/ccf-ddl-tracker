@@ -9,11 +9,17 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 
 [English](#english) · [中文](#中文)
 
-![demo](assets/demo.gif)
+<div align="center">
+<video width="400" controls>
+<source src="assets/demo.mp4" type="video/mp4">
+您的浏览器不支持视频标签。
+</video>
+</div>
 
 </div>
 
 ---
+
 
 ## 更新日志 / Changelog
 
@@ -29,7 +35,7 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 - Added a manual refresh button to allow users to trigger updates manually  
 - Improved the remaining days calculation logic so that **tasks due today are correctly displayed as 0 days**<div align="center">
 
-## English
+## English README
 
 ### 📌 Overview
 
@@ -105,7 +111,7 @@ MIT License
 
 ---
 
-## 中文
+## 中文 README
 
 ### 📌 项目简介
 
