@@ -9,6 +9,8 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 
 [English](#english) · [中文](#中文)
 
+![demo](assets/demo.gif)
+
 </div>
 
 ---
@@ -41,7 +43,6 @@ Conference data is synchronized from the official **CCFDDL** repository to ensur
 
 <img width="399" height="643" alt="111" src="https://github.com/user-attachments/assets/4e8f42bb-f0c1-4333-8886-cec648cae39c" />
 <img width="356" height="602" alt="222" src="https://github.com/user-attachments/assets/7b7ba68f-3afd-4d80-80ee-0e6a78af8332" />
-
 
 ---
 
@@ -116,13 +117,12 @@ MIT License
 <img width="442" height="653" alt="Snipaste_2026-02-08_12-51-14" src="https://github.com/user-attachments/assets/df9dd755-0d3e-476d-902c-36ef460837e6" />
 <img width="381" height="614" alt="Snipaste_2026-02-08_12-51-54" src="https://github.com/user-attachments/assets/b0537a5c-ce59-4f53-81bb-4dce5547d29d" />
 
-
----
-
-### ✨ 功能特性
-
-* 📝 **快速添加 DDL**
-  手动输入标题、日期和时间，一键添加。
+<div align="center">
+<video width="400" controls>
+<source src="assets/demo.mp4" type="video/mp4">
+您的浏览器不支持视频标签。
+</video>
+</div>
 
 * 📅 **清晰的时间排序视图**
   所有 DDL 按截止时间自动排序，并实时显示剩余天数。
