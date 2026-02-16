@@ -13,6 +13,40 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 
 ---
 
+## Quick Start
+<div align="center" style="margin:24px 0;">
+  <a href="https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb"
+     target="_blank" rel="noopener"
+     style="
+       display:inline-flex;
+       align-items:center;
+       gap:14px;
+       padding:14px 18px;
+       border-radius:16px;
+       background:linear-gradient(135deg,#f8fafc,#eef2ff);
+       border:1px solid #e5e7eb;
+       text-decoration:none;
+       box-shadow:0 6px 20px rgba(0,0,0,0.06);
+     ">
+    <img
+      src="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg"
+      alt="Chrome Web Store"
+      width="48"
+      height="48"
+      style="display:block;"
+    />
+    <div style="text-align:left;">
+      <div style="font-size:16px;font-weight:700;color:#111827;">
+        Available on Chrome Web Store
+      </div>
+      <div style="font-size:13px;color:#4f46e5;font-weight:500;">
+        Install Extension →
+      </div>
+    </div>
+  </a>
+</div>
+
+
 
 ## 更新日志 / Changelog
 
