@@ -16,23 +16,6 @@
 
 ---
 
-## Overview
-
-**CCF DDL Tracker** keeps your upcoming deadlines in one place and shows the nearest remaining days directly on the Chrome toolbar badge. It is designed for researchers, students, and developers who want a fast popup instead of a heavy dashboard.
-
----
-
-## Highlights
-
-- **Native popup experience**: Clicking the extension icon opens a compact Chrome popup instead of a separate window.
-- **Manual + imported deadlines**: You can add custom deadlines or import recommended conferences from CCFDDL.
-- **Official site shortcuts**: Imported conferences retain homepage links, and added cards can open the conference website directly.
-- **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
-- **Display preferences**: Choose 24-hour or 12-hour time, and switch date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
-- **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
-
----
-
 ## Preview
 
 <div align="center">
@@ -68,6 +51,18 @@ Install directly from the Chrome Web Store:
 
   See [chrome/README.md](chrome/README.md) for the extension-only guide.
 </details>
+
+---
+
+
+## Highlights
+
+- **Native popup experience**: Clicking the extension icon opens a compact Chrome popup instead of a separate window.
+- **Manual + imported deadlines**: You can add custom deadlines or import recommended conferences from CCFDDL.
+- **Official site shortcuts**: Imported conferences retain homepage links, and added cards can open the conference website directly.
+- **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
+- **Display preferences**: Choose 24-hour or 12-hour time, and switch date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
+- **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
 
 ---
 
