@@ -44,27 +44,6 @@
   <img width="399" height="643" alt="English Popup Preview" src="https://github.com/user-attachments/assets/4e8f42bb-f0c1-4333-8886-cec648cae39c" />
   <img width="356" height="602" alt="Chinese Popup Preview" src="https://github.com/user-attachments/assets/7b7ba68f-3afd-4d80-80ee-0e6a78af8332" />
 </div>
-
-<details>
-  <summary>More Screens / 更多界面截图</summary>
-
-  <div align="center">
-    <img width="442" height="653" alt="Popup Screenshot 1" src="https://github.com/user-attachments/assets/df9dd755-0d3e-476d-902c-36ef460837e6" />
-    <img width="381" height="614" alt="Popup Screenshot 2" src="https://github.com/user-attachments/assets/b0537a5c-ce59-4f53-81bb-4dce5547d29d" />
-  </div>
-</details>
-
-<details>
-  <summary>Demo Video / 演示视频</summary>
-
-  <div align="center">
-    <video width="400" controls>
-      <source src="assets/demo.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</details>
-
 ---
 
 ## Install / 安装
