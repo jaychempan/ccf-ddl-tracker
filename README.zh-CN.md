@@ -19,7 +19,7 @@
 ## 预览
 
 <div align="center">
-  <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 中文预览" width="360" />
+  <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 中文预览" width="720" />
 </div>
 
 v2.0 的 popup 更强调紧凑和高效：顶部双入口卡片、默认常驻的导入面板、悬浮会议选择层、底部快捷入口，以及轻量设置面板都集中在同一视图里。
