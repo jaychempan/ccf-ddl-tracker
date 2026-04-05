@@ -36,7 +36,7 @@
 ## Preview
 
 <div align="center">
-  <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="360" />
+  <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="720" />
 </div>
 
 The v2.0 popup focuses on density and speed: compact top cards, a persistent import panel, a floating conference picker, footer shortcuts, and a lightweight settings popover.
