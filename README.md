@@ -1,277 +1,173 @@
-
-
 <div align="center">
-<img src="assets/ccf-ddl-tracker-logo.png" alt="Image" width="100">
+  <img src="assets/ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker Logo" width="96" />
 
-# CCF DDL Tracker 🚀
+  # CCF DDL Tracker
 
-A Lightweight Chrome Extension for Tracking CCF Deadlines
+  Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage.
 
-[English](#english) · [中文](#中文)
+  轻量的 Chrome 扩展，用于管理 CCF 相关会议截止日期，支持手动添加、CCFDDL 导入和本地提醒。
 
+  **Current Version / 当前版本:** `v2.0`
+
+  [Chrome Web Store](https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb) ·
+  [Local Install](#install--安装) ·
+  [Chrome Extension README](chrome/README.md) ·
+  [CCFDDL Source](https://github.com/ccfddl/ccf-deadlines) ·
+  [Contribute](https://github.com/jaychempan/ccf-ddl-tracker) ·
+  [Changelog](#changelog--更新日志)
 </div>
 
 ---
 
-## Quick Start
-<div align="center" style="margin:24px 0;">
-  <a href="https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb"
-     target="_blank" rel="noopener"
-     style="
-       display:inline-flex;
-       align-items:center;
-       gap:14px;
-       padding:14px 18px;
-       border-radius:16px;
-       background:linear-gradient(135deg,#f8fafc,#eef2ff);
-       border:1px solid #e5e7eb;
-       text-decoration:none;
-       box-shadow:0 6px 20px rgba(0,0,0,0.06);
-     ">
-    <img
-      src="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg"
-      alt="Chrome Web Store"
-      width="48"
-      height="48"
-      style="display:block;"
-    />
-    <div style="text-align:left;">
-      <div style="font-size:16px;font-weight:700;color:#111827;">
-        Available on Chrome Web Store
-      </div>
-      <div style="font-size:13px;color:#4f46e5;font-weight:500;">
-        Install Extension →
-      </div>
-    </div>
+## Overview / 简介
+
+**CCF DDL Tracker** keeps your upcoming deadlines in one place and shows the nearest remaining days directly on the Chrome toolbar badge. It is designed for researchers, students, and developers who want a fast popup instead of a heavy dashboard.
+
+**CCF DDL Tracker** 适合希望快速查看和管理会议截止日期的科研人员、学生和开发者。它使用 Chrome 原生 popup 交互，在工具栏徽标上直接显示最近一个截止日期的剩余天数。
+
+---
+
+## Highlights / 核心功能
+
+- **Native popup experience / 原生贴靠弹窗**: Clicking the extension icon opens a compact Chrome popup instead of a separate window.
+- **Manual + imported deadlines / 手动添加 + 导入会议**: You can add custom deadlines or import recommended conferences from CCFDDL.
+- **Official site shortcuts / 官网直达**: Imported conferences retain homepage links, and added cards can open the conference website directly.
+- **Bilingual UI / 中英双语**: Switch between Chinese and English from the bottom toolbar.
+- **Display preferences / 显示设置**: Choose 24-hour or 12-hour time, and switch date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
+- **Local-only data / 仅本地存储**: All data stays in `chrome.storage.local`, with no account or cloud sync.
+
+---
+
+## Preview / 预览
+
+<div align="center">
+  <img width="399" height="643" alt="English Popup Preview" src="https://github.com/user-attachments/assets/4e8f42bb-f0c1-4333-8886-cec648cae39c" />
+  <img width="356" height="602" alt="Chinese Popup Preview" src="https://github.com/user-attachments/assets/7b7ba68f-3afd-4d80-80ee-0e6a78af8332" />
+</div>
+
+<details>
+  <summary>More Screens / 更多界面截图</summary>
+
+  <div align="center">
+    <img width="442" height="653" alt="Popup Screenshot 1" src="https://github.com/user-attachments/assets/df9dd755-0d3e-476d-902c-36ef460837e6" />
+    <img width="381" height="614" alt="Popup Screenshot 2" src="https://github.com/user-attachments/assets/b0537a5c-ce59-4f53-81bb-4dce5547d29d" />
+  </div>
+</details>
+
+<details>
+  <summary>Demo Video / 演示视频</summary>
+
+  <div align="center">
+    <video width="400" controls>
+      <source src="assets/demo.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</details>
+
+---
+
+## Install / 安装
+
+### Chrome Web Store
+
+Install directly from the Chrome Web Store:
+
+<div align="center">
+  <a href="https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb" target="_blank" rel="noopener">
+    <img src="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg" alt="Chrome Web Store" width="56" height="56" />
   </a>
 </div>
 
+### Load Unpacked / 开发者模式安装
 
+1. Open Chrome and visit `chrome://extensions/`.
+2. Enable `Developer mode`.
+3. Click `Load unpacked`.
+4. Select the [`chrome/`](chrome/) directory in this repository.
+5. Pin `CCF DDL Tracker` to the toolbar and click the icon to use it.
 
-## 更新日志 / Changelog
+1. 打开 Chrome，进入 `chrome://extensions/`。
+2. 打开 `开发者模式`。
+3. 点击 `加载已解压的扩展程序`。
+4. 选择本仓库下的 [`chrome/`](chrome/) 目录。
+5. 固定到工具栏后点击图标即可使用。
 
-### v2.0
+<details>
+  <summary>Need more extension-specific details? / 需要更细的扩展说明？</summary>
 
-**中文**
-- 恢复为 Chrome 原生扩展弹窗，点击工具栏图标时使用贴靠图标的默认 popup 体验
-- 优化弹窗界面：压缩顶栏高度，移除导入区说明文案，调整滚动条为仅保留滑块、去除轨道
-- 恢复英文界面的原生日期选择器，日期显示样式继续遵循 Chrome / 系统本地化设置
-- 将“新增截止日期”和“从 CCFDDL 导入”重构为一行两个入口卡片，点击后在下方切换对应面板
-- 调整“我的 DDL”标题布局：数量显示在标题右侧，刷新按钮单独靠右
-- 将弹窗顶部图标替换为 `chrome/icons/logo.png`
-- 进一步压缩弹窗整体行高与卡片间距，提升信息密度
-- 进一步压缩“加载 / 收起”和“刷新”按钮尺寸
-- 新增表单提交成功后会自动收起；导入面板默认常驻显示，点击搜索框后会自动加载推荐会议
-- 控制外层弹窗尽量不出现滚动条，“我的 DDL”和推荐会议列表分别在内部滚动
-- 顶部两个入口卡片现在负责稳定开关面板：导入面板默认展开，再次点击导入卡片会收起它，点击新增卡片会先关闭导入面板
-- 导入面板的搜索框改为自动展开的悬浮选择层：点击搜索框会自动加载并弹出推荐会议列表
-- 顶部两个入口卡片的标题与说明文字改为居中，并进一步压缩行高
-- 顶部两个入口卡片增加了左上角角标图标，且不再额外占用行高
-- 将“从 CCFDDL 导入”入口卡片的角标换成了更简洁的搜索图标
-- 微调英文入口卡片文案，缩短标题与说明文字以减少不自然换行
-- 中文标题“我的 DDL”改为“我的截止日期”
-- 导入搜索框下方增加了一行小字，提示点击搜索框可获取最新会议列表
-- 将导入区提示文字改为居中，并把“我的截止日期”区域的刷新文字按钮换成图标按钮
-- 将刷新图标换成更常见的无底框 SVG，并增加旋转动效表示刷新已触发
-- 将语言切换和 CCFDDL 官网入口移到底部工具栏，移除右上角操作区
-- 将底部工具栏贴近弹窗底边，去掉多余留白
-- 继续压缩底部工具栏高度，将语言切换收成单行文字感
-- 将底部工具栏固定贴到底边，消除其下方空白区域
-- 增加弹窗启动瞬间的误触保护，避免打开时误触发“从 CCFDDL 导入”
-- 将“从 CCFDDL 导入”面板改为默认常驻显示，但推荐列表仍只在点击搜索框后弹出
-- 从 CCFDDL 导入的会议现在会保留官网链接，加入“我的截止日期”后可点击卡片直接打开会议官网
-- 底部工具栏新增 GitHub 协作入口，可直接打开项目仓库参与开发
-- 底部新增设置入口，可切换时间显示为 24 小时制或上午/下午 12 小时制
-- 设置面板新增日期顺序选项，可在“年月日”和“月日年”两种显示顺序之间切换
-- 扩展版本更新为 `v2.0`，并在弹窗右上角新增当前版本标记
-
-**English**
-- Restored the native Chrome extension popup so the toolbar icon opens the default anchored popup experience
-- Refined the popup UI: compressed the header, removed the import hint text, and changed scrolling visuals to keep only the thumb without the track
-- Restored the native date picker in English mode, with date display continuing to follow Chrome / system localization
-- Reworked "Add DDL" and "Import from CCFDDL" into two side-by-side entry cards that switch the corresponding panel below
-- Adjusted the "My DDLs" header so the item count sits next to the title while the Refresh button stays right-aligned
-- Replaced the popup header icon with `chrome/icons/logo.png`
-- Further tightened row height and card spacing across the popup to increase information density
-- Further reduced the size of the Load / Collapse and Refresh buttons
-- The add form now closes after a successful submit, and the import panel stays visible by default while the search field auto-loads recommendations when clicked
-- Kept the outer popup from scrolling as much as possible by moving scrolling into "My DDLs" and the recommendation list
-- The two top entry cards now control panel visibility directly: the import panel starts expanded, clicking the import card again collapses it, and clicking the add card closes the import panel first
-- The import search field now opens a floating picker: clicking the search box auto-loads and shows recommended conferences in an overlay dropdown
-- Centered the title and helper text inside the two top entry cards and tightened their line height further
-- Replaced the CCFDDL import entry card badge with a cleaner search icon
-- Moved the two top entry card icons into the top-left corner so they do not add extra line height
-- Tightened the English entry-card copy to reduce awkward wrapping in the two top cards
-- Renamed the Chinese "My DDLs" section title to "我的截止日期"
-- Added a small helper line below the import search field explaining that clicking it loads the latest conference list
-- Centered the import helper text and replaced the "My DDLs" refresh text button with an icon button
-- Replaced the refresh icon with a more standard frameless SVG and added a spin animation to signal refresh
-- Moved the language switcher and CCFDDL website shortcut into a bottom utility bar and removed the top-right actions
-- Tightened the bottom utility bar so it sits closer to the popup edge without extra blank space
-- Further compressed the bottom utility bar into a lighter single-line text-style control row
-- Made the "Import from CCFDDL" panel stay visible by default, while keeping the recommendation picker lazy-opened from the search field
-- Anchored the bottom utility bar to the popup edge so there is no empty area beneath it
-- Added a short startup click guard to prevent accidental opening of "Import from CCFDDL" when the popup first appears
-- Imported CCFDDL conferences now retain their homepage links, and added deadline cards can be clicked to open the conference website
-- Added a GitHub contribution link to the bottom utility bar for opening the project repository directly
-- Added a settings entry to the bottom bar so time display can switch between 24-hour and 12-hour formats
-- Added a date-order option in settings so displayed dates can switch between year/month/day and month/day/year
-- Updated the extension to `v2.0` and added a version label in the popup header
-
-### v1.0.1
-
-**中文**
-- 修复了日期无法自动更新的问题  
-- 新增手动刷新按钮，支持用户主动触发更新  
-- 优化剩余天数的计算逻辑，使**当日截止的任务正确显示为 0 天**
-
-**English**
-- Fixed an issue where dates could not be updated automatically  
-- Added a manual refresh button to allow users to trigger updates manually  
-- Improved the remaining days calculation logic so that **tasks due today are correctly displayed as 0 days**<div align="center">
-
-## English README
-
-### 📌 Overview
-
-**CCF DDL Tracker** is a lightweight and practical Chrome extension for tracking and managing **CCF conference deadlines (DDL)**.
-It is designed for researchers, students, and developers who want a simple, distraction-free deadline reminder tool.
-
-Conference data is synchronized from the official **CCFDDL** repository to ensure accuracy and timely updates.
-
-📌 Data source synced from the official CCFDDL repository:
-[https://github.com/ccfddl/ccf-deadlines](https://github.com/ccfddl/ccf-deadlines)
-
-<img width="399" height="643" alt="111" src="https://github.com/user-attachments/assets/4e8f42bb-f0c1-4333-8886-cec648cae39c" />
-<img width="356" height="602" alt="222" src="https://github.com/user-attachments/assets/7b7ba68f-3afd-4d80-80ee-0e6a78af8332" />
+  See [chrome/README.md](chrome/README.md) for the extension-only guide.
+</details>
 
 ---
 
-### ✨ Features
+## Customization / 自定义
 
-* 📝 **Quick DDL Creation**
-  Manually add conference titles, dates, and times with one click.
-
-* 📅 **Sorted Timeline View**
-  All deadlines are automatically sorted by time and display remaining days in real time.
-
-* 🔔 **Toolbar Countdown Badge**
-  The Chrome toolbar icon shows the remaining days for the nearest upcoming deadline.
-
-* 🗑 **One-Click Removal**
-  Easily remove completed or unnecessary deadlines.
-
-* 🔄 **Import from Official CCFDDL**
-
-  * Primary source: GitHub CCFDDL repository
-  * Fallback: CCFDDL ICS feed if GitHub access fails
-  * Clicking the search field loads the latest recommendations in a floating picker
-
-* 🌐 **Bilingual Interface (EN / 中文)**
-  Switch languages instantly from the bottom toolbar.
-
-* 🗓 **Native Date Picker**
-  The date field uses Chrome's native date picker in both languages, and its visual format follows browser or system locale settings.
+- **Language / 语言**: Toggle between Chinese and English from the popup footer.
+- **Time format / 时间制式**: Choose `24-hour` or `12-hour (AM/PM)` in the settings panel.
+- **Date order / 日期顺序**: Choose `YYYY/MM/DD` or `MM/DD/YYYY`.
+- **Imported conference cards / 导入会议卡片**: Imported items can be added to your own list and opened directly on the conference website.
 
 ---
 
-### 📦 Installation
+## Data Source & Privacy / 数据来源与隐私
 
-#### Developer Mode (Recommended)
-
-1. Open Chrome and go to `chrome://extensions/`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select the `chrome/` directory in this repository
-5. Click the toolbar icon to start using CCF DDL Tracker
+- **Primary source / 主数据源**: [`ccfddl/ccf-deadlines`](https://github.com/ccfddl/ccf-deadlines)
+- **Fallback / 回退数据源**: CCFDDL ICS feeds when GitHub data is unavailable
+- **Storage / 存储方式**: `chrome.storage.local`
+- **Privacy / 隐私**: no account, no cloud sync, no telemetry
 
 ---
 
-### 🔐 Data & Privacy
+## Development / 开发
 
-* All data is stored locally using `chrome.storage.local`
-* No cloud sync
-* No account, no tracking, no data collection
-
----
-
-### 🛠 Tech Stack
-
-* Chrome Extension (Manifest V3)
-* Vanilla JavaScript
-* `chrome.storage.local`
-* GitHub API + ICS parsing
+- Repository / 仓库: <https://github.com/jaychempan/ccf-ddl-tracker>
+- Chrome extension docs / 扩展说明: [chrome/README.md](chrome/README.md)
+- Tech stack / 技术栈: Manifest V3, Vanilla JavaScript, `chrome.storage.local`
+- Contribution / 共同开发: Issues and pull requests are welcome
 
 ---
 
-### 📄 License
+## Changelog / 更新日志
 
-MIT License
+<details open>
+  <summary><strong>v2.0</strong> - UI overhaul, import improvements, settings, and versioning</summary>
 
----
+  **中文**
 
-## 中文 README
+  - 重构 popup 布局，改为更紧凑的双入口卡片和底部工具栏
+  - 导入面板默认常驻，搜索框点击后弹出悬浮推荐列表
+  - 导入会议支持保留官网链接，加入“我的截止日期”后可点击卡片打开官网
+  - 新增显示设置，支持 `24 小时 / 12 小时` 和 `年月日 / 月日年` 两组偏好
+  - 弹窗右上角增加 `v2.0` 版本标记，并同步升级扩展版本号
 
-### 📌 项目简介
+  **English**
 
-**CCF DDL Tracker** 是一个轻量、实用的 Chrome 浏览器插件，用于集中管理和提醒 **CCF 相关会议 / 截止日期（DDL）**，适合科研人员、学生和开发者日常使用。
+  - Reworked the popup into a denser layout with two entry cards and a bottom utility bar
+  - Kept the import panel visible by default while moving recommendations into a floating search picker
+  - Imported conferences now keep homepage links and added cards can open the official conference site
+  - Added display settings for `24-hour / 12-hour` time and `year-month-day / month-day-year` date order
+  - Added a `v2.0` version label in the popup header and bumped the extension version
+</details>
 
-📌 数据来源同步自官方 CCFDDL 仓库：
-[https://github.com/ccfddl/ccf-deadlines](https://github.com/ccfddl/ccf-deadlines)
+<details>
+  <summary><strong>v1.0.1</strong> - Refresh and day-count fixes</summary>
 
-<img width="442" height="653" alt="Snipaste_2026-02-08_12-51-14" src="https://github.com/user-attachments/assets/df9dd755-0d3e-476d-902c-36ef460837e6" />
-<img width="381" height="614" alt="Snipaste_2026-02-08_12-51-54" src="https://github.com/user-attachments/assets/b0537a5c-ce59-4f53-81bb-4dce5547d29d" />
+  **中文**
 
-<div align="center">
-<video width="400" controls>
-<source src="assets/demo.mp4" type="video/mp4">
-您的浏览器不支持视频标签。
-</video>
-</div>
+  - 修复日期无法自动更新的问题
+  - 新增手动刷新按钮
+  - 修正当天截止任务显示为 `0 天`
 
-* 📅 **清晰的时间排序视图**
-  所有 DDL 按截止时间自动排序，并实时显示剩余天数。
+  **English**
 
-* 🔔 **徽标倒计时提醒**
-  浏览器工具栏图标显示最近一个 DDL 的剩余天数。
-
-* 🗑 **一键删除**
-  支持在列表中直接移除已完成或不需要的 DDL。
-
-* 🔄 **从 CCFDDL 官方仓库导入**
-
-  * 优先从 GitHub 仓库获取最新会议信息
-  * GitHub 访问失败时自动回退到 CCFDDL 的 ICS 数据源
-  * 点击搜索框即可加载最新推荐会议，并在悬浮选择层中展示
-
-* 🌐 **中英双语界面**
-  点击底部工具栏中的 EN / 中文 按钮即可切换语言。
-
-* 🗓 **原生日期选择器**
-  中英文界面都使用 Chrome 原生日期选择器，日期显示格式遵循浏览器或系统本地化设置。
+  - Fixed automatic date refresh issues
+  - Added a manual refresh button
+  - Corrected same-day deadlines to display `0 days`
+</details>
 
 ---
 
-### 📦 安装方式
-
-#### 开发者模式安装（推荐）
-
-1. 打开 Chrome，进入 `chrome://extensions/`
-2. 打开右上角的 **开发者模式**
-3. 点击 **加载已解压的扩展程序**
-4. 选择本仓库下的 `chrome/` 目录
-5. 点击工具栏中的 CCF DDL Tracker 图标即可使用
-
----
-
-### 🔐 数据与隐私
-
-* 所有数据均存储在本地：`chrome.storage.local`
-* 不上传云端
-* 不收集任何个人信息
-
----
-
-### 📄 开源协议
+## License
 
 MIT License
