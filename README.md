@@ -50,6 +50,74 @@ A Lightweight Chrome Extension for Tracking CCF Deadlines
 
 ## 更新日志 / Changelog
 
+### v2.0
+
+**中文**
+- 恢复为 Chrome 原生扩展弹窗，点击工具栏图标时使用贴靠图标的默认 popup 体验
+- 优化弹窗界面：压缩顶栏高度，移除导入区说明文案，调整滚动条为仅保留滑块、去除轨道
+- 恢复英文界面的原生日期选择器，日期显示样式继续遵循 Chrome / 系统本地化设置
+- 将“新增截止日期”和“从 CCFDDL 导入”重构为一行两个入口卡片，点击后在下方切换对应面板
+- 调整“我的 DDL”标题布局：数量显示在标题右侧，刷新按钮单独靠右
+- 将弹窗顶部图标替换为 `chrome/icons/logo.png`
+- 进一步压缩弹窗整体行高与卡片间距，提升信息密度
+- 进一步压缩“加载 / 收起”和“刷新”按钮尺寸
+- 新增表单提交成功后会自动收起；导入面板默认常驻显示，点击搜索框后会自动加载推荐会议
+- 控制外层弹窗尽量不出现滚动条，“我的 DDL”和推荐会议列表分别在内部滚动
+- 顶部两个入口卡片现在负责稳定开关面板：导入面板默认展开，再次点击导入卡片会收起它，点击新增卡片会先关闭导入面板
+- 导入面板的搜索框改为自动展开的悬浮选择层：点击搜索框会自动加载并弹出推荐会议列表
+- 顶部两个入口卡片的标题与说明文字改为居中，并进一步压缩行高
+- 顶部两个入口卡片增加了左上角角标图标，且不再额外占用行高
+- 将“从 CCFDDL 导入”入口卡片的角标换成了更简洁的搜索图标
+- 微调英文入口卡片文案，缩短标题与说明文字以减少不自然换行
+- 中文标题“我的 DDL”改为“我的截止日期”
+- 导入搜索框下方增加了一行小字，提示点击搜索框可获取最新会议列表
+- 将导入区提示文字改为居中，并把“我的截止日期”区域的刷新文字按钮换成图标按钮
+- 将刷新图标换成更常见的无底框 SVG，并增加旋转动效表示刷新已触发
+- 将语言切换和 CCFDDL 官网入口移到底部工具栏，移除右上角操作区
+- 将底部工具栏贴近弹窗底边，去掉多余留白
+- 继续压缩底部工具栏高度，将语言切换收成单行文字感
+- 将底部工具栏固定贴到底边，消除其下方空白区域
+- 增加弹窗启动瞬间的误触保护，避免打开时误触发“从 CCFDDL 导入”
+- 将“从 CCFDDL 导入”面板改为默认常驻显示，但推荐列表仍只在点击搜索框后弹出
+- 从 CCFDDL 导入的会议现在会保留官网链接，加入“我的截止日期”后可点击卡片直接打开会议官网
+- 底部工具栏新增 GitHub 协作入口，可直接打开项目仓库参与开发
+- 底部新增设置入口，可切换时间显示为 24 小时制或上午/下午 12 小时制
+- 设置面板新增日期顺序选项，可在“年月日”和“月日年”两种显示顺序之间切换
+- 扩展版本更新为 `v2.0`，并在弹窗右上角新增当前版本标记
+
+**English**
+- Restored the native Chrome extension popup so the toolbar icon opens the default anchored popup experience
+- Refined the popup UI: compressed the header, removed the import hint text, and changed scrolling visuals to keep only the thumb without the track
+- Restored the native date picker in English mode, with date display continuing to follow Chrome / system localization
+- Reworked "Add DDL" and "Import from CCFDDL" into two side-by-side entry cards that switch the corresponding panel below
+- Adjusted the "My DDLs" header so the item count sits next to the title while the Refresh button stays right-aligned
+- Replaced the popup header icon with `chrome/icons/logo.png`
+- Further tightened row height and card spacing across the popup to increase information density
+- Further reduced the size of the Load / Collapse and Refresh buttons
+- The add form now closes after a successful submit, and the import panel stays visible by default while the search field auto-loads recommendations when clicked
+- Kept the outer popup from scrolling as much as possible by moving scrolling into "My DDLs" and the recommendation list
+- The two top entry cards now control panel visibility directly: the import panel starts expanded, clicking the import card again collapses it, and clicking the add card closes the import panel first
+- The import search field now opens a floating picker: clicking the search box auto-loads and shows recommended conferences in an overlay dropdown
+- Centered the title and helper text inside the two top entry cards and tightened their line height further
+- Replaced the CCFDDL import entry card badge with a cleaner search icon
+- Moved the two top entry card icons into the top-left corner so they do not add extra line height
+- Tightened the English entry-card copy to reduce awkward wrapping in the two top cards
+- Renamed the Chinese "My DDLs" section title to "我的截止日期"
+- Added a small helper line below the import search field explaining that clicking it loads the latest conference list
+- Centered the import helper text and replaced the "My DDLs" refresh text button with an icon button
+- Replaced the refresh icon with a more standard frameless SVG and added a spin animation to signal refresh
+- Moved the language switcher and CCFDDL website shortcut into a bottom utility bar and removed the top-right actions
+- Tightened the bottom utility bar so it sits closer to the popup edge without extra blank space
+- Further compressed the bottom utility bar into a lighter single-line text-style control row
+- Made the "Import from CCFDDL" panel stay visible by default, while keeping the recommendation picker lazy-opened from the search field
+- Anchored the bottom utility bar to the popup edge so there is no empty area beneath it
+- Added a short startup click guard to prevent accidental opening of "Import from CCFDDL" when the popup first appears
+- Imported CCFDDL conferences now retain their homepage links, and added deadline cards can be clicked to open the conference website
+- Added a GitHub contribution link to the bottom utility bar for opening the project repository directly
+- Added a settings entry to the bottom bar so time display can switch between 24-hour and 12-hour formats
+- Added a date-order option in settings so displayed dates can switch between year/month/day and month/day/year
+- Updated the extension to `v2.0` and added a version label in the popup header
+
 ### v1.0.1
 
 **中文**
@@ -97,9 +165,13 @@ Conference data is synchronized from the official **CCFDDL** repository to ensur
 
   * Primary source: GitHub CCFDDL repository
   * Fallback: CCFDDL ICS feed if GitHub access fails
+  * Clicking the search field loads the latest recommendations in a floating picker
 
 * 🌐 **Bilingual Interface (EN / 中文)**
-  Switch languages instantly via the top-right button.
+  Switch languages instantly from the bottom toolbar.
+
+* 🗓 **Native Date Picker**
+  The date field uses Chrome's native date picker in both languages, and its visual format follows browser or system locale settings.
 
 ---
 
@@ -170,9 +242,13 @@ MIT License
 
   * 优先从 GitHub 仓库获取最新会议信息
   * GitHub 访问失败时自动回退到 CCFDDL 的 ICS 数据源
+  * 点击搜索框即可加载最新推荐会议，并在悬浮选择层中展示
 
 * 🌐 **中英双语界面**
-  点击右上角 EN / 中文 按钮即可切换语言。
+  点击底部工具栏中的 EN / 中文 按钮即可切换语言。
+
+* 🗓 **原生日期选择器**
+  中英文界面都使用 Chrome 原生日期选择器，日期显示格式遵循浏览器或系统本地化设置。
 
 ---
 
