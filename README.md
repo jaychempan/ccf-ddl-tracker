@@ -5,7 +5,7 @@
 
   Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage.
 
-  **Version:** `v2.0`
+  **Version:** `v2.1`
 
   [中文版本](README.zh-CN.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,7 +23,7 @@
   <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="720" />
 </div>
 
-The v2.0 popup focuses on density and speed: compact top cards, a persistent import panel, a floating conference picker, footer shortcuts, and a lightweight settings popover.
+The current popup keeps the compact v2.0 layout and adds v2.1 display controls for switching time zones, with `Asia/Shanghai` as the default.
 
 ---
 
@@ -62,7 +62,7 @@ Install directly from the Chrome Web Store:
 - **Manual + imported deadlines**: You can add custom deadlines or import recommended conferences from CCFDDL.
 - **Official site shortcuts**: Imported conferences retain homepage links, and added cards can open the conference website directly.
 - **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
-- **Display preferences**: Choose 24-hour or 12-hour time, and switch date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
+- **Display preferences**: Choose a display time zone, switch between `24-hour` and `12-hour`, and change date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
 - **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
 
 ---
@@ -70,6 +70,7 @@ Install directly from the Chrome Web Store:
 ## Customization
 
 - **Language**: Toggle between Chinese and English from the popup footer.
+- **Time zone**: Switch deadline display between supported time zones. The default is `Asia/Shanghai`.
 - **Time format**: Choose `24-hour` or `12-hour (AM/PM)` in the settings panel.
 - **Date order**: Choose `YYYY/MM/DD` or `MM/DD/YYYY`.
 - **Imported conference cards**: Imported items can be added to your own list and opened directly on the conference website.
@@ -97,6 +98,15 @@ Install directly from the Chrome Web Store:
 ## Changelog
 
 <details open>
+  <summary><strong>v2.1</strong> - Time zone switching and import time handling</summary>
+
+  - Added a popup time zone selector with `Asia/Shanghai` as the default display zone
+  - Manual deadlines are now saved using the currently selected time zone instead of the browser's local zone
+  - Imported CCFDDL deadlines continue to respect their source time zone metadata when displayed
+  - Improved ICS fallback parsing so `TZID` based timestamps are handled correctly when GitHub-hosted YAML is unavailable
+</details>
+
+<details>
   <summary><strong>v2.0</strong> - UI overhaul, import improvements, settings, and versioning</summary>
 
   - Reworked the popup into a denser layout with two entry cards and a bottom utility bar
