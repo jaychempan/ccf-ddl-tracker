@@ -34,7 +34,7 @@ body {
     background:
         radial-gradient(circle at top left, rgba(37, 99, 235, 0.07), transparent 28%),
         linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Manrope", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
     line-height: 1.65;
 }
 
@@ -89,7 +89,7 @@ code {
     display: inline-flex;
     align-items: center;
     gap: 0.8rem;
-    font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Space Grotesk", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
     font-size: 1.05rem;
     font-weight: 700;
 }
@@ -205,7 +205,7 @@ code {
 .article-shell h2,
 .article-shell h3,
 .preview-copy h2 {
-    font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Space Grotesk", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
     letter-spacing: -0.03em;
 }
 
@@ -364,7 +364,7 @@ code {
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-background);
-    font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Space Grotesk", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
     font-size: 1.1rem;
     font-weight: 700;
 }
@@ -389,7 +389,7 @@ code {
 
 .home-features > ul > li > ul li {
     color: var(--color-muted);
-    font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Manrope", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
     font-size: 0.98rem;
     font-weight: 500;
 }
