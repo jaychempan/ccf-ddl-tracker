@@ -13,6 +13,7 @@ const translations = {
             "nav.getIt": "Get it",
             "nav.guide": "Guide",
             "nav.faq": "FAQ",
+            "nav.changelog": "Changelog",
             "nav.github": "GitHub",
             "menu.ariaLabel": "Open site navigation",
             "langToggle.ariaLabel": "Switch website language",
@@ -137,6 +138,24 @@ const translations = {
                 "privacy.changes.body": "If this policy changes, the updated version will be published on this page.",
                 "privacy.contact.title": "Contact",
                 "privacy.contact.body": "For questions about the project, open an issue on <a href=\"https://github.com/jaychempan/ccf-ddl-tracker\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a>."
+            },
+            changelog: {
+                "meta.title": "CCF DDL Tracker Changelog",
+                "meta.description": "Release notes and update history for CCF DDL Tracker.",
+                "changelog.title": "Changelog",
+                "changelog.intro": "This page records major product and interface changes across website and extension releases.",
+                "changelog.v2.title": "v2.0",
+                "changelog.v2.subtitle": "UI overhaul, import improvements, settings, and versioning.",
+                "changelog.v2.item1": "Reworked the popup into a denser layout with two entry cards and a bottom utility bar.",
+                "changelog.v2.item2": "Kept the import panel visible by default while moving recommendations into a floating search picker.",
+                "changelog.v2.item3": "Imported conferences now keep homepage links and added cards can open the official conference site.",
+                "changelog.v2.item4": "Added display settings for 24-hour or 12-hour time and year-first or month-first date order.",
+                "changelog.v2.item5": "Added a v2.0 version label in the popup header and bumped the extension version.",
+                "changelog.v101.title": "v1.0.1",
+                "changelog.v101.subtitle": "Refresh and remaining-day fixes.",
+                "changelog.v101.item1": "Fixed automatic date refresh issues.",
+                "changelog.v101.item2": "Added a manual refresh button.",
+                "changelog.v101.item3": "Corrected same-day deadlines to display 0 days."
             }
         }
     },
@@ -148,6 +167,7 @@ const translations = {
             "nav.getIt": "获取",
             "nav.guide": "指南",
             "nav.faq": "常见问题",
+            "nav.changelog": "更新日志",
             "nav.github": "GitHub",
             "menu.ariaLabel": "打开网站导航",
             "langToggle.ariaLabel": "切换网站语言",
@@ -272,6 +292,24 @@ const translations = {
                 "privacy.changes.body": "如果本政策发生更新，最新版本会发布在本页面。",
                 "privacy.contact.title": "联系",
                 "privacy.contact.body": "如果你对项目有问题，请在 <a href=\"https://github.com/jaychempan/ccf-ddl-tracker\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a> 上提交 issue。"
+            },
+            changelog: {
+                "meta.title": "CCF DDL Tracker 更新日志",
+                "meta.description": "CCF DDL Tracker 的发布记录与更新历史。",
+                "changelog.title": "更新日志",
+                "changelog.intro": "本页记录网站与扩展版本中的主要产品更新和界面变化。",
+                "changelog.v2.title": "v2.0",
+                "changelog.v2.subtitle": "界面重构、导入优化、设置增强与版本标识。",
+                "changelog.v2.item1": "重构 popup 布局，改为更紧凑的双入口卡片和底部工具栏。",
+                "changelog.v2.item2": "导入面板默认常驻，推荐会议改为悬浮搜索选择器。",
+                "changelog.v2.item3": "导入会议支持保留官网链接，加入卡片后可直接打开官方会议网站。",
+                "changelog.v2.item4": "新增显示设置，支持 24 小时或 12 小时时间制，以及年在前或月在前的日期顺序。",
+                "changelog.v2.item5": "在弹窗头部新增 v2.0 版本标识，并同步升级扩展版本号。",
+                "changelog.v101.title": "v1.0.1",
+                "changelog.v101.subtitle": "刷新与剩余天数修复。",
+                "changelog.v101.item1": "修复日期无法自动更新的问题。",
+                "changelog.v101.item2": "新增手动刷新按钮。",
+                "changelog.v101.item3": "修正当天截止任务显示为 0 天。"
             }
         }
     }

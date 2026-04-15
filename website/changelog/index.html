@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
         name="description"
-        content="Guide for using the CCF DDL Tracker Chrome extension."
+        content="Release notes and update history for CCF DDL Tracker."
         data-i18n-content="meta.description"
     >
-    <title>CCF DDL Tracker Guide</title>
+    <title>CCF DDL Tracker Changelog</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -21,7 +21,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
     <link rel="stylesheet" href="../style.css">
 </head>
-<body data-page="guide">
+<body data-page="changelog">
     <header class="site-header">
         <nav class="nav-shell">
             <a class="brand" href="../" aria-label="CCF DDL Tracker home" data-i18n-aria-label="brand.ariaLabel">
@@ -52,9 +52,9 @@
             <div class="nav-panel" id="nav-panel" data-nav-panel>
                 <a href="../" data-i18n="nav.home">Home</a>
                 <a href="../get-it/" data-i18n="nav.getIt">Get it</a>
-                <a class="active" aria-current="page" href="../guide/" data-i18n="nav.guide">Guide</a>
+                <a href="../guide/" data-i18n="nav.guide">Guide</a>
                 <a href="../faq/" data-i18n="nav.faq">FAQ</a>
-                <a href="../changelog/" data-i18n="nav.changelog">Changelog</a>
+                <a class="active" aria-current="page" href="../changelog/" data-i18n="nav.changelog">Changelog</a>
                 <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
                 <button
                     class="language-toggle"
@@ -72,56 +72,28 @@
 
     <main class="site-main">
         <article class="article-shell">
-            <h1 data-i18n="guide.title">Guide</h1>
-            <p data-i18n="guide.intro">
-                This page covers the basic workflow for using CCF DDL Tracker after installation.
+            <h1 data-i18n="changelog.title">Changelog</h1>
+            <p data-i18n="changelog.intro">
+                This page records major product and interface changes across website and extension releases.
             </p>
 
-            <h2 data-i18n="guide.openPopup.title">Open the Popup</h2>
-            <p data-i18n="guide.openPopup.body">
-                Pin the extension to the Chrome toolbar and click the icon. The extension opens as a
-                native popup, so you can check deadlines without leaving the current tab.
-            </p>
-
-            <h2 data-i18n="guide.manual.title">Add a Deadline Manually</h2>
-            <p data-i18n="guide.manual.body">
-                Use the add form to enter a title, date, and time. Saved deadlines are displayed in
-                time order, and the nearest item drives the toolbar badge countdown.
-            </p>
-
-            <h2 data-i18n="guide.import.title">Import Conferences from CCFDDL</h2>
-            <p data-i18n="guide.import.body">
-                The import panel can fetch recommended conferences from the upstream CCFDDL data source.
-                Imported cards keep their official homepage links, and you can add selected items into
-                your own deadline list.
-            </p>
-
-            <div class="markdown-alert markdown-alert-note">
-                <p class="markdown-alert-title" data-i18n="guide.tip.title">Tip</p>
-                <p data-i18n="guide.tip.body">
-                    Imported deadlines are helpful for discovery, but you should still confirm the final
-                    submission schedule on the official conference website.
-                </p>
-            </div>
-
-            <h2 data-i18n="guide.customize.title">Customize the Display</h2>
+            <h2 data-i18n="changelog.v2.title">v2.0</h2>
+            <p data-i18n="changelog.v2.subtitle">UI overhaul, import improvements, settings, and versioning.</p>
             <ul>
-                <li data-i18n="guide.customize.item1">Switch language between Chinese and English from the bottom toolbar.</li>
-                <li data-i18n="guide.customize.item2">Choose a 24-hour or 12-hour clock in settings.</li>
-                <li data-i18n="guide.customize.item3">Change date order between year-first and month-first formats.</li>
+                <li data-i18n="changelog.v2.item1">Reworked the popup into a denser layout with two entry cards and a bottom utility bar.</li>
+                <li data-i18n="changelog.v2.item2">Kept the import panel visible by default while moving recommendations into a floating search picker.</li>
+                <li data-i18n="changelog.v2.item3">Imported conferences now keep homepage links and added cards can open the official conference site.</li>
+                <li data-i18n="changelog.v2.item4">Added display settings for 24-hour or 12-hour time and year-first or month-first date order.</li>
+                <li data-i18n="changelog.v2.item5">Added a v2.0 version label in the popup header and bumped the extension version.</li>
             </ul>
 
-            <h2 data-i18n="guide.links.title">Open Official Conference Sites</h2>
-            <p data-i18n="guide.links.body">
-                Imported conferences retain their homepage links, so once a card is added to your list,
-                you can jump from the popup to the official website for calls for papers or updates.
-            </p>
-
-            <h2 data-i18n="guide.storage.title">Storage Model</h2>
-            <p data-i18n-html="guide.storage.body">
-                All deadlines and preferences are stored in <code>chrome.storage.local</code>. The
-                extension does not require sign-in or cloud sync to function.
-            </p>
+            <h2 data-i18n="changelog.v101.title">v1.0.1</h2>
+            <p data-i18n="changelog.v101.subtitle">Refresh and remaining-day fixes.</p>
+            <ul>
+                <li data-i18n="changelog.v101.item1">Fixed automatic date refresh issues.</li>
+                <li data-i18n="changelog.v101.item2">Added a manual refresh button.</li>
+                <li data-i18n="changelog.v101.item3">Corrected same-day deadlines to display 0 days.</li>
+            </ul>
         </article>
     </main>
 
