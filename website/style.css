@@ -384,8 +384,8 @@ html[lang="en"] .language-toggle [data-lang-option="en"] {
 }
 
 .home-features > ul {
-    display: flex;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
     gap: 1rem;
     margin: 0;
 }
@@ -393,7 +393,7 @@ html[lang="en"] .language-toggle [data-lang-option="en"] {
 .home-features > ul > li {
     display: flex;
     flex-direction: column;
-    flex: 1 1 0;
+    min-width: 0;
     min-height: 100%;
     margin: 0;
     padding: 1.25rem;
@@ -414,6 +414,7 @@ html[lang="en"] .language-toggle [data-lang-option="en"] {
     align-items: flex-start;
     min-height: 2.6rem;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .home-features > ul > li > ul {
@@ -579,10 +580,6 @@ html[lang="en"] .language-toggle [data-lang-option="en"] {
     .preview-panel {
         grid-template-columns: 1fr;
     }
-
-    .home-features > ul {
-        flex-direction: column;
-    }
 }
 
 @media (max-width: 720px) {
@@ -647,5 +644,17 @@ html[lang="en"] .language-toggle [data-lang-option="en"] {
     .project-icon {
         width: 76px;
         height: 76px;
+    }
+
+    .home-features > ul {
+        grid-template-columns: 1fr;
+    }
+
+    .home-features > ul > li {
+        padding: 1rem;
+    }
+
+    .feature-title {
+        min-height: 0;
     }
 }
