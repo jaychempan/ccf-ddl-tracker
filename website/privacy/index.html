@@ -6,6 +6,7 @@
     <meta
         name="description"
         content="Privacy policy for CCF DDL Tracker."
+        data-i18n-content="meta.description"
     >
     <title>CCF DDL Tracker Privacy Policy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,11 +21,17 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
     <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body data-page="privacy">
     <header class="site-header">
         <nav class="nav-shell">
-            <a class="brand" href="../" aria-label="CCF DDL Tracker home">
-                <img src="../ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+            <a class="brand" href="../" aria-label="CCF DDL Tracker home" data-i18n-aria-label="brand.ariaLabel">
+                <img
+                    src="../ccf-ddl-tracker-logo.png"
+                    alt="CCF DDL Tracker logo"
+                    width="500"
+                    height="500"
+                    data-i18n-alt="brand.logoAlt"
+                >
                 <span>CCF DDL Tracker</span>
             </a>
 
@@ -33,7 +40,9 @@
                 type="button"
                 aria-expanded="false"
                 aria-controls="nav-panel"
+                aria-label="Open site navigation"
                 data-menu-toggle
+                data-i18n-aria-label="menu.ariaLabel"
             >
                 <span></span>
                 <span></span>
@@ -41,60 +50,67 @@
             </button>
 
             <div class="nav-panel" id="nav-panel" data-nav-panel>
-                <a href="../">Home</a>
-                <a href="../get-it/">Get it</a>
-                <a href="../guide/">Guide</a>
-                <a href="../faq/">FAQ</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../" data-i18n="nav.home">Home</a>
+                <a href="../get-it/" data-i18n="nav.getIt">Get it</a>
+                <a href="../guide/" data-i18n="nav.guide">Guide</a>
+                <a href="../faq/" data-i18n="nav.faq">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
+                <button
+                    class="language-toggle"
+                    type="button"
+                    aria-label="Switch website language"
+                    data-lang-toggle
+                    data-i18n-aria-label="langToggle.ariaLabel"
+                >
+                    <span data-lang-option="zh">中</span>
+                    <span data-lang-option="en">EN</span>
+                </button>
             </div>
         </nav>
-        <div class="scroll-track" aria-hidden="true">
-            <div class="scroll-indicator" data-scroll-indicator></div>
-        </div>
     </header>
 
     <main class="site-main">
         <article class="article-shell">
-            <h1>Privacy Policy</h1>
-            <p>Effective date: April 15, 2026</p>
+            <h1 data-i18n="privacy.title">Privacy Policy</h1>
+            <p data-i18n="privacy.effectiveDate">Effective date: April 15, 2026</p>
 
-            <p>
+            <p data-i18n-html="privacy.summary">
                 <strong>CCF DDL Tracker does not require an account and does not intentionally collect
                 your personal data.</strong>
             </p>
 
-            <h2>Local Storage</h2>
-            <p>
+            <h2 data-i18n="privacy.local.title">Local Storage</h2>
+            <p data-i18n-html="privacy.local.body">
                 Deadlines, imported conference entries that you save, and interface preferences are stored
                 in <code>chrome.storage.local</code> within the browser profile where the extension runs.
             </p>
 
-            <h2>External Data Sources</h2>
-            <p>
+            <h2 data-i18n="privacy.sources.title">External Data Sources</h2>
+            <p data-i18n="privacy.sources.body">
                 The extension can fetch conference information from the upstream CCFDDL repository and
                 fallback ICS feeds. These sources are used to help populate the import list.
             </p>
 
-            <h2>Analytics</h2>
-            <p>
+            <h2 data-i18n="privacy.analytics.title">Analytics</h2>
+            <p data-i18n="privacy.analytics.body">
                 The extension workflow is designed to operate without project-hosted telemetry, user
                 accounts, or cloud sync managed by this project.
             </p>
 
-            <h2>Third-Party Links</h2>
-            <p>
+            <h2 data-i18n="privacy.links.title">Third-Party Links</h2>
+            <p data-i18n="privacy.links.body">
                 The extension and this website may link to third-party sites such as conference homepages,
                 GitHub repositories, or the Chrome Web Store. Those services have their own privacy
                 policies and terms.
             </p>
 
-            <h2>Changes</h2>
-            <p>
+            <h2 data-i18n="privacy.changes.title">Changes</h2>
+            <p data-i18n="privacy.changes.body">
                 If this policy changes, the updated version will be published on this page.
             </p>
 
-            <h2>Contact</h2>
-            <p>
+            <h2 data-i18n="privacy.contact.title">Contact</h2>
+            <p data-i18n-html="privacy.contact.body">
                 For questions about the project, open an issue on
                 <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>.
             </p>
@@ -105,8 +121,8 @@
         <div class="footer-shell">
             <div>CCF DDL Tracker © 2026</div>
             <div class="footer-links">
-                <a href="../privacy/">Privacy Policy</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../privacy/" data-i18n="footer.privacy">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
             </div>
         </div>
     </footer>

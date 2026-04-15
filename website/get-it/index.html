@@ -6,6 +6,7 @@
     <meta
         name="description"
         content="Install CCF DDL Tracker from the Chrome Web Store or load it unpacked from source."
+        data-i18n-content="meta.description"
     >
     <title>Get CCF DDL Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,11 +21,17 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
     <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body data-page="getIt">
     <header class="site-header">
         <nav class="nav-shell">
-            <a class="brand" href="../" aria-label="CCF DDL Tracker home">
-                <img src="../ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+            <a class="brand" href="../" aria-label="CCF DDL Tracker home" data-i18n-aria-label="brand.ariaLabel">
+                <img
+                    src="../ccf-ddl-tracker-logo.png"
+                    alt="CCF DDL Tracker logo"
+                    width="500"
+                    height="500"
+                    data-i18n-alt="brand.logoAlt"
+                >
                 <span>CCF DDL Tracker</span>
             </a>
 
@@ -33,7 +40,9 @@
                 type="button"
                 aria-expanded="false"
                 aria-controls="nav-panel"
+                aria-label="Open site navigation"
                 data-menu-toggle
+                data-i18n-aria-label="menu.ariaLabel"
             >
                 <span></span>
                 <span></span>
@@ -41,28 +50,35 @@
             </button>
 
             <div class="nav-panel" id="nav-panel" data-nav-panel>
-                <a href="../">Home</a>
-                <a class="active" aria-current="page" href="../get-it/">Get it</a>
-                <a href="../guide/">Guide</a>
-                <a href="../faq/">FAQ</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../" data-i18n="nav.home">Home</a>
+                <a class="active" aria-current="page" href="../get-it/" data-i18n="nav.getIt">Get it</a>
+                <a href="../guide/" data-i18n="nav.guide">Guide</a>
+                <a href="../faq/" data-i18n="nav.faq">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
+                <button
+                    class="language-toggle"
+                    type="button"
+                    aria-label="Switch website language"
+                    data-lang-toggle
+                    data-i18n-aria-label="langToggle.ariaLabel"
+                >
+                    <span data-lang-option="zh">中</span>
+                    <span data-lang-option="en">EN</span>
+                </button>
             </div>
         </nav>
-        <div class="scroll-track" aria-hidden="true">
-            <div class="scroll-indicator" data-scroll-indicator></div>
-        </div>
     </header>
 
     <main class="site-main">
         <article class="article-shell">
-            <h1>Get CCF DDL Tracker</h1>
-            <p>
+            <h1 data-i18n="getIt.title">Get CCF DDL Tracker</h1>
+            <p data-i18n="getIt.intro">
                 CCF DDL Tracker is built as a Manifest V3 Chrome extension. You can install it from
                 the Chrome Web Store or load it unpacked from the repository during development.
             </p>
 
-            <h2>Stable Release</h2>
-            <p>
+            <h2 data-i18n="getIt.release.title">Stable Release</h2>
+            <p data-i18n="getIt.release.body">
                 The easiest path is the Chrome Web Store release.
             </p>
             <div class="button-list">
@@ -76,33 +92,33 @@
                             <span class="button-logo-slot" aria-hidden="true">
                                 <img class="button-logo" src="../logos/chrome-web-store.svg" alt="">
                             </span>
-                            <span class="button-label">Chrome Web Store</span>
+                            <span class="button-label" data-i18n="getIt.links.chromeWebStore">Chrome Web Store</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="panel">
-                <p><strong>Note</strong></p>
-                <p>
+                <p><strong data-i18n="getIt.note.title">Note</strong></p>
+                <p data-i18n="getIt.note.body">
                     The primary supported target is Chrome. Other Chromium-based browsers may work if
                     they support Manifest V3 extension loading, but Chrome is the main distribution path.
                 </p>
             </div>
 
-            <h2>Load Unpacked</h2>
-            <p>
+            <h2 data-i18n="getIt.unpack.title">Load Unpacked</h2>
+            <p data-i18n="getIt.unpack.body">
                 If you want to inspect or modify the source code, load the extension unpacked:
             </p>
             <ol>
-                <li>Open <code>chrome://extensions/</code>.</li>
-                <li>Enable <code>Developer mode</code>.</li>
-                <li>Click <code>Load unpacked</code>.</li>
-                <li>Select the <code>chrome/</code> directory in this repository.</li>
-                <li>Pin the extension icon to the toolbar and click it to open the popup.</li>
+                <li data-i18n-html="getIt.unpack.step1">Open <code>chrome://extensions/</code>.</li>
+                <li data-i18n-html="getIt.unpack.step2">Enable <code>Developer mode</code>.</li>
+                <li data-i18n-html="getIt.unpack.step3">Click <code>Load unpacked</code>.</li>
+                <li data-i18n-html="getIt.unpack.step4">Select the <code>chrome/</code> directory in this repository.</li>
+                <li data-i18n="getIt.unpack.step5">Pin the extension icon to the toolbar and click it to open the popup.</li>
             </ol>
 
-            <h2>Project Resources</h2>
+            <h2 data-i18n="getIt.resources.title">Project Resources</h2>
             <div class="button-list">
                 <ul>
                     <li>
@@ -110,7 +126,7 @@
                             <span class="button-logo-slot" aria-hidden="true">
                                 <img class="button-logo button-logo-github" src="../logos/github.svg" alt="">
                             </span>
-                            <span class="button-label">Repository</span>
+                            <span class="button-label" data-i18n="getIt.links.repository">Repository</span>
                         </a>
                     </li>
                     <li>
@@ -118,7 +134,7 @@
                             <span class="button-logo-slot" aria-hidden="true">
                                 <img class="button-logo button-logo-github" src="../logos/github.svg" alt="">
                             </span>
-                            <span class="button-label">Chrome README</span>
+                            <span class="button-label" data-i18n="getIt.links.chromeReadme">Chrome README</span>
                         </a>
                     </li>
                     <li>
@@ -126,14 +142,14 @@
                             <span class="button-logo-slot" aria-hidden="true">
                                 <img class="button-logo button-logo-ccfddl" src="../logos/ccfddl.png" alt="">
                             </span>
-                            <span class="button-label">CCFDDL Official Site</span>
+                            <span class="button-label" data-i18n="getIt.links.ccfddl">CCFDDL Official Site</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <h2>Need the Source?</h2>
-            <p>
+            <h2 data-i18n="getIt.source.title">Need the Source?</h2>
+            <p data-i18n="getIt.source.body">
                 Browse the repository, open issues, or submit pull requests if you want to help improve
                 the extension or the surrounding documentation.
             </p>
@@ -144,8 +160,8 @@
         <div class="footer-shell">
             <div>CCF DDL Tracker © 2026</div>
             <div class="footer-links">
-                <a href="../privacy/">Privacy Policy</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../privacy/" data-i18n="footer.privacy">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
             </div>
         </div>
     </footer>

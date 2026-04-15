@@ -6,6 +6,7 @@
     <meta
         name="description"
         content="Guide for using the CCF DDL Tracker Chrome extension."
+        data-i18n-content="meta.description"
     >
     <title>CCF DDL Tracker Guide</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,11 +21,17 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
     <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body data-page="guide">
     <header class="site-header">
         <nav class="nav-shell">
-            <a class="brand" href="../" aria-label="CCF DDL Tracker home">
-                <img src="../ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+            <a class="brand" href="../" aria-label="CCF DDL Tracker home" data-i18n-aria-label="brand.ariaLabel">
+                <img
+                    src="../ccf-ddl-tracker-logo.png"
+                    alt="CCF DDL Tracker logo"
+                    width="500"
+                    height="500"
+                    data-i18n-alt="brand.logoAlt"
+                >
                 <span>CCF DDL Tracker</span>
             </a>
 
@@ -33,7 +40,9 @@
                 type="button"
                 aria-expanded="false"
                 aria-controls="nav-panel"
+                aria-label="Open site navigation"
                 data-menu-toggle
+                data-i18n-aria-label="menu.ariaLabel"
             >
                 <span></span>
                 <span></span>
@@ -41,67 +50,74 @@
             </button>
 
             <div class="nav-panel" id="nav-panel" data-nav-panel>
-                <a href="../">Home</a>
-                <a href="../get-it/">Get it</a>
-                <a class="active" aria-current="page" href="../guide/">Guide</a>
-                <a href="../faq/">FAQ</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../" data-i18n="nav.home">Home</a>
+                <a href="../get-it/" data-i18n="nav.getIt">Get it</a>
+                <a class="active" aria-current="page" href="../guide/" data-i18n="nav.guide">Guide</a>
+                <a href="../faq/" data-i18n="nav.faq">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
+                <button
+                    class="language-toggle"
+                    type="button"
+                    aria-label="Switch website language"
+                    data-lang-toggle
+                    data-i18n-aria-label="langToggle.ariaLabel"
+                >
+                    <span data-lang-option="zh">中</span>
+                    <span data-lang-option="en">EN</span>
+                </button>
             </div>
         </nav>
-        <div class="scroll-track" aria-hidden="true">
-            <div class="scroll-indicator" data-scroll-indicator></div>
-        </div>
     </header>
 
     <main class="site-main">
         <article class="article-shell">
-            <h1>Guide</h1>
-            <p>
+            <h1 data-i18n="guide.title">Guide</h1>
+            <p data-i18n="guide.intro">
                 This page covers the basic workflow for using CCF DDL Tracker after installation.
             </p>
 
-            <h2>Open the Popup</h2>
-            <p>
+            <h2 data-i18n="guide.openPopup.title">Open the Popup</h2>
+            <p data-i18n="guide.openPopup.body">
                 Pin the extension to the Chrome toolbar and click the icon. The extension opens as a
                 native popup, so you can check deadlines without leaving the current tab.
             </p>
 
-            <h2>Add a Deadline Manually</h2>
-            <p>
+            <h2 data-i18n="guide.manual.title">Add a Deadline Manually</h2>
+            <p data-i18n="guide.manual.body">
                 Use the add form to enter a title, date, and time. Saved deadlines are displayed in
                 time order, and the nearest item drives the toolbar badge countdown.
             </p>
 
-            <h2>Import Conferences from CCFDDL</h2>
-            <p>
+            <h2 data-i18n="guide.import.title">Import Conferences from CCFDDL</h2>
+            <p data-i18n="guide.import.body">
                 The import panel can fetch recommended conferences from the upstream CCFDDL data source.
                 Imported cards keep their official homepage links, and you can add selected items into
                 your own deadline list.
             </p>
 
             <div class="markdown-alert markdown-alert-note">
-                <p class="markdown-alert-title">Tip</p>
-                <p>
+                <p class="markdown-alert-title" data-i18n="guide.tip.title">Tip</p>
+                <p data-i18n="guide.tip.body">
                     Imported deadlines are helpful for discovery, but you should still confirm the final
                     submission schedule on the official conference website.
                 </p>
             </div>
 
-            <h2>Customize the Display</h2>
+            <h2 data-i18n="guide.customize.title">Customize the Display</h2>
             <ul>
-                <li>Switch language between Chinese and English from the bottom toolbar.</li>
-                <li>Choose a 24-hour or 12-hour clock in settings.</li>
-                <li>Change date order between year-first and month-first formats.</li>
+                <li data-i18n="guide.customize.item1">Switch language between Chinese and English from the bottom toolbar.</li>
+                <li data-i18n="guide.customize.item2">Choose a 24-hour or 12-hour clock in settings.</li>
+                <li data-i18n="guide.customize.item3">Change date order between year-first and month-first formats.</li>
             </ul>
 
-            <h2>Open Official Conference Sites</h2>
-            <p>
+            <h2 data-i18n="guide.links.title">Open Official Conference Sites</h2>
+            <p data-i18n="guide.links.body">
                 Imported conferences retain their homepage links, so once a card is added to your list,
                 you can jump from the popup to the official website for calls for papers or updates.
             </p>
 
-            <h2>Storage Model</h2>
-            <p>
+            <h2 data-i18n="guide.storage.title">Storage Model</h2>
+            <p data-i18n-html="guide.storage.body">
                 All deadlines and preferences are stored in <code>chrome.storage.local</code>. The
                 extension does not require sign-in or cloud sync to function.
             </p>
@@ -112,8 +128,8 @@
         <div class="footer-shell">
             <div>CCF DDL Tracker © 2026</div>
             <div class="footer-links">
-                <a href="../privacy/">Privacy Policy</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../privacy/" data-i18n="footer.privacy">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
             </div>
         </div>
     </footer>

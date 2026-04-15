@@ -6,6 +6,7 @@
     <meta
         name="description"
         content="Frequently asked questions about CCF DDL Tracker."
+        data-i18n-content="meta.description"
     >
     <title>CCF DDL Tracker FAQ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,11 +21,17 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
     <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body data-page="faq">
     <header class="site-header">
         <nav class="nav-shell">
-            <a class="brand" href="../" aria-label="CCF DDL Tracker home">
-                <img src="../ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+            <a class="brand" href="../" aria-label="CCF DDL Tracker home" data-i18n-aria-label="brand.ariaLabel">
+                <img
+                    src="../ccf-ddl-tracker-logo.png"
+                    alt="CCF DDL Tracker logo"
+                    width="500"
+                    height="500"
+                    data-i18n-alt="brand.logoAlt"
+                >
                 <span>CCF DDL Tracker</span>
             </a>
 
@@ -33,7 +40,9 @@
                 type="button"
                 aria-expanded="false"
                 aria-controls="nav-panel"
+                aria-label="Open site navigation"
                 data-menu-toggle
+                data-i18n-aria-label="menu.ariaLabel"
             >
                 <span></span>
                 <span></span>
@@ -41,54 +50,61 @@
             </button>
 
             <div class="nav-panel" id="nav-panel" data-nav-panel>
-                <a href="../">Home</a>
-                <a href="../get-it/">Get it</a>
-                <a href="../guide/">Guide</a>
-                <a class="active" aria-current="page" href="../faq/">FAQ</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../" data-i18n="nav.home">Home</a>
+                <a href="../get-it/" data-i18n="nav.getIt">Get it</a>
+                <a href="../guide/" data-i18n="nav.guide">Guide</a>
+                <a class="active" aria-current="page" href="../faq/" data-i18n="nav.faq">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
+                <button
+                    class="language-toggle"
+                    type="button"
+                    aria-label="Switch website language"
+                    data-lang-toggle
+                    data-i18n-aria-label="langToggle.ariaLabel"
+                >
+                    <span data-lang-option="zh">中</span>
+                    <span data-lang-option="en">EN</span>
+                </button>
             </div>
         </nav>
-        <div class="scroll-track" aria-hidden="true">
-            <div class="scroll-indicator" data-scroll-indicator></div>
-        </div>
     </header>
 
     <main class="site-main">
         <article class="article-shell">
-            <h1>FAQ</h1>
+            <h1 data-i18n="faq.title">FAQ</h1>
 
-            <h3>Where are my deadlines stored?</h3>
-            <p>
+            <h3 data-i18n="faq.q1">Where are my deadlines stored?</h3>
+            <p data-i18n-html="faq.a1">
                 They are stored in <code>chrome.storage.local</code> inside the browser. There is no
                 account system and no project-hosted cloud sync.
             </p>
 
-            <h3>Where do imported conferences come from?</h3>
-            <p>
+            <h3 data-i18n="faq.q2">Where do imported conferences come from?</h3>
+            <p data-i18n-html="faq.a2">
                 Imports prefer the upstream <a href="https://github.com/ccfddl/ccf-deadlines" target="_blank" rel="noopener noreferrer">ccfddl/ccf-deadlines</a>
                 repository and fall back to CCFDDL ICS feeds when needed.
             </p>
 
-            <h3>Should I trust imported deadlines without checking?</h3>
-            <p>
+            <h3 data-i18n="faq.q3">Should I trust imported deadlines without checking?</h3>
+            <p data-i18n="faq.a3">
                 No. Imported dates are a convenience feature. For any real submission, always confirm
                 the current CFP and official deadline on the conference website.
             </p>
 
-            <h3>Does the extension collect analytics or telemetry?</h3>
-            <p>
+            <h3 data-i18n="faq.q4">Does the extension collect analytics or telemetry?</h3>
+            <p data-i18n="faq.a4">
                 No project-hosted telemetry is built into the extension. The workflow is designed to be
                 local-first and does not require logging in.
             </p>
 
-            <h3>Can I open the official conference homepage from a card?</h3>
-            <p>
+            <h3 data-i18n="faq.q5">Can I open the official conference homepage from a card?</h3>
+            <p data-i18n="faq.a5">
                 Yes. Imported conferences keep their homepage links, and added cards can open the
                 conference website directly from the popup.
             </p>
 
-            <h3>Can I use my own custom deadlines?</h3>
-            <p>
+            <h3 data-i18n="faq.q6">Can I use my own custom deadlines?</h3>
+            <p data-i18n="faq.a6">
                 Yes. The extension supports both manually added deadlines and imported conference entries.
             </p>
         </article>
@@ -98,8 +114,8 @@
         <div class="footer-shell">
             <div>CCF DDL Tracker © 2026</div>
             <div class="footer-links">
-                <a href="../privacy/">Privacy Policy</a>
-                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="../privacy/" data-i18n="footer.privacy">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer" data-i18n="nav.github">GitHub</a>
             </div>
         </div>
     </footer>
