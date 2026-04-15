@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="CCF DDL Tracker is an open source Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage."
+    >
+    <title>CCF DDL Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="page-home">
+    <header class="site-header">
+        <nav class="nav-shell">
+            <a class="brand" href="./" aria-label="CCF DDL Tracker home">
+                <img src="./ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+                <span>CCF DDL Tracker</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="nav-panel"
+                data-menu-toggle
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-panel" id="nav-panel" data-nav-panel>
+                <a class="active" aria-current="page" href="./">Home</a>
+                <a href="./get-it/">Get it</a>
+                <a href="./guide/">Guide</a>
+                <a href="./faq/">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </nav>
+        <div class="scroll-track" aria-hidden="true">
+            <div class="scroll-indicator" data-scroll-indicator></div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <section class="project-info">
+            <picture class="project-icon">
+                <img src="./ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+            </picture>
+            <h1>CCF DDL Tracker</h1>
+            <p class="project-subtitle">An open source Chrome extension for tracking CCF deadlines.</p>
+        </section>
+
+        <div class="hero-actions">
+            <a
+                class="button button-primary"
+                href="./get-it/"
+            >
+                Get Started
+            </a>
+            <a
+                class="button button-secondary"
+                href="https://github.com/jaychempan/ccf-ddl-tracker"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                GitHub
+            </a>
+        </div>
+
+        <section class="preview-panel">
+            <div class="preview-copy">
+                <span class="eyebrow">Version 2.0</span>
+                <h2>Compact popup workflow for dense conference schedules</h2>
+                <p>
+                    The popup focuses on quick scanning: compact top cards, a persistent import panel,
+                    a floating conference picker, footer shortcuts, and lightweight settings.
+                </p>
+            </div>
+            <img
+                src="./previewv2.0.png"
+                alt="Preview of the CCF DDL Tracker popup"
+                width="3231"
+                height="2475"
+            >
+        </section>
+
+        <article class="article-shell">
+            <p>
+                CCF DDL Tracker provides a compact popup for keeping deadlines visible in Chrome.
+                You can add custom deadlines, import recommended conferences from CCFDDL, and keep
+                everything stored locally in your browser.
+            </p>
+
+            <h2>Features</h2>
+            <div class="home-features">
+                <ul>
+                    <li>
+                        <span class="feature-title">Focused tracking</span>
+                        <ul>
+                            <li>Keep deadlines in a dense popup instead of a separate dashboard.</li>
+                            <li>See remaining days quickly with compact cards and sorted lists.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span class="feature-title">CCFDDL import flow</span>
+                        <ul>
+                            <li>Import recommended conferences from the CCFDDL dataset and ICS fallback.</li>
+                            <li>Keep homepage links so each card can jump to the official conference site.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span class="feature-title">User-friendly settings</span>
+                        <ul>
+                            <li>Switch between Chinese and English from the bottom toolbar.</li>
+                            <li>Choose time format and date order without leaving the popup.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="markdown-alert markdown-alert-note">
+                <p class="markdown-alert-title">Note</p>
+                <p>
+                    This extension does not require an account and does not upload your saved deadlines.
+                    Your data stays in <code>chrome.storage.local</code> on the current browser.
+                </p>
+            </div>
+
+            <div class="markdown-alert markdown-alert-warning">
+                <p class="markdown-alert-title">Warning</p>
+                <p>
+                    Imported deadlines are a convenience layer, not a replacement for official conference
+                    announcements. Submission schedules can change, so always verify important deadlines on
+                    the conference website before submitting.
+                </p>
+            </div>
+
+            <h2>Installation</h2>
+            <p>
+                CCF DDL Tracker is built as a Manifest V3 Chrome extension. You can install it from the
+                Chrome Web Store or load it unpacked from source during development.
+            </p>
+
+            <div class="button-list">
+                <ul>
+                    <li>
+                        <a
+                            href="https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo" src="./logos/chrome-web-store.svg" alt="">
+                            </span>
+                            <span class="button-label">Chrome Web Store</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://github.com/jaychempan/ccf-ddl-tracker"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo button-logo-github" src="./logos/github.svg" alt="">
+                            </span>
+                            <span class="button-label">Repository</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://ccfddl.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo button-logo-ccfddl" src="./logos/ccfddl.png" alt="">
+                            </span>
+                            <span class="button-label">CCFDDL Official Site</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <p>
+                View detailed installation options <a href="./get-it/">here</a>.
+            </p>
+
+            <h2>Contribution</h2>
+            <p>You are welcome to contribute to this project by:</p>
+            <ul>
+                <li>contributing code or opening issues on <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                <li>improving the extension workflow and documentation in <a href="https://github.com/jaychempan/ccf-ddl-tracker/tree/main/chrome" target="_blank" rel="noopener noreferrer">the Chrome extension directory</a></li>
+                <li>helping improve the upstream deadline source at <a href="https://github.com/ccfddl/ccf-deadlines" target="_blank" rel="noopener noreferrer">ccfddl/ccf-deadlines</a></li>
+                <li>sharing feedback from real deadline-tracking workflows</li>
+            </ul>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div>CCF DDL Tracker © 2026</div>
+            <div class="footer-links">
+                <a href="./privacy/">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+</html>
