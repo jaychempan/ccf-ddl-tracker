@@ -26,6 +26,7 @@
 
 html {
     scroll-behavior: smooth;
+    scrollbar-width: none;
 }
 
 body {
@@ -36,6 +37,13 @@ body {
         linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     font-family: "Manrope", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
     line-height: 1.65;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 body.menu-open {
