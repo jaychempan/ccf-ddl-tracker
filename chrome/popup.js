@@ -4,11 +4,24 @@ const REFRESH_INTERVAL_MS = 60 * 1000;
 const STARTUP_CLICK_GUARD_MS = 300;
 const TIME_FORMAT_STORAGE_KEY = "timeFormat";
 const DATE_ORDER_STORAGE_KEY = "dateOrder";
+const TIMEZONE_STORAGE_KEY = "displayTimezone";
+const DEFAULT_TIME_ZONE = "Asia/Shanghai";
+const FALLBACK_TIME_ZONES = [
+  DEFAULT_TIME_ZONE,
+  "UTC",
+  "America/Los_Angeles",
+  "America/New_York",
+  "Europe/London",
+  "Europe/Berlin",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+];
 
 const form = document.getElementById("deadline-form");
 const titleInput = document.getElementById("title");
 const dateInput = document.getElementById("date");
 const timeInput = document.getElementById("time");
+const timeZoneNote = document.getElementById("timezone-note");
 const listEl = document.getElementById("deadline-list");
 const emptyEl = document.getElementById("empty-state");
 const countEl = document.getElementById("count");
@@ -26,12 +39,14 @@ const settingsPanel = document.getElementById("settings-panel");
 const refreshDeadlinesBtn = document.getElementById("refresh-deadlines");
 const timeFormatInputs = Array.from(document.querySelectorAll('input[name="time-format"]'));
 const dateOrderInputs = Array.from(document.querySelectorAll('input[name="date-order"]'));
+const timeZoneSelect = document.getElementById("timezone-select");
 
 let ccfddlItems = [];
 let currentLang = "zh";
 const LANG_STORAGE_KEY = "language";
 let currentTimeFormat = "24h";
 let currentDateOrder = "ymd";
+let currentTimeZone = DEFAULT_TIME_ZONE;
 let refreshTimer = null;
 let refreshButtonAnimationTimer = null;
 let isAddFormExpanded = false;
@@ -40,6 +55,7 @@ let isCcfddlDropdownOpen = false;
 let isCcfddlLoading = false;
 let isSettingsOpen = false;
 const popupOpenedAt = performance.now();
+const AVAILABLE_TIME_ZONES = getAvailableTimeZones();
 
 const translations = {
   zh: {
@@ -67,6 +83,7 @@ const translations = {
     refresh_button: "刷新",
     settings_button: "设置",
     settings_title: "显示设置",
+    timezone_label: "显示时区",
     time_format_label: "时间显示",
     time_format_24h: "24 小时制",
     time_format_12h: "12 小时制",
@@ -78,6 +95,8 @@ const translations = {
     delete_item: "删除",
     remaining: (days) => `剩余 ${days} 天`,
     load_failed: "加载失败，请稍后重试。",
+    invalid_date: "无效日期",
+    timezone_note: (label) => `按当前时区保存：${label}`,
   },
   en: {
     title: "CCF DDL Tracker",
@@ -104,6 +123,7 @@ const translations = {
     refresh_button: "Refresh",
     settings_button: "Settings",
     settings_title: "Display Settings",
+    timezone_label: "Display Time Zone",
     time_format_label: "Time Format",
     time_format_24h: "24-hour clock",
     time_format_12h: "12-hour clock",
@@ -115,13 +135,75 @@ const translations = {
     delete_item: "Delete",
     remaining: (days) => `${days} days left`,
     load_failed: "Failed to load. Please try again.",
+    invalid_date: "Invalid date",
+    timezone_note: (label) => `Saved in selected time zone: ${label}`,
   },
 };
+
+function getAvailableTimeZones() {
+  if (typeof Intl.supportedValuesOf !== "function") {
+    return [...FALLBACK_TIME_ZONES];
+  }
+
+  try {
+    const supported = Intl.supportedValuesOf("timeZone");
+    const deduped = Array.from(new Set([DEFAULT_TIME_ZONE, "UTC", ...supported]));
+    return deduped.sort((left, right) => {
+      if (left === DEFAULT_TIME_ZONE) return -1;
+      if (right === DEFAULT_TIME_ZONE) return 1;
+      if (left === "UTC") return -1;
+      if (right === "UTC") return 1;
+      return left.localeCompare(right);
+    });
+  } catch (error) {
+    return [...FALLBACK_TIME_ZONES];
+  }
+}
 
 function t(key, fallback = "") {
   const entry = translations[currentLang]?.[key];
   if (typeof entry === "function") return entry;
   return entry ?? fallback;
+}
+
+function getLocale() {
+  return currentLang === "en" ? "en-US" : "zh-CN";
+}
+
+function sanitizeTimeZone(timeZone) {
+  if (AVAILABLE_TIME_ZONES.includes(timeZone)) {
+    return timeZone;
+  }
+  return DEFAULT_TIME_ZONE;
+}
+
+function syncTimeZoneSelect() {
+  if (!timeZoneSelect) return;
+
+  const selectedTimeZone = sanitizeTimeZone(currentTimeZone);
+  const shouldRebuild =
+    timeZoneSelect.options.length !== AVAILABLE_TIME_ZONES.length ||
+    !timeZoneSelect.querySelector(`option[value="${selectedTimeZone}"]`);
+
+  if (shouldRebuild) {
+    timeZoneSelect.innerHTML = "";
+    AVAILABLE_TIME_ZONES.forEach((timeZone) => {
+      const option = document.createElement("option");
+      option.value = timeZone;
+      option.textContent = timeZone;
+      timeZoneSelect.appendChild(option);
+    });
+  }
+
+  if (timeZoneSelect.value !== selectedTimeZone) {
+    timeZoneSelect.value = selectedTimeZone;
+  }
+}
+
+function syncTimeZoneNote() {
+  if (!timeZoneNote) return;
+  const renderNote = t("timezone_note", (label) => `按当前时区保存：${label}`);
+  timeZoneNote.textContent = renderNote(sanitizeTimeZone(currentTimeZone));
 }
 
 function applyTranslations() {
@@ -147,9 +229,11 @@ function applyTranslations() {
     langToggle.textContent = currentLang === "zh" ? "EN" : "ZH";
   }
 
-  const locale = currentLang === "en" ? "en-US" : "zh-CN";
+  const locale = getLocale();
   document.documentElement.setAttribute("lang", locale);
   timeInput?.setAttribute("lang", locale);
+  syncTimeZoneSelect();
+  syncTimeZoneNote();
   syncTimeFormatInputs();
   syncDateOrderInputs();
   syncDateInputMode();
@@ -237,26 +321,46 @@ function daysLeft(datetime) {
   return Math.max(0, Math.floor(diff / MS_PER_DAY));
 }
 
+function getDateTimeParts(date, includeTimeZoneName = false) {
+  const formatter = new Intl.DateTimeFormat(getLocale(), {
+    timeZone: sanitizeTimeZone(currentTimeZone),
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: currentTimeFormat === "12h",
+    ...(currentTimeFormat === "24h" ? { hourCycle: "h23" } : {}),
+    ...(includeTimeZoneName ? { timeZoneName: "short" } : {}),
+  });
+
+  return formatter.formatToParts(date).reduce((acc, part) => {
+    if (part.type !== "literal") {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+}
+
 function formatDate(datetime) {
   const date = new Date(datetime);
-  if (Number.isNaN(date.getTime())) return "无效日期";
-  const year = String(date.getFullYear());
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  if (Number.isNaN(date.getTime())) return t("invalid_date", "无效日期");
+
+  const parts = getDateTimeParts(date, true);
+  const year = parts.year;
+  const month = parts.month;
+  const day = parts.day;
   const dateText =
     currentDateOrder === "mdy"
       ? `${month}/${day}/${year}`
       : `${year}/${month}/${day}`;
-
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const timeZoneName = parts.timeZoneName ? ` ${parts.timeZoneName}` : "";
   if (currentTimeFormat === "12h") {
-    const period = currentLang === "en" ? (hours >= 12 ? "PM" : "AM") : (hours >= 12 ? "下午" : "上午");
-    const displayHour = String(hours % 12 || 12).padStart(2, "0");
-    return `${dateText} ${period} ${displayHour}:${minutes}`;
+    const period = parts.dayPeriod ? `${parts.dayPeriod} ` : "";
+    return `${dateText} ${period}${parts.hour}:${parts.minute}${timeZoneName}`;
   }
 
-  return `${dateText} ${String(hours).padStart(2, "0")}:${minutes}`;
+  return `${dateText} ${parts.hour}:${parts.minute}${timeZoneName}`;
 }
 
 function syncTimeFormatInputs() {
@@ -269,6 +373,126 @@ function syncDateOrderInputs() {
   dateOrderInputs.forEach((input) => {
     input.checked = input.value === currentDateOrder;
   });
+}
+
+function getTimeZoneOffsetMinutes(timeZone, date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date).reduce((acc, part) => {
+    if (part.type !== "literal") {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+
+  const utcTimestamp = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second)
+  );
+
+  return (utcTimestamp - date.getTime()) / (60 * 1000);
+}
+
+function buildIsoFromTimeZoneParts(parts, timeZone) {
+  const { year, month, day, hour, minute, second = 0 } = parts;
+  const naiveUtcMs = Date.UTC(year, month - 1, day, hour, minute, second);
+  let utcMs = naiveUtcMs;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const offsetMinutes = getTimeZoneOffsetMinutes(timeZone, new Date(utcMs));
+    const nextUtcMs = naiveUtcMs - offsetMinutes * 60 * 1000;
+    if (nextUtcMs === utcMs) break;
+    utcMs = nextUtcMs;
+  }
+
+  const value = new Date(utcMs);
+  if (Number.isNaN(value.getTime())) return null;
+  return value.toISOString();
+}
+
+function buildIsoFromTimeZoneInput(dateValue, timeValue, timeZone) {
+  const dateMatch = dateValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const timeMatch = (timeValue || "23:59").match(/^(\d{2}):(\d{2})$/);
+  if (!dateMatch || !timeMatch) return null;
+
+  return buildIsoFromTimeZoneParts(
+    {
+      year: Number(dateMatch[1]),
+      month: Number(dateMatch[2]),
+      day: Number(dateMatch[3]),
+      hour: Number(timeMatch[1]),
+      minute: Number(timeMatch[2]),
+      second: 0,
+    },
+    timeZone
+  );
+}
+
+function normalizeIcsTimeZoneHint(timeZoneHint) {
+  return (timeZoneHint || "").trim().replace(/^"(.*)"$/, "$1");
+}
+
+function parseFixedOffsetTimeZone(timeZoneHint) {
+  const normalized = normalizeIcsTimeZoneHint(timeZoneHint);
+  if (!normalized) return "";
+  if (normalized.toUpperCase() === "UTC" || normalized === "Z") return "Z";
+
+  const utcOffsetMatch = normalized.match(/^UTC([+-])(\d{1,2})(?::?(\d{2}))?$/i);
+  if (utcOffsetMatch) {
+    const [, sign, hourDigits, minuteDigits = "00"] = utcOffsetMatch;
+    return `${sign}${hourDigits.padStart(2, "0")}:${minuteDigits}`;
+  }
+
+  const offsetMatch = normalized.match(/^([+-])(\d{2}):?(\d{2})$/);
+  if (offsetMatch) {
+    const [, sign, hourDigits, minuteDigits] = offsetMatch;
+    return `${sign}${hourDigits}:${minuteDigits}`;
+  }
+
+  return "";
+}
+
+function parseIcsProperty(rawKey) {
+  const [name, ...parameterEntries] = rawKey.split(";");
+  const parameters = {};
+
+  parameterEntries.forEach((entry) => {
+    const [parameterName, ...parameterValueParts] = entry.split("=");
+    if (!parameterName || parameterValueParts.length === 0) return;
+    parameters[parameterName.toUpperCase()] = normalizeIcsTimeZoneHint(
+      parameterValueParts.join("=")
+    );
+  });
+
+  return { name, parameters };
+}
+
+function splitIcsLine(line) {
+  let inQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+    if (char === ":" && !inQuotes) {
+      return [line.slice(0, index), line.slice(index + 1)];
+    }
+  }
+
+  return [line, ""];
 }
 
 function setSettingsOpen(open) {
@@ -299,7 +523,16 @@ function setDateOrder(nextOrder) {
   loadDeadlines();
 }
 
-function parseIcsDate(value) {
+function setTimeZone(nextTimeZone) {
+  currentTimeZone = sanitizeTimeZone(nextTimeZone);
+  syncTimeZoneSelect();
+  syncTimeZoneNote();
+  chrome.storage.local.set({ [TIMEZONE_STORAGE_KEY]: currentTimeZone });
+  renderCcfddlList(ccfddlItems);
+  loadDeadlines();
+}
+
+function parseIcsDate(value, timeZoneHint = "") {
   if (!value) return null;
   const sanitized = value.trim();
   const dateTimeMatch =
@@ -308,11 +541,36 @@ function parseIcsDate(value) {
     );
   if (dateTimeMatch) {
     const [, year, month, day, hour, minute, second, tz] = dateTimeMatch;
-    const offset = tz && tz !== "Z" ? `${tz.slice(0, 3)}:${tz.slice(3)}` : "";
-    const suffix = tz === "Z" ? "Z" : offset;
-    const iso = `${year}-${month}-${day}T${hour}:${minute}:${second}${suffix}`;
-    const date = new Date(iso);
-    return Number.isNaN(date.getTime()) ? null : date;
+    const embeddedOffset = tz && tz !== "Z" ? `${tz.slice(0, 3)}:${tz.slice(3)}` : "";
+    const fixedOffset = parseFixedOffsetTimeZone(timeZoneHint);
+    const suffix = tz === "Z" ? "Z" : embeddedOffset || fixedOffset;
+    if (suffix) {
+      const iso = `${year}-${month}-${day}T${hour}:${minute}:${second}${suffix}`;
+      const date = new Date(iso);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    const normalizedTimeZone = normalizeIcsTimeZoneHint(timeZoneHint);
+    if (normalizedTimeZone) {
+      const iso = buildIsoFromTimeZoneParts(
+        {
+          year: Number(year),
+          month: Number(month),
+          day: Number(day),
+          hour: Number(hour),
+          minute: Number(minute),
+          second: Number(second),
+        },
+        normalizedTimeZone
+      );
+      if (iso) {
+        const date = new Date(iso);
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+    }
+
+    const localDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}`);
+    return Number.isNaN(localDate.getTime()) ? null : localDate;
   }
 
   const dateOnlyMatch = sanitized.match(/^(\d{4})(\d{2})(\d{2})$/);
@@ -352,17 +610,19 @@ function parseIcs(text) {
     }
     if (!current) return;
 
-    const [rawKey, ...rest] = line.split(":");
-    const key = rawKey.split(";")[0];
-    const value = rest.join(":");
+    const [rawKey, value] = splitIcsLine(line);
+    const { name: key, parameters } = parseIcsProperty(rawKey);
     if (key === "SUMMARY") current.summary = value;
-    if (key === "DTSTART") current.start = value;
+    if (key === "DTSTART") {
+      current.start = value;
+      current.startTimeZone = parameters.TZID || "";
+    }
     if (key === "URL") current.url = value;
   });
 
   return events
     .map((event) => {
-      const date = parseIcsDate(event.start);
+      const date = parseIcsDate(event.start, event.startTimeZone);
       if (!event.summary || !date) return null;
       return {
         title: event.summary,
@@ -825,15 +1085,19 @@ form.addEventListener("submit", (event) => {
 
   if (!title || !date) return;
 
-  const datetime = new Date(`${date}T${time}`);
-  if (Number.isNaN(datetime.getTime())) return;
+  const datetime = buildIsoFromTimeZoneInput(
+    date,
+    time,
+    sanitizeTimeZone(currentTimeZone)
+  );
+  if (!datetime) return;
 
   chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
     const updated = [
       ...result[STORAGE_KEY],
       {
         title,
-        datetime: datetime.toISOString(),
+        datetime,
       },
     ];
     saveDeadlines(updated);
@@ -853,11 +1117,13 @@ chrome.storage.local.get(
     [LANG_STORAGE_KEY]: "zh",
     [TIME_FORMAT_STORAGE_KEY]: "24h",
     [DATE_ORDER_STORAGE_KEY]: "ymd",
+    [TIMEZONE_STORAGE_KEY]: DEFAULT_TIME_ZONE,
   },
   (result) => {
     currentLang = result[LANG_STORAGE_KEY] || "zh";
     currentTimeFormat = result[TIME_FORMAT_STORAGE_KEY] || "24h";
     currentDateOrder = result[DATE_ORDER_STORAGE_KEY] || "ymd";
+    currentTimeZone = sanitizeTimeZone(result[TIMEZONE_STORAGE_KEY] || DEFAULT_TIME_ZONE);
     applyTranslations();
     setAddFormExpanded(false);
     setCcfddlExpanded(true);
@@ -892,6 +1158,9 @@ dateOrderInputs.forEach((input) => {
     if (!input.checked) return;
     setDateOrder(input.value);
   });
+});
+timeZoneSelect?.addEventListener("change", () => {
+  setTimeZone(timeZoneSelect.value);
 });
 ccfddlSearchInput.addEventListener("focus", () => {
   if (shouldIgnoreStartupInteraction()) return;

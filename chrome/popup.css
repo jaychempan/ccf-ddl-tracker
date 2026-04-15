@@ -280,7 +280,7 @@ p {
   right: 12px;
   bottom: 22px;
   z-index: 40;
-  width: 176px;
+  width: 248px;
   padding: 9px 10px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 12px;
@@ -331,6 +331,21 @@ p {
 
 .settings-option input {
   margin: 0;
+}
+
+.settings-select-wrap {
+  display: block;
+  margin-top: 2px;
+}
+
+.settings-select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 12px;
+  color: var(--text);
+  background: #fff;
 }
 
 form {
@@ -460,6 +475,10 @@ button.action-card.is-active {
   line-height: 1.2;
   color: var(--muted);
   text-align: center;
+}
+
+.timezone-note {
+  margin-top: -2px;
 }
 
 .import-combobox {

@@ -16,7 +16,7 @@
         <p class="subtitle" data-i18n="subtitle_en">Track deadlines and show the nearest days left.</p>
         </div>
       </div>
-      <span class="version-tag" aria-label="Version 2.0">v2.0</span>
+      <span class="version-tag" aria-label="Version 2.1">v2.1</span>
     </header>
 
     <section class="action-grid">
@@ -53,6 +53,7 @@
             <input id="time" type="time" value="23:59" />
           </label>
         </div>
+        <p id="timezone-note" class="field-hint timezone-note"></p>
         <button type="submit" data-i18n="add_button">添加</button>
       </form>
     </section>
@@ -188,6 +189,12 @@
 
     <section id="settings-panel" class="settings-panel" hidden>
       <p class="settings-title" data-i18n="settings_title">显示设置</p>
+      <fieldset class="settings-group">
+        <legend class="settings-legend" data-i18n="timezone_label">显示时区</legend>
+        <label class="settings-select-wrap">
+          <select id="timezone-select" class="settings-select"></select>
+        </label>
+      </fieldset>
       <fieldset class="settings-group">
         <legend class="settings-legend" data-i18n="time_format_label">时间显示</legend>
         <label class="settings-option">
