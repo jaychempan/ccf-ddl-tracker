@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="Frequently asked questions about CCF DDL Tracker."
+    >
+    <title>CCF DDL Tracker FAQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link rel="icon" href="../favicon-16x16.png?v=20260415-logo-large" type="image/png" sizes="16x16">
+    <link rel="icon" href="../favicon-32x32.png?v=20260415-logo-large" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="../favicon-32x32.png?v=20260415-logo-large" type="image/png">
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav-shell">
+            <a class="brand" href="../" aria-label="CCF DDL Tracker home">
+                <img src="../ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+                <span>CCF DDL Tracker</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="nav-panel"
+                data-menu-toggle
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-panel" id="nav-panel" data-nav-panel>
+                <a href="../">Home</a>
+                <a href="../get-it/">Get it</a>
+                <a href="../guide/">Guide</a>
+                <a class="active" aria-current="page" href="../faq/">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </nav>
+        <div class="scroll-track" aria-hidden="true">
+            <div class="scroll-indicator" data-scroll-indicator></div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <article class="article-shell">
+            <h1>FAQ</h1>
+
+            <h3>Where are my deadlines stored?</h3>
+            <p>
+                They are stored in <code>chrome.storage.local</code> inside the browser. There is no
+                account system and no project-hosted cloud sync.
+            </p>
+
+            <h3>Where do imported conferences come from?</h3>
+            <p>
+                Imports prefer the upstream <a href="https://github.com/ccfddl/ccf-deadlines" target="_blank" rel="noopener noreferrer">ccfddl/ccf-deadlines</a>
+                repository and fall back to CCFDDL ICS feeds when needed.
+            </p>
+
+            <h3>Should I trust imported deadlines without checking?</h3>
+            <p>
+                No. Imported dates are a convenience feature. For any real submission, always confirm
+                the current CFP and official deadline on the conference website.
+            </p>
+
+            <h3>Does the extension collect analytics or telemetry?</h3>
+            <p>
+                No project-hosted telemetry is built into the extension. The workflow is designed to be
+                local-first and does not require logging in.
+            </p>
+
+            <h3>Can I open the official conference homepage from a card?</h3>
+            <p>
+                Yes. Imported conferences keep their homepage links, and added cards can open the
+                conference website directly from the popup.
+            </p>
+
+            <h3>Can I use my own custom deadlines?</h3>
+            <p>
+                Yes. The extension supports both manually added deadlines and imported conference entries.
+            </p>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div>CCF DDL Tracker © 2026</div>
+            <div class="footer-links">
+                <a href="../privacy/">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>

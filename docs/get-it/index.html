@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="Install CCF DDL Tracker from the Chrome Web Store or load it unpacked from source."
+    >
+    <title>Get CCF DDL Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link rel="icon" href="../favicon-16x16.png?v=20260415-logo-large" type="image/png" sizes="16x16">
+    <link rel="icon" href="../favicon-32x32.png?v=20260415-logo-large" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="../favicon-32x32.png?v=20260415-logo-large" type="image/png">
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20260415-logo-large">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav-shell">
+            <a class="brand" href="../" aria-label="CCF DDL Tracker home">
+                <img src="../ccf-ddl-tracker-logo.png" alt="CCF DDL Tracker logo" width="500" height="500">
+                <span>CCF DDL Tracker</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="nav-panel"
+                data-menu-toggle
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-panel" id="nav-panel" data-nav-panel>
+                <a href="../">Home</a>
+                <a class="active" aria-current="page" href="../get-it/">Get it</a>
+                <a href="../guide/">Guide</a>
+                <a href="../faq/">FAQ</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </nav>
+        <div class="scroll-track" aria-hidden="true">
+            <div class="scroll-indicator" data-scroll-indicator></div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <article class="article-shell">
+            <h1>Get CCF DDL Tracker</h1>
+            <p>
+                CCF DDL Tracker is built as a Manifest V3 Chrome extension. You can install it from
+                the Chrome Web Store or load it unpacked from the repository during development.
+            </p>
+
+            <h2>Stable Release</h2>
+            <p>
+                The easiest path is the Chrome Web Store release.
+            </p>
+            <div class="button-list">
+                <ul>
+                    <li>
+                        <a
+                            href="https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo" src="../logos/chrome-web-store.svg" alt="">
+                            </span>
+                            <span class="button-label">Chrome Web Store</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <p><strong>Note</strong></p>
+                <p>
+                    The primary supported target is Chrome. Other Chromium-based browsers may work if
+                    they support Manifest V3 extension loading, but Chrome is the main distribution path.
+                </p>
+            </div>
+
+            <h2>Load Unpacked</h2>
+            <p>
+                If you want to inspect or modify the source code, load the extension unpacked:
+            </p>
+            <ol>
+                <li>Open <code>chrome://extensions/</code>.</li>
+                <li>Enable <code>Developer mode</code>.</li>
+                <li>Click <code>Load unpacked</code>.</li>
+                <li>Select the <code>chrome/</code> directory in this repository.</li>
+                <li>Pin the extension icon to the toolbar and click it to open the popup.</li>
+            </ol>
+
+            <h2>Project Resources</h2>
+            <div class="button-list">
+                <ul>
+                    <li>
+                        <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo button-logo-github" src="../logos/github.svg" alt="">
+                            </span>
+                            <span class="button-label">Repository</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/jaychempan/ccf-ddl-tracker/blob/main/chrome/README.md" target="_blank" rel="noopener noreferrer">
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo button-logo-github" src="../logos/github.svg" alt="">
+                            </span>
+                            <span class="button-label">Chrome README</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://ccfddl.com/" target="_blank" rel="noopener noreferrer">
+                            <span class="button-logo-slot" aria-hidden="true">
+                                <img class="button-logo button-logo-ccfddl" src="../logos/ccfddl.png" alt="">
+                            </span>
+                            <span class="button-label">CCFDDL Official Site</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <h2>Need the Source?</h2>
+            <p>
+                Browse the repository, open issues, or submit pull requests if you want to help improve
+                the extension or the surrounding documentation.
+            </p>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div>CCF DDL Tracker © 2026</div>
+            <div class="footer-links">
+                <a href="../privacy/">Privacy Policy</a>
+                <a href="https://github.com/jaychempan/ccf-ddl-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>
