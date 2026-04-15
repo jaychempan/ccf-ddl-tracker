@@ -8,6 +8,7 @@
   **Version:** `v2.0`
 
   [中文版本](README.zh-CN.md) ·
+  [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
   [Chrome Web Store](https://chromewebstore.google.com/detail/fnnpcnlkehcbickmdmepjpjimgcleidd?utm_source=item-share-cb) ·
   [Chrome Extension README](chrome/README.md) ·
   [CCFDDL Source](https://github.com/ccfddl/ccf-deadlines) ·
@@ -87,9 +88,24 @@ Install directly from the Chrome Web Store:
 ## Development
 
 - Repository: <https://github.com/jaychempan/ccf-ddl-tracker>
+- Website source: [`website/`](website/)
+- GitHub Pages URL: <https://jaychempan.github.io/ccf-ddl-tracker/>
 - Chrome extension docs: [chrome/README.md](chrome/README.md)
 - Tech stack: Manifest V3, Vanilla JavaScript, `chrome.storage.local`
 - Contribution: Issues and pull requests are welcome
+
+### GitHub Pages
+
+This repository now includes an Actions-based GitHub Pages deployment for the static site in [`website/`](website/).
+
+1. Push the repository to the `main` branch on GitHub.
+2. Open `Settings -> Pages`.
+3. Set `Source` to `GitHub Actions`.
+4. Wait for the `Deploy GitHub Pages` workflow to finish.
+
+After Pages is enabled, the site will be published at:
+
+- <https://jaychempan.github.io/ccf-ddl-tracker/>
 
 ---
 
