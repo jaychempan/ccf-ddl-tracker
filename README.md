@@ -96,12 +96,20 @@ Install directly from the Chrome Web Store:
 
 ### GitHub Pages
 
-This repository now includes an Actions-based GitHub Pages deployment for the static site in [`website/`](website/).
+This repository now includes a GitHub Actions workflow for publishing the static site in [`website/`](website/).
+The [`docs/`](docs/) mirror is kept only as a compatibility fallback for older branch-based Pages setups.
 
 1. Push the repository to the `main` branch on GitHub.
 2. Open `Settings -> Pages`.
 3. Set `Source` to `GitHub Actions`.
-4. Wait for the `Deploy GitHub Pages` workflow to finish.
+4. Keep [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) enabled.
+5. Push changes to `main`, or run `Deploy GitHub Pages` manually from the `Actions` tab.
+
+If you temporarily stay on the branch-based `/docs` mode and update files in [`website/`](website/), run:
+
+```bash
+bash scripts/sync-pages.sh
+```
 
 After Pages is enabled, the site will be published at:
 
