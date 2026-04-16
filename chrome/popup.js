@@ -6,16 +6,58 @@ const TIME_FORMAT_STORAGE_KEY = "timeFormat";
 const DATE_ORDER_STORAGE_KEY = "dateOrder";
 const TIMEZONE_STORAGE_KEY = "displayTimezone";
 const DEFAULT_TIME_ZONE = "Asia/Shanghai";
-const FALLBACK_TIME_ZONES = [
-  DEFAULT_TIME_ZONE,
-  "UTC",
-  "America/Los_Angeles",
-  "America/New_York",
-  "Europe/London",
-  "Europe/Berlin",
-  "Asia/Tokyo",
-  "Australia/Sydney",
+const STANDARD_TIME_ZONE_OPTIONS = [
+  { value: "UTC", group: "featured", zh: "协调世界时", en: "Coordinated Universal Time" },
+  { value: "Etc/GMT+12", group: "featured", zh: "AOE - 全球最晚时区", en: "AOE - Anywhere on Earth" },
+  { value: DEFAULT_TIME_ZONE, group: "featured", zh: "中国 - 上海", en: "China - Shanghai" },
+  { value: "America/Los_Angeles", group: "featured", zh: "美国 - 洛杉矶", en: "United States - Los Angeles" },
+  { value: "America/New_York", group: "featured", zh: "美国 - 纽约", en: "United States - New York" },
+  { value: "Europe/London", group: "featured", zh: "英国 - 伦敦", en: "United Kingdom - London" },
+  { value: "Europe/Berlin", group: "featured", zh: "德国 - 柏林", en: "Germany - Berlin" },
+  { value: "Asia/Tokyo", group: "featured", zh: "日本 - 东京", en: "Japan - Tokyo" },
+  { value: "Australia/Sydney", group: "featured", zh: "澳大利亚 - 悉尼", en: "Australia - Sydney" },
+  { value: "Asia/Hong_Kong", group: "asia_pacific", zh: "中国香港 - 香港", en: "Hong Kong - Hong Kong" },
+  { value: "Asia/Singapore", group: "asia_pacific", zh: "新加坡 - 新加坡", en: "Singapore - Singapore" },
+  { value: "Asia/Seoul", group: "asia_pacific", zh: "韩国 - 首尔", en: "South Korea - Seoul" },
+  { value: "Asia/Taipei", group: "asia_pacific", zh: "中国台湾 - 台北", en: "Taiwan - Taipei" },
+  { value: "Asia/Kolkata", group: "asia_pacific", zh: "印度 - 加尔各答", en: "India - Kolkata" },
+  { value: "Asia/Bangkok", group: "asia_pacific", zh: "泰国 - 曼谷", en: "Thailand - Bangkok" },
+  { value: "Asia/Ho_Chi_Minh", group: "asia_pacific", zh: "越南 - 胡志明市", en: "Vietnam - Ho Chi Minh City" },
+  { value: "Asia/Jakarta", group: "asia_pacific", zh: "印度尼西亚 - 雅加达", en: "Indonesia - Jakarta" },
+  { value: "Asia/Manila", group: "asia_pacific", zh: "菲律宾 - 马尼拉", en: "Philippines - Manila" },
+  { value: "Asia/Kuala_Lumpur", group: "asia_pacific", zh: "马来西亚 - 吉隆坡", en: "Malaysia - Kuala Lumpur" },
+  { value: "Asia/Dubai", group: "asia_pacific", zh: "阿联酋 - 迪拜", en: "United Arab Emirates - Dubai" },
+  { value: "Australia/Melbourne", group: "asia_pacific", zh: "澳大利亚 - 墨尔本", en: "Australia - Melbourne" },
+  { value: "Pacific/Auckland", group: "asia_pacific", zh: "新西兰 - 奥克兰", en: "New Zealand - Auckland" },
+  { value: "Europe/Lisbon", group: "europe_africa", zh: "葡萄牙 - 里斯本", en: "Portugal - Lisbon" },
+  { value: "Europe/Paris", group: "europe_africa", zh: "法国 - 巴黎", en: "France - Paris" },
+  { value: "Europe/Madrid", group: "europe_africa", zh: "西班牙 - 马德里", en: "Spain - Madrid" },
+  { value: "Europe/Rome", group: "europe_africa", zh: "意大利 - 罗马", en: "Italy - Rome" },
+  { value: "Europe/Amsterdam", group: "europe_africa", zh: "荷兰 - 阿姆斯特丹", en: "Netherlands - Amsterdam" },
+  { value: "Europe/Zurich", group: "europe_africa", zh: "瑞士 - 苏黎世", en: "Switzerland - Zurich" },
+  { value: "Europe/Warsaw", group: "europe_africa", zh: "波兰 - 华沙", en: "Poland - Warsaw" },
+  { value: "Europe/Stockholm", group: "europe_africa", zh: "瑞典 - 斯德哥尔摩", en: "Sweden - Stockholm" },
+  { value: "Europe/Helsinki", group: "europe_africa", zh: "芬兰 - 赫尔辛基", en: "Finland - Helsinki" },
+  { value: "Europe/Istanbul", group: "europe_africa", zh: "土耳其 - 伊斯坦布尔", en: "Turkey - Istanbul" },
+  { value: "Europe/Moscow", group: "europe_africa", zh: "俄罗斯 - 莫斯科", en: "Russia - Moscow" },
+  { value: "Africa/Johannesburg", group: "europe_africa", zh: "南非 - 约翰内斯堡", en: "South Africa - Johannesburg" },
+  { value: "Africa/Nairobi", group: "europe_africa", zh: "肯尼亚 - 内罗毕", en: "Kenya - Nairobi" },
+  { value: "Pacific/Honolulu", group: "americas", zh: "美国 - 檀香山", en: "United States - Honolulu" },
+  { value: "America/Anchorage", group: "americas", zh: "美国 - 安克雷奇", en: "United States - Anchorage" },
+  { value: "America/Denver", group: "americas", zh: "美国 - 丹佛", en: "United States - Denver" },
+  { value: "America/Phoenix", group: "americas", zh: "美国 - 菲尼克斯", en: "United States - Phoenix" },
+  { value: "America/Chicago", group: "americas", zh: "美国 - 芝加哥", en: "United States - Chicago" },
+  { value: "America/Toronto", group: "americas", zh: "加拿大 - 多伦多", en: "Canada - Toronto" },
+  { value: "America/Halifax", group: "americas", zh: "加拿大 - 哈利法克斯", en: "Canada - Halifax" },
+  { value: "America/Vancouver", group: "americas", zh: "加拿大 - 温哥华", en: "Canada - Vancouver" },
+  { value: "America/Mexico_City", group: "americas", zh: "墨西哥 - 墨西哥城", en: "Mexico - Mexico City" },
+  { value: "America/Bogota", group: "americas", zh: "哥伦比亚 - 波哥大", en: "Colombia - Bogota" },
+  { value: "America/Lima", group: "americas", zh: "秘鲁 - 利马", en: "Peru - Lima" },
+  { value: "America/Santiago", group: "americas", zh: "智利 - 圣地亚哥", en: "Chile - Santiago" },
+  { value: "America/Sao_Paulo", group: "americas", zh: "巴西 - 圣保罗", en: "Brazil - Sao Paulo" },
+  { value: "America/Argentina/Buenos_Aires", group: "americas", zh: "阿根廷 - 布宜诺斯艾利斯", en: "Argentina - Buenos Aires" },
 ];
+const STANDARD_TIME_ZONE_MAP = new Map(STANDARD_TIME_ZONE_OPTIONS.map((option) => [option.value, option]));
 
 const form = document.getElementById("deadline-form");
 const titleInput = document.getElementById("title");
@@ -55,6 +97,7 @@ let isCcfddlDropdownOpen = false;
 let isCcfddlLoading = false;
 let isSettingsOpen = false;
 const popupOpenedAt = performance.now();
+const SUPPORTED_TIME_ZONES = getSupportedTimeZones();
 const AVAILABLE_TIME_ZONES = getAvailableTimeZones();
 
 const translations = {
@@ -84,6 +127,11 @@ const translations = {
     settings_button: "设置",
     settings_title: "显示设置",
     timezone_label: "显示时区",
+    timezone_group_featured: "常用",
+    timezone_group_asia_pacific: "亚太",
+    timezone_group_europe_africa: "欧洲 / 非洲",
+    timezone_group_americas: "美洲",
+    timezone_group_custom: "当前保存的时区",
     time_format_label: "时间显示",
     time_format_24h: "24 小时制",
     time_format_12h: "12 小时制",
@@ -124,6 +172,11 @@ const translations = {
     settings_button: "Settings",
     settings_title: "Display Settings",
     timezone_label: "Display Time Zone",
+    timezone_group_featured: "Featured",
+    timezone_group_asia_pacific: "Asia-Pacific",
+    timezone_group_europe_africa: "Europe / Africa",
+    timezone_group_americas: "Americas",
+    timezone_group_custom: "Saved Time Zone",
     time_format_label: "Time Format",
     time_format_24h: "24-hour clock",
     time_format_12h: "12-hour clock",
@@ -140,24 +193,20 @@ const translations = {
   },
 };
 
-function getAvailableTimeZones() {
+function getSupportedTimeZones() {
   if (typeof Intl.supportedValuesOf !== "function") {
-    return [...FALLBACK_TIME_ZONES];
+    return new Set(STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value));
   }
 
   try {
-    const supported = Intl.supportedValuesOf("timeZone");
-    const deduped = Array.from(new Set([DEFAULT_TIME_ZONE, "UTC", ...supported]));
-    return deduped.sort((left, right) => {
-      if (left === DEFAULT_TIME_ZONE) return -1;
-      if (right === DEFAULT_TIME_ZONE) return 1;
-      if (left === "UTC") return -1;
-      if (right === "UTC") return 1;
-      return left.localeCompare(right);
-    });
+    return new Set(["UTC", ...Intl.supportedValuesOf("timeZone")]);
   } catch (error) {
-    return [...FALLBACK_TIME_ZONES];
+    return new Set(STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value));
   }
+}
+
+function getAvailableTimeZones() {
+  return STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value).filter((value) => SUPPORTED_TIME_ZONES.has(value));
 }
 
 function t(key, fallback = "") {
@@ -170,11 +219,34 @@ function getLocale() {
   return currentLang === "en" ? "en-US" : "zh-CN";
 }
 
+function isSupportedTimeZone(timeZone) {
+  return SUPPORTED_TIME_ZONES.has(timeZone);
+}
+
 function sanitizeTimeZone(timeZone) {
-  if (AVAILABLE_TIME_ZONES.includes(timeZone)) {
+  if (isSupportedTimeZone(timeZone)) {
     return timeZone;
   }
   return DEFAULT_TIME_ZONE;
+}
+
+function getRenderableTimeZoneOptions(selectedTimeZone) {
+  const options = STANDARD_TIME_ZONE_OPTIONS.filter(({ value }) => AVAILABLE_TIME_ZONES.includes(value));
+
+  if (
+    selectedTimeZone &&
+    isSupportedTimeZone(selectedTimeZone) &&
+    !options.some(({ value }) => value === selectedTimeZone)
+  ) {
+    options.push({
+      value: selectedTimeZone,
+      group: "custom",
+      zh: `自定义 - ${formatTimeZoneIdentifier(selectedTimeZone)}`,
+      en: `Custom - ${formatTimeZoneIdentifier(selectedTimeZone)}`,
+    });
+  }
+
+  return options;
 }
 
 function getTimeZoneNamePart(locale, timeZone, timeZoneName) {
@@ -186,7 +258,7 @@ function getTimeZoneNamePart(locale, timeZone, timeZoneName) {
         minute: "2-digit",
         timeZoneName,
       })
-        .formatToParts(new Date("2026-01-15T12:00:00Z"))
+        .formatToParts(new Date())
         .find((part) => part.type === "timeZoneName")?.value || ""
     );
   } catch (error) {
@@ -201,13 +273,22 @@ function formatTimeZoneIdentifier(timeZone) {
     .join(" / ");
 }
 
+function getTimeZoneOffsetLabel(timeZone) {
+  return getTimeZoneNamePart("en-US", timeZone, "longOffset").replace(/^GMT/, "UTC");
+}
+
+function getTimeZoneGroupLabel(group) {
+  return t(`timezone_group_${group}`, group);
+}
+
 function getTimeZoneDisplayLabel(timeZone) {
-  const locale = getLocale();
+  const option = STANDARD_TIME_ZONE_MAP.get(timeZone);
   const localizedName =
-    getTimeZoneNamePart(locale, timeZone, "longGeneric") ||
-    getTimeZoneNamePart(locale, timeZone, "long") ||
+    option?.[currentLang] ||
+    getTimeZoneNamePart(getLocale(), timeZone, "longGeneric") ||
+    getTimeZoneNamePart(getLocale(), timeZone, "long") ||
     formatTimeZoneIdentifier(timeZone);
-  const offset = getTimeZoneNamePart("en-US", timeZone, "longOffset").replace(/^GMT/, "UTC");
+  const offset = getTimeZoneOffsetLabel(timeZone);
 
   if (!offset) {
     return localizedName;
@@ -222,19 +303,34 @@ function syncTimeZoneSelect() {
   if (!timeZoneSelect) return;
 
   const selectedTimeZone = sanitizeTimeZone(currentTimeZone);
+  const renderableOptions = getRenderableTimeZoneOptions(selectedTimeZone);
   const shouldRebuild =
     timeZoneSelect.dataset.lang !== currentLang ||
-    timeZoneSelect.options.length !== AVAILABLE_TIME_ZONES.length ||
+    timeZoneSelect.options.length !== renderableOptions.length ||
     !timeZoneSelect.querySelector(`option[value="${selectedTimeZone}"]`);
 
   if (shouldRebuild) {
     timeZoneSelect.innerHTML = "";
-    AVAILABLE_TIME_ZONES.forEach((timeZone) => {
+    const groupElements = new Map();
+
+    renderableOptions.forEach(({ group, value }) => {
+      let parent = timeZoneSelect;
+      if (group) {
+        if (!groupElements.has(group)) {
+          const optgroup = document.createElement("optgroup");
+          optgroup.label = getTimeZoneGroupLabel(group);
+          groupElements.set(group, optgroup);
+          timeZoneSelect.appendChild(optgroup);
+        }
+        parent = groupElements.get(group);
+      }
+
       const option = document.createElement("option");
-      option.value = timeZone;
-      option.textContent = getTimeZoneDisplayLabel(timeZone);
-      timeZoneSelect.appendChild(option);
+      option.value = value;
+      option.textContent = getTimeZoneDisplayLabel(value);
+      parent.appendChild(option);
     });
+
     timeZoneSelect.dataset.lang = currentLang;
   }
 
