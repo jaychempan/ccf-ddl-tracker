@@ -21,7 +21,7 @@ const translations = {
         },
         pages: {
             home: {
-                "meta.title": "CCF DDL Tracker",
+                "meta.title": "CCF DDL Tracker: Add and manage your deadlines in one click",
                 "meta.description": "CCF DDL Tracker is an open source Chrome extension for tracking CCF deadlines with a compact popup, right-click calendar actions, time zone switching, import flow, and local-only storage.",
                 "home.subtitle": "An open source Chrome extension for tracking CCF deadlines",
                 "home.primaryCta": "Get Started",
@@ -61,7 +61,7 @@ const translations = {
                 "home.contribution.item4": "sharing feedback from real deadline-tracking workflows"
             },
             getIt: {
-                "meta.title": "Get CCF DDL Tracker",
+                "meta.title": "CCF DDL Tracker｜Get it",
                 "meta.description": "Install CCF DDL Tracker from the Chrome Web Store or load it unpacked from source.",
                 "getIt.title": "Get CCF DDL Tracker",
                 "getIt.intro": "CCF DDL Tracker is built as a Manifest V3 Chrome extension. You can install it from the Chrome Web Store or load it unpacked from the repository during development.",
@@ -85,7 +85,7 @@ const translations = {
                 "getIt.source.body": "Browse the repository, open issues, or submit pull requests if you want to help improve the extension or the surrounding documentation."
             },
             guide: {
-                "meta.title": "CCF DDL Tracker Guide",
+                "meta.title": "CCF DDL Tracker｜Guide",
                 "meta.description": "Guide for using the CCF DDL Tracker Chrome extension.",
                 "guide.title": "Guide",
                 "guide.intro": "This page covers the basic workflow for using CCF DDL Tracker after installation.",
@@ -110,7 +110,7 @@ const translations = {
                 "guide.storage.body": "All deadlines and preferences are stored in <code>chrome.storage.local</code>. The extension does not require sign-in or cloud sync to function."
             },
             faq: {
-                "meta.title": "CCF DDL Tracker FAQ",
+                "meta.title": "CCF DDL Tracker｜FAQ",
                 "meta.description": "Frequently asked questions about CCF DDL Tracker.",
                 "faq.title": "FAQ",
                 "faq.q1": "Where are my deadlines stored?",
@@ -129,7 +129,7 @@ const translations = {
                 "faq.a7": "Right-click any saved or imported deadline card in the popup. You can open a prefilled Google Calendar event or export an ICS file for Apple / iCloud and other calendar apps."
             },
             privacy: {
-                "meta.title": "CCF DDL Tracker Privacy Policy",
+                "meta.title": "CCF DDL Tracker｜Privacy Policy",
                 "meta.description": "Privacy policy for CCF DDL Tracker.",
                 "privacy.title": "Privacy Policy",
                 "privacy.effectiveDate": "Effective date: April 15, 2026",
@@ -148,7 +148,7 @@ const translations = {
                 "privacy.contact.body": "For questions about the project, open an issue on <a href=\"https://github.com/jaychempan/ccf-ddl-tracker\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a>."
             },
             changelog: {
-                "meta.title": "CCF DDL Tracker Changelog",
+                "meta.title": "CCF DDL Tracker｜Changelog",
                 "meta.description": "Release notes and update history for CCF DDL Tracker.",
                 "changelog.title": "Changelog",
                 "changelog.intro": "This page records major product and interface changes across website and extension releases.",
@@ -195,7 +195,7 @@ const translations = {
         },
         pages: {
             home: {
-                "meta.title": "CCF DDL Tracker",
+                "meta.title": "CCF DDL Tracker: 一键添加和管理你的截止日期",
                 "meta.description": "CCF DDL Tracker 是一个开源 Chrome 扩展，用紧凑弹窗、右键日历操作、时区切换、本地存储和导入流程帮助你跟踪 CCF 截稿日期。",
                 "home.subtitle": "一个用于跟踪 CCF 截稿日期的开源 Chrome 扩展",
                 "home.primaryCta": "开始使用",
@@ -235,7 +235,7 @@ const translations = {
                 "home.contribution.item4": "分享真实使用场景中的截止日期跟踪反馈"
             },
             getIt: {
-                "meta.title": "获取 CCF DDL Tracker",
+                "meta.title": "CCF DDL Tracker｜获取",
                 "meta.description": "从 Chrome Web Store 安装 CCF DDL Tracker，或从源码以未打包方式加载。",
                 "getIt.title": "获取 CCF DDL Tracker",
                 "getIt.intro": "CCF DDL Tracker 是一个 Manifest V3 Chrome 扩展。你可以从 Chrome Web Store 安装，也可以在开发时直接从仓库源码加载未打包版本。",
@@ -259,7 +259,7 @@ const translations = {
                 "getIt.source.body": "如果你想帮助改进扩展或配套文档，可以浏览仓库、提交 issue，或者发起 pull request。"
             },
             guide: {
-                "meta.title": "CCF DDL Tracker 使用指南",
+                "meta.title": "CCF DDL Tracker｜使用指南",
                 "meta.description": "CCF DDL Tracker Chrome 扩展使用指南。",
                 "guide.title": "使用指南",
                 "guide.intro": "本页介绍安装完成后使用 CCF DDL Tracker 的基本流程。",
@@ -284,7 +284,7 @@ const translations = {
                 "guide.storage.body": "所有截止日期和偏好设置都保存在 <code>chrome.storage.local</code> 中。扩展无需登录，也不依赖云同步。"
             },
             faq: {
-                "meta.title": "CCF DDL Tracker 常见问题",
+                "meta.title": "CCF DDL Tracker｜常见问题",
                 "meta.description": "关于 CCF DDL Tracker 的常见问题。",
                 "faq.title": "常见问题",
                 "faq.q1": "我的截止日期数据存在哪里？",
@@ -303,7 +303,7 @@ const translations = {
                 "faq.a7": "可在 popup 中对任意已保存或已导入的截止日期卡片点击右键。你可以打开预填好的 Google Calendar 事件，或导出适用于 Apple / iCloud 及其他日历应用的 ICS 文件。"
             },
             privacy: {
-                "meta.title": "CCF DDL Tracker 隐私政策",
+                "meta.title": "CCF DDL Tracker｜隐私政策",
                 "meta.description": "CCF DDL Tracker 的隐私政策。",
                 "privacy.title": "隐私政策",
                 "privacy.effectiveDate": "生效日期：2026 年 4 月 15 日",
@@ -322,7 +322,7 @@ const translations = {
                 "privacy.contact.body": "如果你对项目有问题，请在 <a href=\"https://github.com/jaychempan/ccf-ddl-tracker\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a> 上提交 issue。"
             },
             changelog: {
-                "meta.title": "CCF DDL Tracker 更新日志",
+                "meta.title": "CCF DDL Tracker｜更新日志",
                 "meta.description": "CCF DDL Tracker 的发布记录与更新历史。",
                 "changelog.title": "更新日志",
                 "changelog.intro": "本页记录网站与扩展版本中的主要产品更新和界面变化。",
