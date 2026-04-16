@@ -68,7 +68,7 @@
         <div id="ccfddl-dropdown" class="import-dropdown" hidden>
           <ul id="ccfddl-list" class="import-list"></ul>
           <p id="ccfddl-empty" class="empty" data-i18n="import_empty">
-            推荐会议会显示在这里。
+            推荐会议会显示在这里
           </p>
         </div>
       </div>
@@ -103,7 +103,7 @@
         </div>
       </div>
       <ul id="deadline-list"></ul>
-      <p id="empty-state" class="empty" data-i18n="empty_state">还没有添加任何截止日期。</p>
+      <p id="empty-state" class="empty" data-i18n="empty_state">还没有添加任何截止日期</p>
     </section>
 
     <footer class="footer-tools">
@@ -215,6 +215,13 @@
         <label class="settings-option">
           <input type="radio" name="date-order" value="mdy" />
           <span data-i18n="date_order_mdy">月日年</span>
+        </label>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend class="settings-legend" data-i18n="countdown_label">倒计时显示</legend>
+        <label class="settings-option">
+          <input id="precise-countdown-toggle" type="checkbox" />
+          <span data-i18n="countdown_precise">显示小时和分钟</span>
         </label>
       </fieldset>
     </section>

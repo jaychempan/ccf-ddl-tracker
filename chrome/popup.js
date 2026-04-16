@@ -5,6 +5,7 @@ const STARTUP_CLICK_GUARD_MS = 300;
 const TIME_FORMAT_STORAGE_KEY = "timeFormat";
 const DATE_ORDER_STORAGE_KEY = "dateOrder";
 const TIMEZONE_STORAGE_KEY = "displayTimezone";
+const PRECISE_COUNTDOWN_STORAGE_KEY = "preciseCountdown";
 const DEFAULT_TIME_ZONE = "Asia/Shanghai";
 const STANDARD_TIME_ZONE_OPTIONS = [
   { value: "UTC", group: "featured", zh: "协调世界时", en: "Coordinated Universal Time" },
@@ -82,6 +83,7 @@ const refreshDeadlinesBtn = document.getElementById("refresh-deadlines");
 const timeFormatInputs = Array.from(document.querySelectorAll('input[name="time-format"]'));
 const dateOrderInputs = Array.from(document.querySelectorAll('input[name="date-order"]'));
 const timeZoneSelect = document.getElementById("timezone-select");
+const preciseCountdownToggle = document.getElementById("precise-countdown-toggle");
 
 let ccfddlItems = [];
 let currentLang = "zh";
@@ -89,6 +91,7 @@ const LANG_STORAGE_KEY = "language";
 let currentTimeFormat = "24h";
 let currentDateOrder = "ymd";
 let currentTimeZone = DEFAULT_TIME_ZONE;
+let isPreciseCountdownEnabled = false;
 let refreshTimer = null;
 let refreshButtonAnimationTimer = null;
 let isAddFormExpanded = false;
@@ -120,9 +123,9 @@ const translations = {
     search_label: "搜索会议",
     search_placeholder: "例如：ICML / SIGMOD",
     import_click_hint: "点击搜索框可获取最新会议列表",
-    import_empty: "推荐会议会显示在这里。",
+    import_empty: "推荐会议会显示在这里",
     my_section: "我的截止日期",
-    empty_state: "还没有添加任何截止日期。",
+    empty_state: "还没有添加任何截止日期",
     refresh_button: "刷新",
     settings_button: "设置",
     settings_title: "显示设置",
@@ -138,11 +141,20 @@ const translations = {
     date_order_label: "日期顺序",
     date_order_ymd: "年月日",
     date_order_mdy: "月日年",
+    countdown_label: "倒计时显示",
+    countdown_precise: "显示小时和分钟",
     open_site: "打开会议官网",
     add_item: "添加",
     delete_item: "删除",
     remaining: (days) => `剩余 ${days} 天`,
-    load_failed: "加载失败，请稍后重试。",
+    remaining_precise: ({ days, hours, minutes }) => {
+      const parts = [];
+      if (days > 0) parts.push(`${days} 天`);
+      if (days > 0 || hours > 0) parts.push(`${hours} 小时`);
+      parts.push(`${minutes} 分钟`);
+      return `剩余 ${parts.join(" ")}`;
+    },
+    load_failed: "加载失败，请稍后重试",
     invalid_date: "无效日期",
     timezone_note: (label) => `按当前时区保存：${label}`,
   },
@@ -165,9 +177,9 @@ const translations = {
     search_label: "Search",
     search_placeholder: "e.g., ICML / SIGMOD",
     import_click_hint: "Click the search box to load the latest conferences",
-    import_empty: "Recommended conferences will appear here.",
+    import_empty: "Recommended conferences will appear here",
     my_section: "My DDLs",
-    empty_state: "No deadlines yet.",
+    empty_state: "No deadlines yet",
     refresh_button: "Refresh",
     settings_button: "Settings",
     settings_title: "Display Settings",
@@ -183,11 +195,20 @@ const translations = {
     date_order_label: "Date Order",
     date_order_ymd: "Year / Month / Day",
     date_order_mdy: "Month / Day / Year",
+    countdown_label: "Countdown Display",
+    countdown_precise: "Show hours and minutes",
     open_site: "Open conference website",
     add_item: "Add",
     delete_item: "Delete",
     remaining: (days) => `${days} days left`,
-    load_failed: "Failed to load. Please try again.",
+    remaining_precise: ({ days, hours, minutes }) => {
+      const parts = [];
+      if (days > 0) parts.push(`${days}d`);
+      if (days > 0 || hours > 0) parts.push(`${hours}h`);
+      parts.push(`${minutes}m`);
+      return `${parts.join(" ")} left`;
+    },
+    load_failed: "Failed to load, please try again",
     invalid_date: "Invalid date",
     timezone_note: (label) => `Saved in selected time zone: ${label}`,
   },
@@ -199,7 +220,18 @@ function getSupportedTimeZones() {
   }
 
   try {
-    return new Set(["UTC", ...Intl.supportedValuesOf("timeZone")]);
+    const supported = new Set(["UTC", ...Intl.supportedValuesOf("timeZone")]);
+
+    STANDARD_TIME_ZONE_OPTIONS.forEach(({ value }) => {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: value }).format(new Date());
+        supported.add(value);
+      } catch (error) {
+        // Ignore zones unsupported by the current runtime.
+      }
+    });
+
+    return supported;
   } catch (error) {
     return new Set(STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value));
   }
@@ -375,6 +407,7 @@ function applyTranslations() {
   syncTimeZoneNote();
   syncTimeFormatInputs();
   syncDateOrderInputs();
+  syncPreciseCountdownToggle();
   syncDateInputMode();
   syncActionButtons();
 }
@@ -460,6 +493,24 @@ function daysLeft(datetime) {
   return Math.max(0, Math.floor(diff / MS_PER_DAY));
 }
 
+function getCountdownParts(datetime) {
+  const ts = toTimestamp(datetime);
+  if (ts === null) return null;
+
+  const diff = Math.max(0, ts - Date.now());
+  const totalMinutes = Math.floor(diff / (60 * 1000));
+  const days = Math.floor(totalMinutes / (24 * 60));
+  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+  const minutes = totalMinutes % 60;
+
+  return { days, hours, minutes };
+}
+
+function formatTimeZoneAbbreviation(value) {
+  if (!value) return "";
+  return value.replace(/^GMT/, "UTC");
+}
+
 function getDateTimeParts(date, includeTimeZoneName = false) {
   const formatter = new Intl.DateTimeFormat(getLocale(), {
     timeZone: sanitizeTimeZone(currentTimeZone),
@@ -493,7 +544,8 @@ function formatDate(datetime) {
     currentDateOrder === "mdy"
       ? `${month}/${day}/${year}`
       : `${year}/${month}/${day}`;
-  const timeZoneName = parts.timeZoneName ? ` ${parts.timeZoneName}` : "";
+  const timeZoneLabel = formatTimeZoneAbbreviation(parts.timeZoneName);
+  const timeZoneName = timeZoneLabel ? ` ${timeZoneLabel}` : "";
   if (currentTimeFormat === "12h") {
     const period = parts.dayPeriod ? `${parts.dayPeriod} ` : "";
     return `${dateText} ${period}${parts.hour}:${parts.minute}${timeZoneName}`;
@@ -512,6 +564,11 @@ function syncDateOrderInputs() {
   dateOrderInputs.forEach((input) => {
     input.checked = input.value === currentDateOrder;
   });
+}
+
+function syncPreciseCountdownToggle() {
+  if (!preciseCountdownToggle) return;
+  preciseCountdownToggle.checked = isPreciseCountdownEnabled;
 }
 
 function getTimeZoneOffsetMinutes(timeZone, date) {
@@ -659,6 +716,13 @@ function setDateOrder(nextOrder) {
   syncDateOrderInputs();
   chrome.storage.local.set({ [DATE_ORDER_STORAGE_KEY]: currentDateOrder });
   renderCcfddlList(ccfddlItems);
+  loadDeadlines();
+}
+
+function setPreciseCountdown(enabled) {
+  isPreciseCountdownEnabled = Boolean(enabled);
+  syncPreciseCountdownToggle();
+  chrome.storage.local.set({ [PRECISE_COUNTDOWN_STORAGE_KEY]: isPreciseCountdownEnabled });
   loadDeadlines();
 }
 
@@ -940,7 +1004,7 @@ function setCcfddlExpanded(expanded) {
   if (!expanded) {
     setCcfddlDropdownOpen(false);
   } else if (ccfddlList.children.length === 0 && isCcfddlDropdownOpen) {
-    ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里。");
+    ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里");
     ccfddlEmpty.style.display = "block";
   } else {
     ccfddlEmpty.style.display = "none";
@@ -969,14 +1033,14 @@ function filterCcfddlList() {
 function applyLoadedCcfddlItems(items) {
   if (items.length === 0) {
     if (ccfddlItems.length === 0) {
-      ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里。");
+      ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里");
       ccfddlEmpty.style.display = isCcfddlExpanded && isCcfddlDropdownOpen ? "block" : "none";
     }
     return;
   }
 
   ccfddlItems = items;
-  ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里。");
+  ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里");
   filterCcfddlList();
 }
 
@@ -1042,7 +1106,7 @@ async function loadCcfddlData() {
     applyLoadedCcfddlItems(parsedItems);
   } catch (error) {
     if (ccfddlItems.length === 0) {
-      ccfddlEmpty.textContent = t("load_failed", "加载失败，请稍后重试。");
+      ccfddlEmpty.textContent = t("load_failed", "加载失败，请稍后重试");
       ccfddlEmpty.style.display = isCcfddlExpanded && isCcfddlDropdownOpen ? "block" : "none";
     }
   } finally {
@@ -1141,10 +1205,20 @@ function render(deadlines) {
     date.textContent = formatDate(item.datetime);
 
     const remaining = document.createElement("span");
-    const remainingDays = daysLeft(item.datetime);
-    if (remainingDays === null) {
+    const countdown = getCountdownParts(item.datetime);
+    if (countdown === null) {
       remaining.textContent = "";
+    } else if (isPreciseCountdownEnabled) {
+      const remainingText = t("remaining_precise", ({ days, hours, minutes }) => {
+        const parts = [];
+        if (days > 0) parts.push(`${days} 天`);
+        if (days > 0 || hours > 0) parts.push(`${hours} 小时`);
+        parts.push(`${minutes} 分钟`);
+        return `剩余 ${parts.join(" ")}`;
+      });
+      remaining.textContent = remainingText(countdown);
     } else {
+      const remainingDays = countdown.days;
       const remainingText = t("remaining", (days) => `剩余 ${days} 天`);
       remaining.textContent = remainingText(remainingDays);
     }
@@ -1257,12 +1331,14 @@ chrome.storage.local.get(
     [TIME_FORMAT_STORAGE_KEY]: "24h",
     [DATE_ORDER_STORAGE_KEY]: "ymd",
     [TIMEZONE_STORAGE_KEY]: DEFAULT_TIME_ZONE,
+    [PRECISE_COUNTDOWN_STORAGE_KEY]: false,
   },
   (result) => {
     currentLang = result[LANG_STORAGE_KEY] || "zh";
     currentTimeFormat = result[TIME_FORMAT_STORAGE_KEY] || "24h";
     currentDateOrder = result[DATE_ORDER_STORAGE_KEY] || "ymd";
     currentTimeZone = sanitizeTimeZone(result[TIMEZONE_STORAGE_KEY] || DEFAULT_TIME_ZONE);
+    isPreciseCountdownEnabled = Boolean(result[PRECISE_COUNTDOWN_STORAGE_KEY]);
     applyTranslations();
     setAddFormExpanded(false);
     setCcfddlExpanded(true);
@@ -1297,6 +1373,9 @@ dateOrderInputs.forEach((input) => {
     if (!input.checked) return;
     setDateOrder(input.value);
   });
+});
+preciseCountdownToggle?.addEventListener("change", () => {
+  setPreciseCountdown(preciseCountdownToggle.checked);
 });
 timeZoneSelect?.addEventListener("change", () => {
   setTimeZone(timeZoneSelect.value);
