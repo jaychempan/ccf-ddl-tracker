@@ -447,6 +447,13 @@ button.action-card.is-active {
   margin-bottom: 6px;
 }
 
+.section-hint {
+  margin: -2px 0 6px;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
 .section-title {
   display: flex;
   align-items: baseline;
@@ -655,4 +662,73 @@ button.action-card.is-active {
   text-align: center;
   margin: 6px 0 2px;
   font-size: 11px;
+}
+
+.context-menu {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 204px;
+  padding: 7px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.context-menu[hidden] {
+  display: none;
+}
+
+.context-menu-title {
+  margin-bottom: 1px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.context-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  min-height: 34px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.context-menu-item:hover,
+.context-menu-item:focus-visible {
+  background: rgba(37, 99, 235, 0.08);
+  outline: none;
+}
+
+.context-menu-item-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.context-menu-item-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.context-menu-item-label {
+  line-height: 1.15;
 }

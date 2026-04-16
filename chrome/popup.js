@@ -2,6 +2,8 @@ const STORAGE_KEY = "deadlines";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const REFRESH_INTERVAL_MS = 60 * 1000;
 const STARTUP_CLICK_GUARD_MS = 300;
+const CONTEXT_MENU_MARGIN_PX = 8;
+const CALENDAR_EVENT_DURATION_MINUTES = 1;
 const TIME_FORMAT_STORAGE_KEY = "timeFormat";
 const DATE_ORDER_STORAGE_KEY = "dateOrder";
 const TIMEZONE_STORAGE_KEY = "displayTimezone";
@@ -84,6 +86,8 @@ const timeFormatInputs = Array.from(document.querySelectorAll('input[name="time-
 const dateOrderInputs = Array.from(document.querySelectorAll('input[name="date-order"]'));
 const timeZoneSelect = document.getElementById("timezone-select");
 const preciseCountdownToggle = document.getElementById("precise-countdown-toggle");
+const deadlineContextMenu = document.getElementById("deadline-context-menu");
+const contextMenuButtons = Array.from(document.querySelectorAll("[data-context-action]"));
 
 let ccfddlItems = [];
 let currentLang = "zh";
@@ -99,6 +103,7 @@ let isCcfddlExpanded = false;
 let isCcfddlDropdownOpen = false;
 let isCcfddlLoading = false;
 let isSettingsOpen = false;
+let activeContextDeadline = null;
 const popupOpenedAt = performance.now();
 const SUPPORTED_TIME_ZONES = getSupportedTimeZones();
 const AVAILABLE_TIME_ZONES = getAvailableTimeZones();
@@ -125,6 +130,7 @@ const translations = {
     import_click_hint: "点击搜索框可获取最新会议列表",
     import_empty: "推荐会议会显示在这里",
     my_section: "我的截止日期",
+    context_hint: "右键条目可添加到日历",
     empty_state: "还没有添加任何截止日期",
     refresh_button: "刷新",
     settings_button: "设置",
@@ -146,6 +152,10 @@ const translations = {
     open_site: "打开会议官网",
     add_item: "添加",
     delete_item: "删除",
+    calendar_menu_title: "添加到日历",
+    calendar_menu_google: "添加到 Google Calendar",
+    calendar_menu_apple: "添加到 Apple / iCloud 日历（.ics）",
+    calendar_menu_ics: "下载 ICS 文件",
     remaining: (days) => `剩余 ${days} 天`,
     remaining_precise: ({ days, hours, minutes }) => {
       const parts = [];
@@ -153,6 +163,13 @@ const translations = {
       if (days > 0 || hours > 0) parts.push(`${hours} 小时`);
       parts.push(`${minutes} 分钟`);
       return `剩余 ${parts.join(" ")}`;
+    },
+    calendar_description: ({ formattedDate, url }) => {
+      const lines = ["由 CCF DDL Tracker 导出", `截止时间：${formattedDate}`];
+      if (url) {
+        lines.push(`会议官网：${url}`);
+      }
+      return lines.join("\n");
     },
     load_failed: "加载失败，请稍后重试",
     invalid_date: "无效日期",
@@ -179,6 +196,7 @@ const translations = {
     import_click_hint: "Click the search box to load the latest conferences",
     import_empty: "Recommended conferences will appear here",
     my_section: "My DDLs",
+    context_hint: "Right-click a card to add it to calendar",
     empty_state: "No deadlines yet",
     refresh_button: "Refresh",
     settings_button: "Settings",
@@ -200,6 +218,10 @@ const translations = {
     open_site: "Open conference website",
     add_item: "Add",
     delete_item: "Delete",
+    calendar_menu_title: "Add to Calendar",
+    calendar_menu_google: "Add to Google Calendar",
+    calendar_menu_apple: "Apple / iCloud Calendar (.ics)",
+    calendar_menu_ics: "Download ICS file",
     remaining: (days) => `${days} days left`,
     remaining_precise: ({ days, hours, minutes }) => {
       const parts = [];
@@ -207,6 +229,13 @@ const translations = {
       if (days > 0 || hours > 0) parts.push(`${hours}h`);
       parts.push(`${minutes}m`);
       return `${parts.join(" ")} left`;
+    },
+    calendar_description: ({ formattedDate, url }) => {
+      const lines = ["Exported from CCF DDL Tracker", `Deadline: ${formattedDate}`];
+      if (url) {
+        lines.push(`Conference website: ${url}`);
+      }
+      return lines.join("\n");
     },
     load_failed: "Failed to load, please try again",
     invalid_date: "Invalid date",
@@ -486,6 +515,16 @@ function normalizeDateInput(value) {
   return trimmed;
 }
 
+function getSortedDeadlines(deadlines) {
+  return deadlines
+    .map((item, originalIndex) => ({ ...item, originalIndex }))
+    .sort((a, b) => {
+      const aTimestamp = toTimestamp(a.datetime) ?? Number.POSITIVE_INFINITY;
+      const bTimestamp = toTimestamp(b.datetime) ?? Number.POSITIVE_INFINITY;
+      return aTimestamp - bTimestamp;
+    });
+}
+
 function daysLeft(datetime) {
   const ts = toTimestamp(datetime);
   if (ts === null) return null;
@@ -552,6 +591,216 @@ function formatDate(datetime) {
   }
 
   return `${dateText} ${parts.hour}:${parts.minute}${timeZoneName}`;
+}
+
+function getDeadlineDate(item) {
+  const date = new Date(item.datetime);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function addMinutes(date, minutes) {
+  return new Date(date.getTime() + minutes * 60 * 1000);
+}
+
+function getTimeZoneDateTimeParts(date, timeZone) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date).reduce((acc, part) => {
+    if (part.type !== "literal") {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+}
+
+function formatCalendarLocalDate(date, timeZone) {
+  const parts = getTimeZoneDateTimeParts(date, timeZone);
+  return `${parts.year}${parts.month}${parts.day}T${parts.hour}${parts.minute}${parts.second}`;
+}
+
+function formatCalendarUtcDate(date) {
+  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+}
+
+function sanitizeFileName(value) {
+  return (value || "")
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+}
+
+function getCalendarDescription(item) {
+  const normalizedUrl = normalizeConferenceUrl(item.url);
+  const renderDescription = t("calendar_description", ({ formattedDate, url }) => {
+    const lines = ["由 CCF DDL Tracker 导出", `截止时间：${formattedDate}`];
+    if (url) {
+      lines.push(`会议官网：${url}`);
+    }
+    return lines.join("\n");
+  });
+
+  return renderDescription({
+    formattedDate: formatDate(item.datetime),
+    url: normalizedUrl,
+  });
+}
+
+function escapeIcsText(value) {
+  return (value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\r?\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+function getDeadlineIcsFileName(item) {
+  const date = getDeadlineDate(item);
+  const timeZone = sanitizeTimeZone(currentTimeZone);
+  const dateStamp = date ? formatCalendarLocalDate(date, timeZone).replace("T", "-").slice(0, 13) : "deadline";
+  const titlePart = sanitizeFileName(item.title) || "deadline";
+  return `${titlePart}-${dateStamp}.ics`;
+}
+
+function buildDeadlineIcsText(item) {
+  const start = getDeadlineDate(item);
+  if (!start) return "";
+
+  const end = addMinutes(start, CALENDAR_EVENT_DURATION_MINUTES);
+  const normalizedUrl = normalizeConferenceUrl(item.url);
+  const uidBase = sanitizeFileName(item.title).toLowerCase() || "deadline";
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//CCF DDL Tracker//EN",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:${uidBase}-${formatCalendarUtcDate(start)}@ccfddltracker.local`,
+    `DTSTAMP:${formatCalendarUtcDate(new Date())}`,
+    `DTSTART:${formatCalendarUtcDate(start)}`,
+    `DTEND:${formatCalendarUtcDate(end)}`,
+    `SUMMARY:${escapeIcsText(item.title)}`,
+    `DESCRIPTION:${escapeIcsText(getCalendarDescription(item))}`,
+  ];
+
+  if (normalizedUrl) {
+    lines.push(`URL:${escapeIcsText(normalizedUrl)}`);
+  }
+
+  lines.push("END:VEVENT", "END:VCALENDAR");
+  return `${lines.join("\r\n")}\r\n`;
+}
+
+function downloadTextFile(filename, text, mimeType) {
+  const blob = new Blob([text], { type: mimeType });
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+function downloadDeadlineIcs(item) {
+  const icsText = buildDeadlineIcsText(item);
+  if (!icsText) return;
+  downloadTextFile(getDeadlineIcsFileName(item), icsText, "text/calendar;charset=utf-8");
+}
+
+function buildGoogleCalendarUrl(item) {
+  const start = getDeadlineDate(item);
+  if (!start) return "";
+
+  const end = addMinutes(start, CALENDAR_EVENT_DURATION_MINUTES);
+  const timeZone = sanitizeTimeZone(currentTimeZone);
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: item.title,
+    dates: `${formatCalendarLocalDate(start, timeZone)}/${formatCalendarLocalDate(end, timeZone)}`,
+    stz: timeZone,
+    etz: timeZone,
+    details: getCalendarDescription(item),
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function openUrlInTab(url) {
+  if (!url) return;
+
+  if (chrome.tabs?.create) {
+    chrome.tabs.create({ url });
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function closeDeadlineContextMenu() {
+  activeContextDeadline = null;
+
+  if (!deadlineContextMenu) return;
+  deadlineContextMenu.hidden = true;
+  deadlineContextMenu.style.left = "";
+  deadlineContextMenu.style.top = "";
+  deadlineContextMenu.style.visibility = "";
+}
+
+function openDeadlineContextMenu(item, event) {
+  if (!deadlineContextMenu) return;
+
+  activeContextDeadline = item;
+  deadlineContextMenu.hidden = false;
+  deadlineContextMenu.style.visibility = "hidden";
+  deadlineContextMenu.style.left = "0px";
+  deadlineContextMenu.style.top = "0px";
+
+  const { width, height } = deadlineContextMenu.getBoundingClientRect();
+  const maxLeft = Math.max(CONTEXT_MENU_MARGIN_PX, window.innerWidth - width - CONTEXT_MENU_MARGIN_PX);
+  const maxTop = Math.max(CONTEXT_MENU_MARGIN_PX, window.innerHeight - height - CONTEXT_MENU_MARGIN_PX);
+  const left = Math.min(Math.max(event.clientX, CONTEXT_MENU_MARGIN_PX), maxLeft);
+  const top = Math.min(Math.max(event.clientY, CONTEXT_MENU_MARGIN_PX), maxTop);
+
+  deadlineContextMenu.style.left = `${left}px`;
+  deadlineContextMenu.style.top = `${top}px`;
+  deadlineContextMenu.style.visibility = "";
+}
+
+function attachDeadlineContextMenu(target, item) {
+  target.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setSettingsOpen(false);
+    openDeadlineContextMenu(item, event);
+  });
+}
+
+function handleDeadlineContextAction(action) {
+  if (!activeContextDeadline) return;
+
+  const item = activeContextDeadline;
+  closeDeadlineContextMenu();
+
+  if (action === "google") {
+    const url = buildGoogleCalendarUrl(item);
+    openUrlInTab(url);
+    return;
+  }
+
+  if (action === "apple" || action === "ics") {
+    downloadDeadlineIcs(item);
+  }
 }
 
 function syncTimeFormatInputs() {
@@ -946,6 +1195,7 @@ function parseAllConfYaml(text) {
 }
 
 function renderCcfddlList(items) {
+  closeDeadlineContextMenu();
   ccfddlList.innerHTML = "";
 
   if (items.length === 0) {
@@ -976,6 +1226,7 @@ function renderCcfddlList(items) {
     meta.className = "import-meta";
     meta.textContent = formatDate(item.datetime);
 
+    attachDeadlineContextMenu(li, item);
     li.append(header, meta);
     ccfddlList.appendChild(li);
   });
@@ -1149,10 +1400,9 @@ async function toggleImportPanel() {
 }
 
 function render(deadlines) {
+  closeDeadlineContextMenu();
   listEl.innerHTML = "";
-  const sorted = [...deadlines].sort((a, b) => {
-    return toTimestamp(a.datetime) - toTimestamp(b.datetime);
-  });
+  const sorted = getSortedDeadlines(deadlines);
 
   if (sorted.length === 0) {
     emptyEl.style.display = "block";
@@ -1163,7 +1413,7 @@ function render(deadlines) {
   emptyEl.style.display = "none";
   countEl.textContent = currentLang === "zh" ? `(${sorted.length} 项)` : `(${sorted.length})`;
 
-  sorted.forEach((item, index) => {
+  sorted.forEach((item) => {
     const li = document.createElement("li");
     li.className = "item";
     const hasLink = Boolean(item.url);
@@ -1193,7 +1443,7 @@ function render(deadlines) {
     del.textContent = t("delete_item", "删除");
     del.addEventListener("click", (event) => {
       event.stopPropagation();
-      removeDeadline(index);
+      removeDeadline(item.originalIndex);
     });
 
     header.append(title, del);
@@ -1225,6 +1475,7 @@ function render(deadlines) {
 
     meta.append(date, remaining);
 
+    attachDeadlineContextMenu(li, item);
     li.append(header, meta);
     listEl.appendChild(li);
   });
@@ -1233,13 +1484,7 @@ function render(deadlines) {
 function openDeadlineLink(url) {
   const normalizedUrl = normalizeConferenceUrl(url);
   if (!normalizedUrl) return;
-
-  if (chrome.tabs?.create) {
-    chrome.tabs.create({ url: normalizedUrl });
-    return;
-  }
-
-  window.open(normalizedUrl, "_blank", "noopener,noreferrer");
+  openUrlInTab(normalizedUrl);
 }
 
 function loadDeadlines() {
@@ -1380,6 +1625,12 @@ preciseCountdownToggle?.addEventListener("change", () => {
 timeZoneSelect?.addEventListener("change", () => {
   setTimeZone(timeZoneSelect.value);
 });
+contextMenuButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleDeadlineContextAction(button.dataset.contextAction);
+  });
+});
 ccfddlSearchInput.addEventListener("focus", () => {
   if (shouldIgnoreStartupInteraction()) return;
   openCcfddlDropdown().catch(() => {});
@@ -1393,7 +1644,15 @@ refreshDeadlinesBtn.addEventListener("click", () => {
   animateRefreshButton();
   loadDeadlines();
 });
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeDeadlineContextMenu();
+  }
+});
 document.addEventListener("pointerdown", (event) => {
+  if (activeContextDeadline && !deadlineContextMenu?.contains(event.target)) {
+    closeDeadlineContextMenu();
+  }
   if (
     isSettingsOpen &&
     !settingsPanel?.contains(event.target) &&
@@ -1406,3 +1665,4 @@ document.addEventListener("pointerdown", (event) => {
   if (importPanel.contains(event.target)) return;
   setCcfddlDropdownOpen(false);
 });
+window.addEventListener("blur", closeDeadlineContextMenu);

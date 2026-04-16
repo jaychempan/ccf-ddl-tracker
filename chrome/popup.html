@@ -16,7 +16,7 @@
         <p class="subtitle" data-i18n="subtitle_en">Add and manage your deadlines in one click, and show the nearest days left</p>
         </div>
       </div>
-      <span class="version-tag" aria-label="Version 2.1">v2.1</span>
+      <span class="version-tag" aria-label="Version 2.2">v2.2</span>
     </header>
 
     <section class="action-grid">
@@ -102,6 +102,7 @@
           </button>
         </div>
       </div>
+      <p class="section-hint" data-i18n="context_hint">右键条目可添加到日历</p>
       <ul id="deadline-list"></ul>
       <p id="empty-state" class="empty" data-i18n="empty_state">还没有添加任何截止日期</p>
     </section>
@@ -224,6 +225,52 @@
           <span data-i18n="countdown_precise">显示小时和分钟</span>
         </label>
       </fieldset>
+    </section>
+
+    <section id="deadline-context-menu" class="context-menu" hidden>
+      <p class="context-menu-title" data-i18n="calendar_menu_title">添加到日历</p>
+      <button type="button" class="context-menu-item" data-context-action="google">
+        <span class="context-menu-item-icon context-menu-item-icon-google" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M6.5 4.5h11a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17V7a2.5 2.5 0 0 1 2.5-2.5Z" fill="#4285f4" />
+            <path d="M4 9.1h16V17a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17Z" fill="#ffffff" />
+            <path d="M7.55 3.35v3.3M16.45 3.35v3.3" fill="none" stroke="#4285f4" stroke-width="1.7" stroke-linecap="round" />
+            <path d="M4 9.1V8a3.5 3.5 0 0 1 3.5-3.5h1.15" fill="none" stroke="#34a853" stroke-width="1.3" stroke-linecap="round" />
+            <path d="M20 9.1V8a3.5 3.5 0 0 0-3.5-3.5h-1.15" fill="none" stroke="#ea4335" stroke-width="1.3" stroke-linecap="round" />
+            <path d="M8.5 12.5h4.1a2.35 2.35 0 1 1 0 4.7H8.5" fill="none" stroke="#4285f4" stroke-width="1.75" stroke-linecap="round" />
+            <path d="M8.5 12.5V16l4.55-3.5" fill="none" stroke="#4285f4" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M15.9 4.5h1a3.1 3.1 0 0 1 2.9 2.1" fill="none" stroke="#fbbc04" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="context-menu-item-label" data-i18n="calendar_menu_google">添加到 Google Calendar</span>
+      </button>
+      <button type="button" class="context-menu-item" data-context-action="apple">
+        <span class="context-menu-item-icon context-menu-item-icon-apple" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <defs>
+              <linearGradient id="icloud-cloud-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#60a5fa" />
+                <stop offset="100%" stop-color="#2563eb" />
+              </linearGradient>
+            </defs>
+            <path d="M7.25 17.1h9.25a3.05 3.05 0 0 0 .23-6.1A4.5 4.5 0 0 0 8.48 9.5 3.42 3.42 0 0 0 7.25 17.1Z" fill="url(#icloud-cloud-gradient)" />
+            <path d="M7.25 17.1h9.25a3.05 3.05 0 0 0 .23-6.1A4.5 4.5 0 0 0 8.48 9.5 3.42 3.42 0 0 0 7.25 17.1Z" fill="none" stroke="#1d4ed8" stroke-width="0.9" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="context-menu-item-label" data-i18n="calendar_menu_apple">添加到 Apple / iCloud 日历（.ics）</span>
+      </button>
+      <button type="button" class="context-menu-item" data-context-action="ics">
+        <span class="context-menu-item-icon context-menu-item-icon-ics" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M8.2 4.2h5.95L18.5 8.55v10.1a1.9 1.9 0 0 1-1.9 1.9H8.2a1.9 1.9 0 0 1-1.9-1.9V6.1a1.9 1.9 0 0 1 1.9-1.9Z" fill="#ffffff" />
+            <path d="M14.15 4.2v3.1a1.25 1.25 0 0 0 1.25 1.25h3.1" fill="#dbeafe" />
+            <path d="M14.15 4.2v3.1a1.25 1.25 0 0 0 1.25 1.25h3.1" fill="none" stroke="#93c5fd" stroke-width="1.05" stroke-linejoin="round" />
+            <path d="M8.2 4.2h5.95L18.5 8.55v10.1a1.9 1.9 0 0 1-1.9 1.9H8.2a1.9 1.9 0 0 1-1.9-1.9V6.1a1.9 1.9 0 0 1 1.9-1.9Z" fill="none" stroke="#64748b" stroke-width="1.15" stroke-linejoin="round" />
+            <path d="M9.25 11.2h6.3M9.25 13.95h6.3M9.25 16.7h3.55" fill="none" stroke="#2563eb" stroke-width="1.25" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="context-menu-item-label" data-i18n="calendar_menu_ics">下载 ICS 文件</span>
+      </button>
     </section>
 
     <script src="popup.js"></script>

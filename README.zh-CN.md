@@ -5,7 +5,7 @@
 
   轻量的 Chrome 扩展，用于管理 CCF 相关会议截止日期，支持手动添加、CCFDDL 导入和本地提醒。
 
-  **版本:** `v2.1`
+  **版本:** `v2.2`
 
   [English Version](README.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,7 +23,7 @@
   <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 中文预览" width="720" />
 </div>
 
-当前版本延续了 v2.0 的紧凑 popup 布局，并在 v2.1 中补充了时区切换能力，默认显示为 `Asia/Shanghai`。
+当前版本延续了 v2.0 的紧凑 popup 布局，保留了 v2.1 的时区切换能力，并在 v2.2 中新增了右键日历菜单，可导出到 Google Calendar、Apple / iCloud 或通用 ICS。
 
 ---
 
@@ -61,6 +61,7 @@
 - **原生贴靠弹窗**：点击扩展图标后，会直接打开紧凑的 Chrome popup，而不是单独窗口。
 - **手动添加 + 导入会议**：既可以新增自定义截止日期，也可以从 CCFDDL 导入推荐会议。
 - **官网直达**：导入的会议会保留官网链接，加入列表后可直接点击打开会议官网。
+- **日历接力**：右键已保存或导入的卡片，可直接发往 Google Calendar，或下载适用于 Apple / iCloud 等日历的 ICS 文件。
 - **中英双语**：可在底部工具栏中切换中文和英文界面。
 - **显示设置**：支持显示时区切换、`24 小时 / 12 小时` 时间制，以及 `年月日 / 月日年` 日期顺序切换。
 - **仅本地存储**：所有数据都保存在 `chrome.storage.local` 中，不依赖账号或云同步。
@@ -73,7 +74,17 @@
 - **时区**：可在设置面板中切换截止时间显示时区，默认是 `Asia/Shanghai`。
 - **时间制式**：可在设置面板中选择 `24 小时` 或 `12 小时（AM/PM）`。
 - **日期顺序**：可切换 `YYYY/MM/DD` 或 `MM/DD/YYYY`。
+- **日历操作**：可对已保存或导入的截止日期卡片点击右键，打开日历菜单。
 - **导入会议卡片**：导入后的会议可加入个人列表，并支持直接跳转会议官网。
+
+---
+
+## 添加到日历
+
+1. 打开 popup，找到任意一个已保存或已导入的截止日期卡片。
+2. 对该卡片点击右键，打开日历菜单。
+3. 选择 `Google Calendar` 可在浏览器中打开预填好的日历事件。
+4. 选择 `Apple / iCloud (.ics)` 或 `下载 ICS 文件`，可导入到支持 ICS 的日历应用。
 
 ---
 
@@ -99,6 +110,15 @@
 ## 更新日志
 
 <details open>
+  <summary><strong>v2.2</strong> - 右键日历菜单</summary>
+
+  - 为 popup 中的截止日期卡片新增右键上下文菜单
+  - 支持把保存或导入的条目直接添加到 Google Calendar
+  - 支持导出适用于 Apple / iCloud 的 `.ics` 文件，并提供通用 ICS 下载
+  - 修复列表排序后删除条目可能删错目标的问题
+</details>
+
+<details>
   <summary><strong>v2.1</strong> - 时区切换与导入时间处理增强</summary>
 
   - 新增 popup 时区选择器，默认显示时区为 `Asia/Shanghai`

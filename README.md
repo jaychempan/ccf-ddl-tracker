@@ -5,7 +5,7 @@
 
   Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage.
 
-  **Version:** `v2.1`
+  **Version:** `v2.2`
 
   [中文版本](README.zh-CN.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,7 +23,7 @@
   <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="720" />
 </div>
 
-The current popup keeps the compact v2.0 layout and adds v2.1 display controls for switching time zones, with `Asia/Shanghai` as the default.
+The current popup keeps the compact v2.0 layout, adds the v2.1 time zone controls, and now introduces a v2.2 right-click calendar menu for Google Calendar, Apple/iCloud, and ICS export.
 
 ---
 
@@ -61,6 +61,7 @@ Install directly from the Chrome Web Store:
 - **Native popup experience**: Clicking the extension icon opens a compact Chrome popup instead of a separate window.
 - **Manual + imported deadlines**: You can add custom deadlines or import recommended conferences from CCFDDL.
 - **Official site shortcuts**: Imported conferences retain homepage links, and added cards can open the conference website directly.
+- **Calendar handoff**: Right-click saved or imported cards to send a deadline to Google Calendar or download ICS for Apple/iCloud and other calendar apps.
 - **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
 - **Display preferences**: Choose a display time zone, switch between `24-hour` and `12-hour`, and change date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
 - **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
@@ -73,7 +74,17 @@ Install directly from the Chrome Web Store:
 - **Time zone**: Switch deadline display between supported time zones. The default is `Asia/Shanghai`.
 - **Time format**: Choose `24-hour` or `12-hour (AM/PM)` in the settings panel.
 - **Date order**: Choose `YYYY/MM/DD` or `MM/DD/YYYY`.
+- **Calendar actions**: Right-click a saved or imported deadline card to open the calendar menu.
 - **Imported conference cards**: Imported items can be added to your own list and opened directly on the conference website.
+
+---
+
+## Add To Calendar
+
+1. Open the popup and locate any saved or imported deadline card.
+2. Right-click the card to open the calendar menu.
+3. Choose `Google Calendar` to open a prefilled event in the browser.
+4. Choose `Apple / iCloud (.ics)` or `Download ICS` to import the deadline into calendar apps that support ICS files.
 
 ---
 
@@ -98,6 +109,15 @@ Install directly from the Chrome Web Store:
 ## Changelog
 
 <details open>
+  <summary><strong>v2.2</strong> - Right-click calendar actions</summary>
+
+  - Added a right-click context menu for deadline cards in the popup
+  - Added direct export to Google Calendar from saved or imported deadline items
+  - Added Apple / iCloud compatible `.ics` export and a generic ICS download action
+  - Fixed list deletion so removing an item still targets the correct deadline after sorting
+</details>
+
+<details>
   <summary><strong>v2.1</strong> - Time zone switching and import time handling</summary>
 
   - Added a popup time zone selector with `Asia/Shanghai` as the default display zone

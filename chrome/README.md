@@ -9,11 +9,12 @@
 
 ## 功能说明 / Features
 
-- **当前版本**：扩展版本已更新为 `v2.0`，弹窗右上角会显示版本标记。/ The extension is now `v2.0`, and the popup header shows the current version.
+- **当前版本**：扩展版本已更新为 `v2.2`，弹窗右上角会显示版本标记。/ The extension is now `v2.2`, and the popup header shows the current version.
 - **添加 DDL**：填写标题、日期、时间，点击“添加”。/ Add title/date/time and click “Add”.
 - **查看详情**：弹窗中会按时间排序展示多个 DDL，并显示剩余天数。/ Sorted list with remaining days.
 - **徽标提示**：工具栏图标会显示最近一个 DDL 的剩余天数。/ Badge shows the nearest days left.
 - **删除 DDL**：在条目右侧点击“删除”。/ Delete from the list.
+- **右键日历菜单**：在已保存或导入的条目上右键，可添加到 Google Calendar，或导出适用于 Apple / iCloud 的 `.ics` 文件。/ Right-click any saved or imported item to add it to Google Calendar or export an Apple / iCloud compatible `.ics` file.
 - **双入口卡片**：新增截止日期和从 CCFDDL 导入改为一行两个入口卡片，点击后切换下方面板。/ Add DDL and Import from CCFDDL now appear as two side-by-side entry cards that switch the panel below.
 - **导入推荐会议**：导入面板默认常驻显示，会优先显示已缓存会议，并在点击搜索框时获取最新推荐。/ The import panel stays visible by default, shows cached conferences first, and refreshes recommendations when the search field is focused.
 - **官网直达**：从 CCFDDL 导入的会议会保留官网链接，加入“我的截止日期”后可直接点击卡片打开会议官网。/ Imported CCFDDL conferences retain their homepage links, and once added to "My DDLs" the card can be clicked to open the conference website.
