@@ -60,7 +60,7 @@ const AVAILABLE_TIME_ZONES = getAvailableTimeZones();
 const translations = {
   zh: {
     title: "CCF DDL Tracker",
-    subtitle_zh: "添加你正在赶的截止日期，徽标显示最近的剩余天数。",
+    subtitle_zh: "一键添加和管理你的截止日期，徽标显示最近的剩余天数",
     subtitle_en: "",
     open: "打开 CCFDDL",
     contribute: "共同开发",
@@ -101,7 +101,7 @@ const translations = {
   en: {
     title: "CCF DDL Tracker",
     subtitle_zh: "",
-    subtitle_en: "Track deadlines and show the nearest days left.",
+    subtitle_en: "Add and manage your deadlines in one click, and show the nearest days left",
     open: "Open CCFDDL",
     contribute: "Contribute",
     add_section: "Add DDL",
@@ -177,11 +177,53 @@ function sanitizeTimeZone(timeZone) {
   return DEFAULT_TIME_ZONE;
 }
 
+function getTimeZoneNamePart(locale, timeZone, timeZoneName) {
+  try {
+    return (
+      new Intl.DateTimeFormat(locale, {
+        timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName,
+      })
+        .formatToParts(new Date("2026-01-15T12:00:00Z"))
+        .find((part) => part.type === "timeZoneName")?.value || ""
+    );
+  } catch (error) {
+    return "";
+  }
+}
+
+function formatTimeZoneIdentifier(timeZone) {
+  return timeZone
+    .split("/")
+    .map((part) => part.replace(/_/g, " "))
+    .join(" / ");
+}
+
+function getTimeZoneDisplayLabel(timeZone) {
+  const locale = getLocale();
+  const localizedName =
+    getTimeZoneNamePart(locale, timeZone, "longGeneric") ||
+    getTimeZoneNamePart(locale, timeZone, "long") ||
+    formatTimeZoneIdentifier(timeZone);
+  const offset = getTimeZoneNamePart("en-US", timeZone, "longOffset").replace(/^GMT/, "UTC");
+
+  if (!offset) {
+    return localizedName;
+  }
+
+  return currentLang === "en"
+    ? `${localizedName} (${offset})`
+    : `${localizedName}（${offset}）`;
+}
+
 function syncTimeZoneSelect() {
   if (!timeZoneSelect) return;
 
   const selectedTimeZone = sanitizeTimeZone(currentTimeZone);
   const shouldRebuild =
+    timeZoneSelect.dataset.lang !== currentLang ||
     timeZoneSelect.options.length !== AVAILABLE_TIME_ZONES.length ||
     !timeZoneSelect.querySelector(`option[value="${selectedTimeZone}"]`);
 
@@ -190,9 +232,10 @@ function syncTimeZoneSelect() {
     AVAILABLE_TIME_ZONES.forEach((timeZone) => {
       const option = document.createElement("option");
       option.value = timeZone;
-      option.textContent = timeZone;
+      option.textContent = getTimeZoneDisplayLabel(timeZone);
       timeZoneSelect.appendChild(option);
     });
+    timeZoneSelect.dataset.lang = currentLang;
   }
 
   if (timeZoneSelect.value !== selectedTimeZone) {
@@ -203,7 +246,7 @@ function syncTimeZoneSelect() {
 function syncTimeZoneNote() {
   if (!timeZoneNote) return;
   const renderNote = t("timezone_note", (label) => `按当前时区保存：${label}`);
-  timeZoneNote.textContent = renderNote(sanitizeTimeZone(currentTimeZone));
+  timeZoneNote.textContent = renderNote(getTimeZoneDisplayLabel(sanitizeTimeZone(currentTimeZone)));
 }
 
 function applyTranslations() {
