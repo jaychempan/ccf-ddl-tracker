@@ -98,22 +98,70 @@
             </a>
         </div>
 
-        <section class="preview-panel">
-            <div class="preview-copy">
-                <span class="eyebrow" data-i18n="home.preview.eyebrow">Version 2.2</span>
-                <h2 data-i18n="home.preview.title">Compact popup workflow for dense conference schedules</h2>
-                <p data-i18n="home.preview.body">
-                    The compact popup now adds a v2.2 right-click calendar menu, so you can send a
-                    deadline to Google Calendar or export an Apple / iCloud friendly ICS file.
-                </p>
+        <section class="preview-showcase">
+            <div class="preview-scroller" data-preview-scroller>
+                <article class="preview-panel" id="preview-v22" data-preview-slide>
+                    <div class="preview-copy">
+                        <span class="eyebrow" data-i18n="home.preview.eyebrow">Version 2.2</span>
+                        <h3 data-i18n="home.preview.title">Compact popup workflow for dense conference schedules</h3>
+                        <p data-i18n="home.preview.body">
+                            The compact popup now adds a v2.2 right-click calendar menu, so you can send a
+                            deadline to Google Calendar or export an Apple / iCloud friendly ICS file.
+                        </p>
+                    </div>
+                    <img
+                        src="./previewv2.2.png"
+                        alt="Preview of the CCF DDL Tracker popup"
+                        width="3180"
+                        height="2475"
+                        data-i18n-alt="home.preview.imageAlt"
+                    >
+                </article>
+
+                <article class="preview-panel" id="preview-v21" data-preview-slide>
+                    <div class="preview-copy">
+                        <span class="eyebrow" data-i18n="home.preview.v21.eyebrow">Version 2.1</span>
+                        <h3 data-i18n="home.preview.v21.title">Time zone switching that fits real submission workflows</h3>
+                        <p data-i18n="home.preview.v21.body">
+                            v2.1 added a popup time zone selector, kept imported source time semantics intact,
+                            and made manual deadlines save against the zone you selected.
+                        </p>
+                    </div>
+                    <img
+                        src="./previewv2.1.png"
+                        alt="Preview of the CCF DDL Tracker popup in v2.1"
+                        width="3180"
+                        height="2475"
+                        loading="lazy"
+                        data-i18n-alt="home.preview.v21.imageAlt"
+                    >
+                </article>
+
+                <article class="preview-panel" id="preview-v20" data-preview-slide>
+                    <div class="preview-copy">
+                        <span class="eyebrow" data-i18n="home.preview.v20.eyebrow">Version 2.0</span>
+                        <h3 data-i18n="home.preview.v20.title">A denser popup redesign for faster deadline triage</h3>
+                        <p data-i18n="home.preview.v20.body">
+                            v2.0 reworked the popup into a tighter layout, kept the import panel visible,
+                            added homepage links, and introduced display settings for time and date formats.
+                        </p>
+                    </div>
+                    <img
+                        src="./previewv2.0.png"
+                        alt="Preview of the CCF DDL Tracker popup in v2.0"
+                        width="3231"
+                        height="2475"
+                        loading="lazy"
+                        data-i18n-alt="home.preview.v20.imageAlt"
+                    >
+                </article>
             </div>
-            <img
-                src="./previewv2.0.png"
-                alt="Preview of the CCF DDL Tracker popup"
-                width="3231"
-                height="2475"
-                data-i18n-alt="home.preview.imageAlt"
-            >
+
+            <div class="preview-dots" role="group" aria-label="Choose a release preview" data-i18n-aria-label="home.preview.tabsLabel">
+                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v22" aria-pressed="true" aria-label="v2.2" title="v2.2"></button>
+                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
+                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
+            </div>
         </section>
 
         <article class="article-shell">

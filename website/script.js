@@ -1,8 +1,20 @@
 const menuToggle = document.querySelector("[data-menu-toggle]");
 const navPanel = document.querySelector("[data-nav-panel]");
 const languageToggle = document.querySelector("[data-lang-toggle]");
+const previewShowcase = document.querySelector(".preview-showcase");
+const previewScroller = document.querySelector("[data-preview-scroller]");
+const previewSlides = Array.from(document.querySelectorAll("[data-preview-slide]"));
+const previewTabs = Array.from(document.querySelectorAll("[data-preview-target]"));
 const pageName = document.body.dataset.page;
 const languageStorageKey = "ccf-ddl-tracker-site-lang";
+const previewAutoplayDelayMs = 4500;
+const previewReducedMotionQuery = typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : null;
+
+let previewAutoplayTimer = null;
+let previewAutoplayPaused = false;
+let previewAutoScrolling = false;
 
 const translations = {
     en: {
@@ -21,6 +33,7 @@ const translations = {
         },
         pages: {
             home: {
+                "home.preview.tabsLabel": "Choose a release preview",
                 "meta.title": "CCF DDL Tracker: Add and manage your deadlines in one click",
                 "meta.description": "CCF DDL Tracker is an open source Chrome extension for tracking CCF deadlines with a compact popup, right-click calendar actions, time zone switching, import flow, and local-only storage.",
                 "home.subtitle": "An open source Chrome extension for tracking CCF deadlines",
@@ -29,6 +42,14 @@ const translations = {
                 "home.preview.title": "Compact popup workflow for dense conference schedules",
                 "home.preview.body": "The compact popup now adds a v2.2 right-click calendar menu, so you can send a deadline to Google Calendar or export an Apple / iCloud friendly ICS file.",
                 "home.preview.imageAlt": "Preview of the CCF DDL Tracker popup",
+                "home.preview.v21.eyebrow": "Version 2.1",
+                "home.preview.v21.title": "Time zone switching that fits real submission workflows",
+                "home.preview.v21.body": "v2.1 added a popup time zone selector, kept imported source time semantics intact, and made manual deadlines save against the zone you selected.",
+                "home.preview.v21.imageAlt": "Preview of the CCF DDL Tracker popup in v2.1",
+                "home.preview.v20.eyebrow": "Version 2.0",
+                "home.preview.v20.title": "A denser popup redesign for faster deadline triage",
+                "home.preview.v20.body": "v2.0 reworked the popup into a tighter layout, kept the import panel visible, added homepage links, and introduced display settings for time and date formats.",
+                "home.preview.v20.imageAlt": "Preview of the CCF DDL Tracker popup in v2.0",
                 "home.intro": "CCF DDL Tracker provides a compact popup for keeping deadlines visible in Chrome. You can add custom deadlines, import recommended conferences from CCFDDL, switch the display time zone, send items to calendar apps from the right-click menu, and keep everything stored locally in your browser.",
                 "home.features.title": "Features",
                 "home.features.focused.title": "Focused tracking",
@@ -195,6 +216,7 @@ const translations = {
         },
         pages: {
             home: {
+                "home.preview.tabsLabel": "选择版本预览",
                 "meta.title": "CCF DDL Tracker: 一键添加和管理你的截止日期",
                 "meta.description": "CCF DDL Tracker 是一个开源 Chrome 扩展，用紧凑弹窗、右键日历操作、时区切换、本地存储和导入流程帮助你跟踪 CCF 截稿日期。",
                 "home.subtitle": "一个用于跟踪 CCF 截稿日期的开源 Chrome 扩展",
@@ -203,6 +225,14 @@ const translations = {
                 "home.preview.title": "为密集会议日程设计的紧凑弹窗工作流",
                 "home.preview.body": "紧凑 popup 在 v2.2 中新增了右键日历菜单，你可以把截止日期直接发到 Google Calendar，或导出适用于 Apple / iCloud 的 ICS 文件。",
                 "home.preview.imageAlt": "CCF DDL Tracker 弹窗预览图",
+                "home.preview.v21.eyebrow": "2.1 版本",
+                "home.preview.v21.title": "时区切换终于更贴近真实投稿工作流",
+                "home.preview.v21.body": "v2.1 新增 popup 时区选择器，保留导入会议的原始时区语义，也让手动添加的截止日期按你当前选择的时区保存。",
+                "home.preview.v21.imageAlt": "CCF DDL Tracker v2.1 弹窗预览图",
+                "home.preview.v20.eyebrow": "2.0 版本",
+                "home.preview.v20.title": "更紧凑的 popup 改版，让筛选截止日期更快",
+                "home.preview.v20.body": "v2.0 重构了 popup 布局，让导入面板默认常驻，保留会议官网链接，并加入时间格式和日期顺序设置。",
+                "home.preview.v20.imageAlt": "CCF DDL Tracker v2.0 弹窗预览图",
                 "home.intro": "CCF DDL Tracker 提供了一个紧凑弹窗，让你在 Chrome 中随时看到截稿信息。你可以手动添加自定义截止日期、从 CCFDDL 导入推荐会议、切换显示时区、通过右键菜单发往日历应用，并将所有数据只保存在当前浏览器本地。",
                 "home.features.title": "功能特性",
                 "home.features.focused.title": "聚焦跟踪",
@@ -462,6 +492,171 @@ function toggleLanguage() {
     applyLanguage(nextLanguage);
 }
 
+function setActivePreviewTab(activeIndex) {
+    previewTabs.forEach((tab, index) => {
+        const isActive = index === activeIndex;
+        tab.classList.toggle("is-active", isActive);
+        tab.setAttribute("aria-pressed", String(isActive));
+    });
+}
+
+function scrollPreviewToIndex(index, behavior = "smooth") {
+    const targetSlide = previewSlides[index];
+    if (!targetSlide) {
+        return;
+    }
+
+    targetSlide.scrollIntoView({
+        behavior,
+        block: "nearest",
+        inline: "start"
+    });
+
+    setActivePreviewTab(index);
+}
+
+function getNearestPreviewIndex() {
+    if (!previewScroller || previewSlides.length === 0) {
+        return 0;
+    }
+
+    const currentScrollLeft = previewScroller.scrollLeft;
+    let activeIndex = 0;
+    let smallestDistance = Number.POSITIVE_INFINITY;
+
+    previewSlides.forEach((slide, index) => {
+        const distance = Math.abs(slide.offsetLeft - currentScrollLeft);
+        if (distance < smallestDistance) {
+            smallestDistance = distance;
+            activeIndex = index;
+        }
+    });
+
+    return activeIndex;
+}
+
+function clearPreviewAutoplayTimer() {
+    if (previewAutoplayTimer !== null) {
+        window.clearTimeout(previewAutoplayTimer);
+        previewAutoplayTimer = null;
+    }
+}
+
+function canPreviewAutoplay() {
+    return Boolean(
+        previewScroller
+        && previewSlides.length > 1
+        && previewTabs.length > 0
+        && !previewAutoplayPaused
+        && !document.hidden
+        && !(previewReducedMotionQuery && previewReducedMotionQuery.matches)
+    );
+}
+
+function schedulePreviewAutoplay(delay = previewAutoplayDelayMs) {
+    clearPreviewAutoplayTimer();
+
+    if (!canPreviewAutoplay()) {
+        return;
+    }
+
+    previewAutoplayTimer = window.setTimeout(() => {
+        const nextIndex = (getNearestPreviewIndex() + 1) % previewSlides.length;
+
+        previewAutoScrolling = true;
+        scrollPreviewToIndex(nextIndex);
+
+        window.setTimeout(() => {
+            previewAutoScrolling = false;
+        }, 500);
+
+        schedulePreviewAutoplay();
+    }, delay);
+}
+
+function setPreviewAutoplayPaused(isPaused) {
+    previewAutoplayPaused = isPaused;
+
+    if (isPaused) {
+        clearPreviewAutoplayTimer();
+        return;
+    }
+
+    schedulePreviewAutoplay();
+}
+
+function initPreviewScroller() {
+    if (!previewScroller || previewSlides.length === 0 || previewTabs.length === 0) {
+        return;
+    }
+
+    previewTabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => {
+            scrollPreviewToIndex(index);
+            schedulePreviewAutoplay();
+        });
+    });
+
+    previewScroller.addEventListener("scroll", () => {
+        setActivePreviewTab(getNearestPreviewIndex());
+
+        if (!previewAutoScrolling) {
+            schedulePreviewAutoplay();
+        }
+    }, { passive: true });
+
+    if (previewShowcase) {
+        previewShowcase.addEventListener("pointerenter", () => {
+            setPreviewAutoplayPaused(true);
+        });
+
+        previewShowcase.addEventListener("pointerleave", () => {
+            setPreviewAutoplayPaused(false);
+        });
+
+        previewShowcase.addEventListener("focusin", () => {
+            setPreviewAutoplayPaused(true);
+        });
+
+        previewShowcase.addEventListener("focusout", (event) => {
+            if (event.relatedTarget && previewShowcase.contains(event.relatedTarget)) {
+                return;
+            }
+
+            setPreviewAutoplayPaused(false);
+        });
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            clearPreviewAutoplayTimer();
+            return;
+        }
+
+        schedulePreviewAutoplay();
+    });
+
+    if (previewReducedMotionQuery) {
+        const handlePreviewMotionChange = () => {
+            if (previewReducedMotionQuery.matches) {
+                clearPreviewAutoplayTimer();
+                return;
+            }
+
+            schedulePreviewAutoplay();
+        };
+
+        if (typeof previewReducedMotionQuery.addEventListener === "function") {
+            previewReducedMotionQuery.addEventListener("change", handlePreviewMotionChange);
+        } else if (typeof previewReducedMotionQuery.addListener === "function") {
+            previewReducedMotionQuery.addListener(handlePreviewMotionChange);
+        }
+    }
+
+    setActivePreviewTab(getNearestPreviewIndex());
+    schedulePreviewAutoplay();
+}
+
 if (menuToggle && navPanel) {
     menuToggle.addEventListener("click", () => {
         const expanded = menuToggle.getAttribute("aria-expanded") === "true";
@@ -488,4 +683,5 @@ if (languageToggle) {
     });
 }
 
+initPreviewScroller();
 applyLanguage(getPreferredLanguage());
