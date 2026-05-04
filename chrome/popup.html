@@ -16,7 +16,7 @@
         <p class="subtitle" data-i18n="subtitle_en">Add and manage your deadlines in one click, and show the nearest days left</p>
         </div>
       </div>
-      <span class="version-tag" aria-label="Version 2.2">v2.2</span>
+      <span class="version-tag" aria-label="Version 2.3">v2.3</span>
     </header>
 
     <section class="action-grid">
@@ -53,6 +53,10 @@
             <input id="time" type="time" value="23:59" />
           </label>
         </div>
+        <label>
+          <span data-i18n="link_label">卡片链接</span>
+          <input id="card-link" type="text" inputmode="url" placeholder="例如：https://2025.aclweb.org" data-i18n-placeholder="link_placeholder" />
+        </label>
         <p id="timezone-note" class="field-hint timezone-note"></p>
         <button type="submit" data-i18n="add_button">添加</button>
       </form>
@@ -84,14 +88,14 @@
           <button id="refresh-deadlines" type="button" class="icon-ghost-btn" data-i18n-title="refresh_button" aria-label="刷新">
             <svg class="refresh-icon" viewBox="0 0 20 20" focusable="false" aria-hidden="true">
               <path
-                d="M16 10a6 6 0 1 1-1.76-4.24"
+                d="M15.8 6.2A6.2 6.2 0 1 0 16.2 13"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.8"
                 stroke-linecap="round"
               />
               <path
-                d="M16 4.5v3.8h-3.8"
+                d="M16 3.8v4.5h-4.5"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.8"
@@ -132,25 +136,55 @@
       </div>
       <div class="footer-links">
         <a
-          class="footer-link"
-          href="https://jianchengpan.space/ccf-ddl-tracker/"
+          class="footer-link footer-github-link"
+          href="https://github.com/jaychempan/ccf-ddl-tracker"
           target="_blank"
           rel="noreferrer"
-          data-i18n-title="contribute"
-          aria-label="共同开发"
+          data-i18n-title="github_repo"
+          aria-label="GitHub 仓库"
         >
           <span class="footer-link-mark" aria-hidden="true">
             <svg viewBox="0 0 20 20" focusable="false">
               <path
-                d="M10 2.5a7.5 7.5 0 0 0-2.37 14.62c.37.07.5-.16.5-.36v-1.27c-2.02.44-2.45-.86-2.45-.86-.33-.84-.8-1.06-.8-1.06-.66-.45.05-.45.05-.45.73.05 1.11.74 1.11.74.65 1.1 1.7.79 2.12.61.07-.46.25-.79.45-.97-1.61-.18-3.3-.79-3.3-3.52 0-.78.28-1.42.74-1.92-.07-.18-.32-.9.07-1.88 0 0 .6-.19 1.97.73A6.9 6.9 0 0 1 10 6.56c.64 0 1.28.09 1.88.27 1.37-.92 1.97-.73 1.97-.73.39.98.14 1.7.07 1.88.46.5.74 1.14.74 1.92 0 2.74-1.69 3.34-3.3 3.52.26.22.49.66.49 1.33v1.97c0 .2.13.44.5.36A7.5 7.5 0 0 0 10 2.5Z"
+                d="M10 2.6a7.4 7.4 0 0 0-2.34 14.42c.37.07.5-.16.5-.36v-1.26c-2.01.43-2.44-.86-2.44-.86-.33-.83-.8-1.05-.8-1.05-.65-.45.05-.44.05-.44.72.05 1.1.73 1.1.73.64 1.1 1.69.78 2.1.6.07-.46.25-.78.45-.96-1.6-.18-3.27-.79-3.27-3.49 0-.77.28-1.41.73-1.9-.07-.18-.32-.89.07-1.86 0 0 .6-.19 1.95.72A6.78 6.78 0 0 1 10 6.74c.63 0 1.27.08 1.86.25 1.36-.91 1.95-.72 1.95-.72.39.97.14 1.68.07 1.86.45.49.73 1.13.73 1.9 0 2.71-1.68 3.31-3.28 3.49.26.22.49.65.49 1.32v1.95c0 .2.13.43.5.36A7.4 7.4 0 0 0 10 2.6Z"
                 fill="currentColor"
               />
             </svg>
           </span>
-          <span class="footer-link-text" data-i18n="contribute">共同开发</span>
+          <span class="footer-link-text">GitHub</span>
         </a>
         <a
-          class="footer-link"
+          class="footer-link footer-site-link"
+          href="https://jianchengpan.space/ccf-ddl-tracker/"
+          target="_blank"
+          rel="noreferrer"
+          data-i18n-title="official_site"
+          aria-label="插件主页"
+        >
+          <span class="footer-link-mark" aria-hidden="true">
+            <svg viewBox="0 0 20 20" focusable="false">
+              <path
+                d="M3.2 9.4 10 3.7l6.8 5.7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5.2 8.7v7.1h3.4v-4.1h2.8v4.1h3.4V8.7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span class="footer-link-text" data-i18n="official_site">插件主页</span>
+        </a>
+        <a
+          class="footer-link footer-source-link"
           href="https://ccfddl.com/"
           target="_blank"
           rel="noreferrer"
@@ -224,6 +258,35 @@
           <input id="precise-countdown-toggle" type="checkbox" />
           <span data-i18n="countdown_precise">显示小时和分钟</span>
         </label>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend class="settings-legend" data-i18n="card_info_label">卡片信息</legend>
+        <label class="settings-option">
+          <input id="card-info-toggle" type="checkbox" />
+          <span data-i18n="card_info_show">在已保存卡片中显示分类和等级</span>
+        </label>
+        <div class="settings-suboptions" aria-label="卡片信息字段">
+          <label class="settings-option">
+            <input type="checkbox" name="card-info-field" value="ccf" checked />
+            <span data-i18n="card_info_field_ccf">CCF 等级</span>
+          </label>
+          <label class="settings-option">
+            <input type="checkbox" name="card-info-field" value="sub" checked />
+            <span data-i18n="card_info_field_sub">CCF 分类</span>
+          </label>
+          <label class="settings-option">
+            <input type="checkbox" name="card-info-field" value="core" />
+            <span data-i18n="card_info_field_core">CORE 等级</span>
+          </label>
+          <label class="settings-option">
+            <input type="checkbox" name="card-info-field" value="thcpl" />
+            <span data-i18n="card_info_field_thcpl">TH-CPL 等级</span>
+          </label>
+          <label class="settings-option">
+            <input type="checkbox" name="card-info-field" value="place" />
+            <span data-i18n="card_info_field_place">地点</span>
+          </label>
+        </div>
       </fieldset>
     </section>
 

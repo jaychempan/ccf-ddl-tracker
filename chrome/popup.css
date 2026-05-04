@@ -220,7 +220,7 @@ p {
 .footer-links {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .footer-toggle {
@@ -243,6 +243,11 @@ p {
   letter-spacing: 0.02em;
 }
 
+.footer-site-link,
+.footer-source-link {
+  gap: 4px;
+}
+
 .footer-link-mark {
   width: 14px;
   height: 14px;
@@ -250,6 +255,12 @@ p {
   align-items: center;
   justify-content: center;
   color: var(--primary);
+}
+
+.footer-site-link .footer-link-mark,
+.footer-source-link .footer-link-mark {
+  width: 14px;
+  height: 14px;
 }
 
 .footer-link-mark svg {
@@ -331,6 +342,13 @@ p {
 
 .settings-option input {
   margin: 0;
+}
+
+.settings-suboptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 8px;
+  padding-left: 16px;
 }
 
 .settings-select-wrap {
@@ -575,7 +593,7 @@ button.action-card.is-active {
 .import-item {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   padding: 7px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -598,6 +616,28 @@ button.action-card.is-active {
   color: var(--muted);
 }
 
+.import-badges,
+.item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.conference-badge {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 5px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.55);
+  color: #1d4ed8;
+  font-size: 10px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .import-add {
   border: none;
   background: var(--primary);
@@ -611,7 +651,7 @@ button.action-card.is-active {
 .item {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   padding: 7px;
   border: 1px solid var(--border);
   border-radius: 10px;

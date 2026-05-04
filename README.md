@@ -5,7 +5,7 @@
 
   Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage.
 
-  **Version:** `v2.2`
+  **Version:** `v2.3`
 
   [中文版本](README.zh-CN.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,7 +23,7 @@
   <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="720" />
 </div>
 
-The current popup keeps the compact v2.0 layout, adds the v2.1 time zone controls, and now introduces a v2.2 right-click calendar menu for Google Calendar, Apple/iCloud, and ICS export.
+The current popup keeps the compact layout, adds manual card links and draft restoration, defaults countdowns to minute precision, and refines footer shortcuts for GitHub, the extension home, and CCFDDL.
 
 ---
 
@@ -109,6 +109,18 @@ Install directly from the Chrome Web Store:
 ## Changelog
 
 <details open>
+  <summary><strong>v2.3</strong> - Manual links, remembered input, and footer shortcuts</summary>
+
+  - Added optional card links when manually creating deadlines
+  - Remembered the last opened add/import panel and unfinished add-form draft between popup opens
+  - Changed the default countdown display to include hours and minutes
+  - Refined footer shortcuts for GitHub, the extension home, and CCFDDL
+  - Added CCF category and ranking metadata to imported conference browsing
+  - Added optional settings to choose which conference metadata appears on saved cards
+  - Included the selected conference metadata in Google Calendar and ICS exports
+</details>
+
+<details>
   <summary><strong>v2.2</strong> - Right-click calendar actions</summary>
 
   - Added a right-click context menu for deadline cards in the popup

@@ -5,7 +5,7 @@
 
   轻量的 Chrome 扩展，用于管理 CCF 相关会议截止日期，支持手动添加、CCFDDL 导入和本地提醒。
 
-  **版本:** `v2.2`
+  **版本:** `v2.3`
 
   [English Version](README.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,7 +23,7 @@
   <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 中文预览" width="720" />
 </div>
 
-当前版本延续了 v2.0 的紧凑 popup 布局，保留了 v2.1 的时区切换能力，并在 v2.2 中新增了右键日历菜单，可导出到 Google Calendar、Apple / iCloud 或通用 ICS。
+当前版本延续紧凑 popup 布局，新增手动卡片链接和新增表单草稿恢复，默认显示分钟级倒计时，并优化 GitHub、插件主页和 CCFDDL 的底部快捷入口。
 
 ---
 
@@ -110,6 +110,18 @@
 ## 更新日志
 
 <details open>
+  <summary><strong>v2.3</strong> - 手动链接、输入记忆与底部入口优化</summary>
+
+  - 手动新增截止日期时，可填写可选卡片链接
+  - 记住上次打开的新增 / 导入面板，并在下次打开 popup 时恢复未完成的新增表单草稿
+  - 默认倒计时显示改为包含小时和分钟
+  - 优化底部快捷入口，区分 GitHub、插件主页和 CCFDDL
+  - 导入会议浏览列表新增 CCF 分类和等级信息
+  - 新增可选设置，可选择哪些会议元信息显示在已保存卡片中
+  - 导出到 Google Calendar 或 ICS 时会带上已选择的会议元信息
+</details>
+
+<details>
   <summary><strong>v2.2</strong> - 右键日历菜单</summary>
 
   - 为 popup 中的截止日期卡片新增右键上下文菜单

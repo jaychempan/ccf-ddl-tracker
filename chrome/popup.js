@@ -8,6 +8,17 @@ const TIME_FORMAT_STORAGE_KEY = "timeFormat";
 const DATE_ORDER_STORAGE_KEY = "dateOrder";
 const TIMEZONE_STORAGE_KEY = "displayTimezone";
 const PRECISE_COUNTDOWN_STORAGE_KEY = "preciseCountdown";
+const CARD_INFO_STORAGE_KEY = "cardInfo";
+const CARD_INFO_FIELDS_STORAGE_KEY = "cardInfoFields";
+const ACTIVE_PANEL_STORAGE_KEY = "activePanel";
+const ADD_FORM_DRAFT_STORAGE_KEY = "addFormDraft";
+const DEFAULT_CARD_INFO_FIELDS = {
+  ccf: true,
+  sub: true,
+  core: false,
+  thcpl: false,
+  place: false,
+};
 const DEFAULT_TIME_ZONE = "Asia/Shanghai";
 const STANDARD_TIME_ZONE_OPTIONS = [
   { value: "UTC", group: "featured", zh: "协调世界时", en: "Coordinated Universal Time" },
@@ -61,11 +72,24 @@ const STANDARD_TIME_ZONE_OPTIONS = [
   { value: "America/Argentina/Buenos_Aires", group: "americas", zh: "阿根廷 - 布宜诺斯艾利斯", en: "Argentina - Buenos Aires" },
 ];
 const STANDARD_TIME_ZONE_MAP = new Map(STANDARD_TIME_ZONE_OPTIONS.map((option) => [option.value, option]));
+const CCF_SUBJECT_LABELS = {
+  DS: { zh: "体系结构 / 并行 / 存储", en: "Architecture / Parallel / Storage" },
+  NW: { zh: "计算机网络", en: "Network System" },
+  SC: { zh: "网络与信息安全", en: "Security" },
+  SE: { zh: "软件工程 / 系统 / 程序设计", en: "Software / System / Programming" },
+  DB: { zh: "数据库 / 数据挖掘 / 信息检索", en: "Database / Mining / IR" },
+  CT: { zh: "计算理论", en: "Computing Theory" },
+  CG: { zh: "计算机图形学", en: "Graphics" },
+  AI: { zh: "人工智能", en: "Artificial Intelligence" },
+  HI: { zh: "人机交互", en: "Human-Computer Interaction" },
+  MX: { zh: "交叉 / 综合 / 新兴", en: "Interdiscipline / Emerging" },
+};
 
 const form = document.getElementById("deadline-form");
 const titleInput = document.getElementById("title");
 const dateInput = document.getElementById("date");
 const timeInput = document.getElementById("time");
+const cardLinkInput = document.getElementById("card-link");
 const timeZoneNote = document.getElementById("timezone-note");
 const listEl = document.getElementById("deadline-list");
 const emptyEl = document.getElementById("empty-state");
@@ -86,6 +110,8 @@ const timeFormatInputs = Array.from(document.querySelectorAll('input[name="time-
 const dateOrderInputs = Array.from(document.querySelectorAll('input[name="date-order"]'));
 const timeZoneSelect = document.getElementById("timezone-select");
 const preciseCountdownToggle = document.getElementById("precise-countdown-toggle");
+const cardInfoToggle = document.getElementById("card-info-toggle");
+const cardInfoFieldInputs = Array.from(document.querySelectorAll('input[name="card-info-field"]'));
 const deadlineContextMenu = document.getElementById("deadline-context-menu");
 const contextMenuButtons = Array.from(document.querySelectorAll("[data-context-action]"));
 
@@ -95,7 +121,9 @@ const LANG_STORAGE_KEY = "language";
 let currentTimeFormat = "24h";
 let currentDateOrder = "ymd";
 let currentTimeZone = DEFAULT_TIME_ZONE;
-let isPreciseCountdownEnabled = false;
+let isPreciseCountdownEnabled = true;
+let isCardInfoEnabled = false;
+let currentCardInfoFields = { ...DEFAULT_CARD_INFO_FIELDS };
 let refreshTimer = null;
 let refreshButtonAnimationTimer = null;
 let isAddFormExpanded = false;
@@ -115,12 +143,16 @@ const translations = {
     subtitle_en: "",
     open: "打开 CCFDDL",
     contribute: "共同开发",
+    github_repo: "GitHub 仓库",
+    official_site: "插件主页",
     add_section: "新增截止日期",
     add_hint: "手动填写标题、日期和时间",
     title_label: "标题",
     title_placeholder: "例如：ACL 2025",
     date_label: "日期",
     time_label: "时间",
+    link_label: "卡片链接",
+    link_placeholder: "例如：https://2025.aclweb.org",
     add_button: "添加",
     import_section: "从 CCFDDL 导入",
     import_hint_short: "加载推荐会议并一键加入",
@@ -149,7 +181,14 @@ const translations = {
     date_order_mdy: "月日年",
     countdown_label: "倒计时显示",
     countdown_precise: "显示小时和分钟",
-    open_site: "打开会议官网",
+    card_info_label: "卡片信息",
+    card_info_show: "在已保存卡片中显示分类和等级",
+    card_info_field_ccf: "CCF 等级",
+    card_info_field_sub: "CCF 分类",
+    card_info_field_core: "CORE 等级",
+    card_info_field_thcpl: "TH-CPL 等级",
+    card_info_field_place: "地点",
+    open_site: "打开卡片链接",
     add_item: "添加",
     delete_item: "删除",
     calendar_menu_title: "添加到日历",
@@ -164,10 +203,13 @@ const translations = {
       parts.push(`${minutes} 分钟`);
       return `剩余 ${parts.join(" ")}`;
     },
-    calendar_description: ({ formattedDate, url }) => {
+    calendar_description: ({ formattedDate, metadata, url }) => {
       const lines = ["由 CCF DDL Tracker 导出", `截止时间：${formattedDate}`];
+      if (metadata) {
+        lines.push(`会议信息：${metadata}`);
+      }
       if (url) {
-        lines.push(`会议官网：${url}`);
+        lines.push(`卡片链接：${url}`);
       }
       return lines.join("\n");
     },
@@ -181,12 +223,16 @@ const translations = {
     subtitle_en: "Add and manage your deadlines in one click, and show the nearest days left",
     open: "Open CCFDDL",
     contribute: "Contribute",
+    github_repo: "GitHub repository",
+    official_site: "Extension Home",
     add_section: "Add DDL",
     add_hint: "Add a title, date, and time",
     title_label: "Title",
     title_placeholder: "e.g., ACL 2025",
     date_label: "Date",
     time_label: "Time",
+    link_label: "Card Link",
+    link_placeholder: "e.g., https://2025.aclweb.org",
     add_button: "Add",
     import_section: "Import CCFDDL",
     import_hint_short: "Browse conferences and add them fast",
@@ -215,7 +261,14 @@ const translations = {
     date_order_mdy: "Month / Day / Year",
     countdown_label: "Countdown Display",
     countdown_precise: "Show hours and minutes",
-    open_site: "Open conference website",
+    card_info_label: "Card Info",
+    card_info_show: "Show category and ranking on saved cards",
+    card_info_field_ccf: "CCF rank",
+    card_info_field_sub: "CCF category",
+    card_info_field_core: "CORE rank",
+    card_info_field_thcpl: "TH-CPL rank",
+    card_info_field_place: "Place",
+    open_site: "Open card link",
     add_item: "Add",
     delete_item: "Delete",
     calendar_menu_title: "Add to Calendar",
@@ -230,10 +283,13 @@ const translations = {
       parts.push(`${minutes}m`);
       return `${parts.join(" ")} left`;
     },
-    calendar_description: ({ formattedDate, url }) => {
+    calendar_description: ({ formattedDate, metadata, url }) => {
       const lines = ["Exported from CCF DDL Tracker", `Deadline: ${formattedDate}`];
+      if (metadata) {
+        lines.push(`Conference info: ${metadata}`);
+      }
       if (url) {
-        lines.push(`Conference website: ${url}`);
+        lines.push(`Card link: ${url}`);
       }
       return lines.join("\n");
     },
@@ -437,6 +493,8 @@ function applyTranslations() {
   syncTimeFormatInputs();
   syncDateOrderInputs();
   syncPreciseCountdownToggle();
+  syncCardInfoToggle();
+  syncCardInfoFieldInputs();
   syncDateInputMode();
   syncActionButtons();
 }
@@ -641,16 +699,21 @@ function sanitizeFileName(value) {
 
 function getCalendarDescription(item) {
   const normalizedUrl = normalizeConferenceUrl(item.url);
-  const renderDescription = t("calendar_description", ({ formattedDate, url }) => {
+  const metadata = getConferenceBadges(item, currentCardInfoFields).join(" · ");
+  const renderDescription = t("calendar_description", ({ formattedDate, metadata, url }) => {
     const lines = ["由 CCF DDL Tracker 导出", `截止时间：${formattedDate}`];
+    if (metadata) {
+      lines.push(`会议信息：${metadata}`);
+    }
     if (url) {
-      lines.push(`会议官网：${url}`);
+      lines.push(`卡片链接：${url}`);
     }
     return lines.join("\n");
   });
 
   return renderDescription({
     formattedDate: formatDate(item.datetime),
+    metadata,
     url: normalizedUrl,
   });
 }
@@ -820,6 +883,17 @@ function syncPreciseCountdownToggle() {
   preciseCountdownToggle.checked = isPreciseCountdownEnabled;
 }
 
+function syncCardInfoToggle() {
+  if (!cardInfoToggle) return;
+  cardInfoToggle.checked = isCardInfoEnabled;
+}
+
+function syncCardInfoFieldInputs() {
+  cardInfoFieldInputs.forEach((input) => {
+    input.checked = Boolean(currentCardInfoFields[input.value]);
+  });
+}
+
 function getTimeZoneOffsetMinutes(timeZone, date) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone,
@@ -975,6 +1049,86 @@ function setPreciseCountdown(enabled) {
   loadDeadlines();
 }
 
+function setCardInfo(enabled) {
+  isCardInfoEnabled = Boolean(enabled);
+  syncCardInfoToggle();
+  chrome.storage.local.set({ [CARD_INFO_STORAGE_KEY]: isCardInfoEnabled });
+  loadDeadlines();
+}
+
+function normalizeCardInfoFields(fields) {
+  const normalized = { ...DEFAULT_CARD_INFO_FIELDS };
+  if (!fields || typeof fields !== "object") return normalized;
+  Object.keys(normalized).forEach((key) => {
+    normalized[key] = Boolean(fields[key]);
+  });
+  return normalized;
+}
+
+function setCardInfoFields(fields) {
+  currentCardInfoFields = normalizeCardInfoFields(fields);
+  syncCardInfoFieldInputs();
+  chrome.storage.local.set({ [CARD_INFO_FIELDS_STORAGE_KEY]: currentCardInfoFields });
+  loadDeadlines();
+}
+
+function getActivePanelPreference(value) {
+  if (value === "add" || value === "import" || value === "none") return value;
+  return "import";
+}
+
+function getCurrentActivePanel() {
+  if (isAddFormExpanded) return "add";
+  if (isCcfddlExpanded) return "import";
+  return "none";
+}
+
+function saveActivePanelPreference() {
+  chrome.storage.local.set({ [ACTIVE_PANEL_STORAGE_KEY]: getCurrentActivePanel() });
+}
+
+function restoreActivePanelPreference(activePanel) {
+  if (activePanel === "add") {
+    setCcfddlExpanded(false);
+    setAddFormExpanded(true);
+    return;
+  }
+
+  if (activePanel === "none") {
+    setAddFormExpanded(false);
+    setCcfddlExpanded(false);
+    return;
+  }
+
+  setAddFormExpanded(false);
+  setCcfddlExpanded(true);
+}
+
+function getCurrentAddFormDraft() {
+  return {
+    title: titleInput?.value || "",
+    date: dateInput?.value || "",
+    time: timeInput?.value || "23:59",
+    url: cardLinkInput?.value || "",
+  };
+}
+
+function restoreAddFormDraft(draft) {
+  if (!draft || typeof draft !== "object") return;
+  if (titleInput) titleInput.value = typeof draft.title === "string" ? draft.title : "";
+  if (dateInput) dateInput.value = typeof draft.date === "string" ? draft.date : "";
+  if (timeInput) timeInput.value = typeof draft.time === "string" && draft.time ? draft.time : "23:59";
+  if (cardLinkInput) cardLinkInput.value = typeof draft.url === "string" ? draft.url : "";
+}
+
+function saveAddFormDraft() {
+  chrome.storage.local.set({ [ADD_FORM_DRAFT_STORAGE_KEY]: getCurrentAddFormDraft() });
+}
+
+function clearAddFormDraft() {
+  chrome.storage.local.remove(ADD_FORM_DRAFT_STORAGE_KEY);
+}
+
 function setTimeZone(nextTimeZone) {
   currentTimeZone = sanitizeTimeZone(nextTimeZone);
   syncTimeZoneSelect();
@@ -1091,6 +1245,9 @@ function normalizeConferenceUrl(value) {
   if (!trimmed) return "";
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   if (/^www\./i.test(trimmed)) return `https://${trimmed}`;
+  if (/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:\/[^\s]*)?$/i.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
   return "";
 }
 
@@ -1122,6 +1279,7 @@ function parseAllConfYaml(text) {
   let current = null;
   let currentTimezone = null;
   let currentYear = null;
+  let currentPlace = null;
   let pendingDeadline = null;
   let pendingComment = null;
 
@@ -1131,7 +1289,15 @@ function parseAllConfYaml(text) {
     if (!iso) return;
     const suffix = pendingComment ? ` (${pendingComment})` : "";
     const title = currentYear ? `${current.title} ${currentYear}${suffix}` : `${current.title}${suffix}`;
-    items.push({ title, datetime: iso, url: normalizeConferenceUrl(current.link) });
+    items.push({
+      title,
+      datetime: iso,
+      url: normalizeConferenceUrl(current.link),
+      description: current.description || "",
+      sub: current.sub || "",
+      rank: current.rank || {},
+      place: currentPlace || "",
+    });
     pendingDeadline = null;
     pendingComment = null;
   };
@@ -1146,13 +1312,40 @@ function parseAllConfYaml(text) {
       current = { title };
       currentTimezone = null;
       currentYear = null;
+      currentPlace = null;
       return;
     }
 
     if (!current) return;
 
+    if (trimmed.startsWith("description:")) {
+      current.description = trimmed.replace("description:", "").trim().replace(/^['"]|['"]$/g, "");
+      return;
+    }
+
+    if (trimmed.startsWith("sub:")) {
+      current.sub = trimmed.replace("sub:", "").trim().replace(/^['"]|['"]$/g, "").toUpperCase();
+      return;
+    }
+
+    if (trimmed.startsWith("ccf:")) {
+      current.rank = { ...(current.rank || {}), ccf: trimmed.replace("ccf:", "").trim().replace(/^['"]|['"]$/g, "") };
+      return;
+    }
+
+    if (trimmed.startsWith("core:")) {
+      current.rank = { ...(current.rank || {}), core: trimmed.replace("core:", "").trim().replace(/^['"]|['"]$/g, "") };
+      return;
+    }
+
+    if (trimmed.startsWith("thcpl:")) {
+      current.rank = { ...(current.rank || {}), thcpl: trimmed.replace("thcpl:", "").trim().replace(/^['"]|['"]$/g, "") };
+      return;
+    }
+
     if (trimmed.startsWith("year:")) {
       currentYear = trimmed.replace("year:", "").trim();
+      currentPlace = null;
       return;
     }
 
@@ -1163,6 +1356,11 @@ function parseAllConfYaml(text) {
 
     if (trimmed.startsWith("link:")) {
       current.link = trimmed.replace("link:", "").trim();
+      return;
+    }
+
+    if (trimmed.startsWith("place:")) {
+      currentPlace = trimmed.replace("place:", "").trim().replace(/^['"]|['"]$/g, "");
       return;
     }
 
@@ -1192,6 +1390,61 @@ function parseAllConfYaml(text) {
 
   flushPending();
   return items;
+}
+
+function getConferenceSubjectLabel(sub) {
+  const normalized = (sub || "").trim().toUpperCase();
+  if (!normalized) return "";
+  const label = CCF_SUBJECT_LABELS[normalized]?.[currentLang];
+  return label ? `${normalized} · ${label}` : normalized;
+}
+
+function getConferenceBadges(item, fields = null) {
+  const visibleFields = fields || {
+    ccf: true,
+    sub: true,
+    core: true,
+    thcpl: true,
+    place: true,
+  };
+  const badges = [];
+  const rank = item.rank || {};
+  if (visibleFields.ccf && rank.ccf) badges.push(`CCF ${rank.ccf}`);
+  if (visibleFields.sub && item.sub) badges.push(getConferenceSubjectLabel(item.sub));
+  if (visibleFields.core && rank.core) badges.push(`CORE ${rank.core}`);
+  if (visibleFields.thcpl && rank.thcpl) badges.push(`TH-CPL ${rank.thcpl}`);
+  if (visibleFields.place && item.place) badges.push(item.place);
+  return badges.filter(Boolean);
+}
+
+function getImportSearchText(item) {
+  return [
+    item.title,
+    item.description,
+    item.sub,
+    getConferenceSubjectLabel(item.sub),
+    item.rank?.ccf ? `CCF ${item.rank.ccf}` : "",
+    item.rank?.core ? `CORE ${item.rank.core}` : "",
+    item.rank?.thcpl ? `TH-CPL ${item.rank.thcpl}` : "",
+    item.place,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function renderConferenceBadges(item, className, fields = null) {
+  const badges = getConferenceBadges(item, fields);
+  if (badges.length === 0) return null;
+
+  const badgeList = document.createElement("div");
+  badgeList.className = className;
+  badges.forEach((badge) => {
+    const badgeEl = document.createElement("span");
+    badgeEl.className = "conference-badge";
+    badgeEl.textContent = badge;
+    badgeList.appendChild(badgeEl);
+  });
+  return badgeList;
 }
 
 function renderCcfddlList(items) {
@@ -1226,8 +1479,14 @@ function renderCcfddlList(items) {
     meta.className = "import-meta";
     meta.textContent = formatDate(item.datetime);
 
+    const badgeList = renderConferenceBadges(item, "import-badges");
+    if (badgeList) {
+      li.append(header, meta, badgeList);
+    } else {
+      li.append(header, meta);
+    }
+
     attachDeadlineContextMenu(li, item);
-    li.append(header, meta);
     ccfddlList.appendChild(li);
   });
 }
@@ -1272,10 +1531,10 @@ function filterCcfddlList() {
   }
   const normalizedKeyword = normalizeText(keyword);
   const filtered = ccfddlItems.filter((item) => {
-    const title = item.title.toLowerCase();
+    const searchable = getImportSearchText(item).toLowerCase();
     return (
-      title.includes(keyword) ||
-      normalizeText(title).includes(normalizedKeyword)
+      searchable.includes(keyword) ||
+      normalizeText(searchable).includes(normalizedKeyword)
     );
   });
   renderCcfddlList(filtered);
@@ -1303,9 +1562,17 @@ function addImportedDeadline(item) {
     );
     if (matchIndex >= 0) {
       const matchedItem = existing[matchIndex];
-      if (matchedItem.url || !item.url) return;
+      const mergedItem = {
+        ...matchedItem,
+        url: matchedItem.url || item.url || "",
+        description: matchedItem.description || item.description || "",
+        sub: matchedItem.sub || item.sub || "",
+        rank: Object.keys(matchedItem.rank || {}).length > 0 ? matchedItem.rank : item.rank || {},
+        place: matchedItem.place || item.place || "",
+      };
+      if (JSON.stringify(mergedItem) === JSON.stringify(matchedItem)) return;
       const updated = [...existing];
-      updated[matchIndex] = { ...matchedItem, url: item.url };
+      updated[matchIndex] = mergedItem;
       saveDeadlines(updated);
       return;
     }
@@ -1381,22 +1648,26 @@ async function openCcfddlDropdown() {
 async function toggleAddPanel() {
   if (isAddFormExpanded) {
     setAddFormExpanded(false);
+    saveActivePanelPreference();
     return;
   }
 
   setCcfddlExpanded(false);
   setAddFormExpanded(true);
+  saveActivePanelPreference();
   titleInput.focus();
 }
 
 async function toggleImportPanel() {
   if (isCcfddlExpanded) {
     setCcfddlExpanded(false);
+    saveActivePanelPreference();
     return;
   }
 
   setAddFormExpanded(false);
   setCcfddlExpanded(true);
+  saveActivePanelPreference();
 }
 
 function render(deadlines) {
@@ -1475,8 +1746,13 @@ function render(deadlines) {
 
     meta.append(date, remaining);
 
+    const badgeList = isCardInfoEnabled ? renderConferenceBadges(item, "item-badges", currentCardInfoFields) : null;
     attachDeadlineContextMenu(li, item);
-    li.append(header, meta);
+    if (badgeList) {
+      li.append(header, badgeList, meta);
+    } else {
+      li.append(header, meta);
+    }
     listEl.appendChild(li);
   });
 }
@@ -1540,6 +1816,7 @@ form.addEventListener("submit", (event) => {
   const title = titleInput.value.trim();
   const date = normalizeDateInput(dateInput.value);
   const time = timeInput.value || "23:59";
+  const url = normalizeConferenceUrl(cardLinkInput?.value || "");
 
   if (!title || !date) return;
 
@@ -1551,17 +1828,17 @@ form.addEventListener("submit", (event) => {
   if (!datetime) return;
 
   chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
-    const updated = [
-      ...result[STORAGE_KEY],
-      {
-        title,
-        datetime,
-      },
-    ];
+    const deadline = { title, datetime };
+    if (url) {
+      deadline.url = url;
+    }
+    const updated = [...result[STORAGE_KEY], deadline];
     saveDeadlines(updated);
     form.reset();
     timeInput.value = "23:59";
+    clearAddFormDraft();
     setAddFormExpanded(false);
+    saveActivePanelPreference();
   });
 });
 
@@ -1576,7 +1853,11 @@ chrome.storage.local.get(
     [TIME_FORMAT_STORAGE_KEY]: "24h",
     [DATE_ORDER_STORAGE_KEY]: "ymd",
     [TIMEZONE_STORAGE_KEY]: DEFAULT_TIME_ZONE,
-    [PRECISE_COUNTDOWN_STORAGE_KEY]: false,
+    [PRECISE_COUNTDOWN_STORAGE_KEY]: true,
+    [CARD_INFO_STORAGE_KEY]: false,
+    [CARD_INFO_FIELDS_STORAGE_KEY]: DEFAULT_CARD_INFO_FIELDS,
+    [ACTIVE_PANEL_STORAGE_KEY]: "import",
+    [ADD_FORM_DRAFT_STORAGE_KEY]: null,
   },
   (result) => {
     currentLang = result[LANG_STORAGE_KEY] || "zh";
@@ -1584,9 +1865,12 @@ chrome.storage.local.get(
     currentDateOrder = result[DATE_ORDER_STORAGE_KEY] || "ymd";
     currentTimeZone = sanitizeTimeZone(result[TIMEZONE_STORAGE_KEY] || DEFAULT_TIME_ZONE);
     isPreciseCountdownEnabled = Boolean(result[PRECISE_COUNTDOWN_STORAGE_KEY]);
+    isCardInfoEnabled = Boolean(result[CARD_INFO_STORAGE_KEY]);
+    currentCardInfoFields = normalizeCardInfoFields(result[CARD_INFO_FIELDS_STORAGE_KEY]);
+    const activePanel = getActivePanelPreference(result[ACTIVE_PANEL_STORAGE_KEY]);
     applyTranslations();
-    setAddFormExpanded(false);
-    setCcfddlExpanded(true);
+    restoreAddFormDraft(result[ADD_FORM_DRAFT_STORAGE_KEY]);
+    restoreActivePanelPreference(activePanel);
     setSettingsOpen(false);
     renderCcfddlList(ccfddlItems);
     loadDeadlines();
@@ -1622,6 +1906,19 @@ dateOrderInputs.forEach((input) => {
 preciseCountdownToggle?.addEventListener("change", () => {
   setPreciseCountdown(preciseCountdownToggle.checked);
 });
+cardInfoToggle?.addEventListener("change", () => {
+  setCardInfo(cardInfoToggle.checked);
+});
+cardInfoFieldInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    setCardInfoFields({
+      ...currentCardInfoFields,
+      [input.value]: input.checked,
+    });
+  });
+});
+form.addEventListener("input", saveAddFormDraft);
+form.addEventListener("change", saveAddFormDraft);
 timeZoneSelect?.addEventListener("change", () => {
   setTimeZone(timeZoneSelect.value);
 });

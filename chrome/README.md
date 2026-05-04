@@ -9,7 +9,7 @@
 
 ## 功能说明 / Features
 
-- **当前版本**：扩展版本已更新为 `v2.2`，弹窗右上角会显示版本标记。/ The extension is now `v2.2`, and the popup header shows the current version.
+- **当前版本**：扩展版本已更新为 `v2.3`，弹窗右上角会显示版本标记。/ The extension is now `v2.3`, and the popup header shows the current version.
 - **添加 DDL**：填写标题、日期、时间，点击“添加”。/ Add title/date/time and click “Add”.
 - **查看详情**：弹窗中会按时间排序展示多个 DDL，并显示剩余天数。/ Sorted list with remaining days.
 - **徽标提示**：工具栏图标会显示最近一个 DDL 的剩余天数。/ Badge shows the nearest days left.
