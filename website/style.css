@@ -131,6 +131,24 @@ code {
     border-color: currentColor;
 }
 
+.nav-badge {
+    margin-left: 0.3rem;
+    padding: 0.35rem 0.7rem !important;
+    border: 1.5px solid var(--color-primary) !important;
+    border-radius: 0.5rem;
+    color: var(--color-primary) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.nav-badge:hover,
+.nav-badge:focus-visible {
+    background: var(--color-primary);
+    color: #fff !important;
+    border-color: var(--color-primary) !important;
+}
+
 .language-toggle {
     display: inline-flex;
     align-items: center;
@@ -680,6 +698,11 @@ html[lang="en"] .language-toggle [data-lang-option="en"] {
     .nav-panel a {
         padding: 0.75rem;
         text-align: center;
+    }
+
+    .nav-badge {
+        margin-left: 0;
+        margin-top: 0.3rem;
     }
 
     .language-toggle {
