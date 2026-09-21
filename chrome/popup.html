@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CCF DDL Tracker</title>
+    <script src="theme.js"></script>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
@@ -224,6 +225,23 @@
 
     <section id="settings-panel" class="settings-panel" hidden>
       <p class="settings-title" data-i18n="settings_title">显示设置</p>
+      <fieldset class="settings-group">
+        <legend class="settings-legend" data-i18n="theme_label">外观</legend>
+        <div class="theme-options">
+          <label class="theme-option">
+            <input type="radio" name="theme" value="system" checked />
+            <span data-i18n="theme_system">跟随系统</span>
+          </label>
+          <label class="theme-option">
+            <input type="radio" name="theme" value="light" />
+            <span data-i18n="theme_light">浅色</span>
+          </label>
+          <label class="theme-option">
+            <input type="radio" name="theme" value="dark" />
+            <span data-i18n="theme_dark">深色</span>
+          </label>
+        </div>
+      </fieldset>
       <fieldset class="settings-group">
         <legend class="settings-legend" data-i18n="timezone_label">显示时区</legend>
         <label class="settings-select-wrap">

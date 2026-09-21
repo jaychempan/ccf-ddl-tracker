@@ -25,6 +25,8 @@
 
 The current popup keeps the compact layout, adds manual card links and draft restoration, defaults countdowns to minute precision, and refines footer shortcuts for GitHub, the extension home, and CCFDDL.
 
+The source checkout also includes unreleased dark mode settings. Load the extension unpacked to try them; pushing source updates to GitHub does not update the Chrome Web Store package.
+
 ---
 
 ## Install
@@ -64,6 +66,7 @@ Install directly from the Chrome Web Store:
 - **Calendar handoff**: Right-click saved or imported cards to send a deadline to Google Calendar or download ICS for Apple/iCloud and other calendar apps.
 - **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
 - **Display preferences**: Choose a display time zone, switch between `24-hour` and `12-hour`, and change date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
+- **Dark mode**: Follow system appearance by default, update immediately when it changes, or choose a fixed light or dark theme in settings.
 - **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
 
 ---
@@ -71,6 +74,7 @@ Install directly from the Chrome Web Store:
 ## Customization
 
 - **Language**: Toggle between Chinese and English from the popup footer.
+- **Appearance**: Choose System, Light, or Dark in settings. Your preference is saved locally.
 - **Time zone**: Switch deadline display between supported time zones. The default is `Asia/Shanghai`.
 - **Time format**: Choose `24-hour` or `12-hour (AM/PM)` in the settings panel.
 - **Date order**: Choose `YYYY/MM/DD` or `MM/DD/YYYY`.
@@ -106,9 +110,21 @@ Install directly from the Chrome Web Store:
 - Tech stack: Manifest V3, Vanilla JavaScript, `chrome.storage.local`
 - Contribution: Issues and pull requests are welcome
 
+## Troubleshooting
+
+If the toolbar popup is slow to open or **Inspect popup** also hangs on macOS, see the [popup troubleshooting guide](chrome/POPUP-TROUBLESHOOTING.md#english). It covers a Chrome restart, the temporary `PMLoadingPageVoter` launch option, and the limits of our verification. Updating this extension does not automatically enable that browser option.
+
 ## Changelog
 
 <details open>
+  <summary><strong>Unreleased</strong> - Appearance settings and popup troubleshooting</summary>
+
+  - Added System (default), Light, and Dark appearance settings with local persistence
+  - Applied dark colors to cards, forms, settings, search results, and calendar menus
+  - Documented the Chrome popup delay issue and a temporary browser launch option; this is not an extension-side fix
+</details>
+
+<details>
   <summary><strong>v2.3</strong> - Manual links, remembered input, and footer shortcuts</summary>
 
   - Added optional card links when manually creating deadlines

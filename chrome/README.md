@@ -1,5 +1,7 @@
 # CCF DDL Tracker (Chrome Extension)
 
+当前源码包含尚未发布的夜间模式，可按下方步骤加载体验；GitHub 更新不会自动更新商店安装包。/ This source checkout includes unreleased dark mode. Load it unpacked using the steps below; GitHub updates do not update the Web Store package.
+
 ## 使用方法 / Usage
 
 1. 打开 Chrome，进入 `chrome://extensions/`。/ Open Chrome and go to `chrome://extensions/`.
@@ -21,6 +23,7 @@
 - **底部工具栏**：中英切换和 CCFDDL 官网入口已移动到底部工具栏，右上角不再放操作项。/ Language switching and the CCFDDL website shortcut now live in the bottom toolbar instead of the top-right corner.
 - **协作入口**：底部工具栏新增 GitHub 仓库链接，可直接打开项目主页参与开发。/ The bottom toolbar now includes a GitHub repository link so you can open the project page and contribute directly.
 - **显示设置**：底部新增设置入口，可切换时间显示为 24 小时制或上午/下午 12 小时制。/ A new settings entry in the bottom bar lets you switch time display between 24-hour and 12-hour formats.
+- **夜间模式**：设置 → 外观提供“跟随系统 / 浅色 / 深色”，默认跟随系统，系统外观变化时立即切换；手动选择会保存在本机。卡片、输入框、下拉列表和日历菜单均适配深色。/ Settings → Appearance offers System (default), Light, and Dark. System mode updates immediately with your system appearance; manual choices are saved locally. Cards, inputs, dropdowns, and calendar menus all support dark mode.
 - **日期顺序**：设置面板新增日期顺序选项，可在“年月日”和“月日年”之间切换。/ The settings panel now includes a date-order option for switching between year/month/day and month/day/year.
 - **底部贴边**：底部工具栏已固定贴到底边，去掉其下方的空白区域。/ The bottom utility bar is now anchored to the popup edge, removing the empty area beneath it.
 - **底部更轻量**：底部工具栏进一步压缩为接近单行文字的样式，语言切换不再保留按钮感。/ The bottom utility bar is further compressed into a near single-line text-style row, and the language toggle no longer looks like a button.
@@ -50,3 +53,9 @@ Note: Imports prefer GitHub repository data and fall back to the CCFDDL ICS feed
 ## 数据存储 / Data
 
 所有数据保存在 `chrome.storage.local` 中，仅在本机可见。/ Stored locally in `chrome.storage.local`.
+
+## 弹窗卡顿 / Popup troubleshooting
+
+macOS 上点击图标无反应或“审查弹出内容”打不开时，请查看[排查指南](POPUP-TROUBLESHOOTING.md#中文)。其中的 `PMLoadingPageVoter` 是 Chrome 启动参数，扩展无法自行启用；本次验证表明普通重启也能恢复，尚不能认定永久修复。
+
+If the popup or **Inspect popup** hangs on macOS, see the [troubleshooting guide](POPUP-TROUBLESHOOTING.md#english). `PMLoadingPageVoter` is a Chrome launch option that the extension cannot enable itself. A normal restart also restored the popup in our test, so a permanent fix has not been established.

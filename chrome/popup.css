@@ -5,13 +5,108 @@
   line-height: 1.4;
   --bg: #f8fafc;
   --card: #ffffff;
+  --surface: #f8fafc;
+  --input-bg: #ffffff;
   --text: #0f172a;
   --muted: #64748b;
   --primary: #2563eb;
+  --button-bg: #2563eb;
+  --button-text: #ffffff;
   --border: #e2e8f0;
   --danger: #dc2626;
+  --focus: #2563eb;
+  --ambient: rgba(37, 99, 235, 0.08);
+  --action-bg: rgba(255, 255, 255, 0.8);
+  --active-border: rgba(37, 99, 235, 0.35);
+  --active-bg: rgba(219, 234, 254, 0.7);
+  --icon-bg: rgba(37, 99, 235, 0.1);
+  --overlay-border: rgba(148, 163, 184, 0.25);
+  --overlay-bg: rgba(255, 255, 255, 0.98);
+  --badge-border: rgba(37, 99, 235, 0.14);
+  --badge-bg: rgba(219, 234, 254, 0.55);
+  --badge-text: #1d4ed8;
+  --hover-border: rgba(37, 99, 235, 0.3);
+  --hover-bg: rgba(239, 246, 255, 0.9);
+  --menu-hover: rgba(37, 99, 235, 0.08);
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --action-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --active-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  --overlay-shadow: 0 16px 32px rgba(15, 23, 42, 0.16);
   --scrollbar-thumb: rgba(15, 23, 42, 0.28);
   --scrollbar-thumb-hover: rgba(15, 23, 42, 0.4);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101722;
+  --card: #172233;
+  --surface: #202c3e;
+  --input-bg: #101a2a;
+  --text: #edf2fa;
+  --muted: #a6b4c8;
+  --primary: #8ab4ff;
+  --button-bg: #2563eb;
+  --button-text: #ffffff;
+  --border: #344156;
+  --danger: #fda4af;
+  --focus: #93bbff;
+  --ambient: rgba(88, 143, 231, 0.08);
+  --action-bg: #1b2739;
+  --active-border: #598cda;
+  --active-bg: #203b60;
+  --icon-bg: rgba(138, 180, 255, 0.14);
+  --overlay-border: #43526a;
+  --overlay-bg: rgba(27, 39, 57, 0.98);
+  --badge-border: #3c567c;
+  --badge-bg: #253d60;
+  --badge-text: #bbd3ff;
+  --hover-border: #598cda;
+  --hover-bg: #263953;
+  --menu-hover: rgba(138, 180, 255, 0.14);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+  --action-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --active-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  --overlay-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+  --scrollbar-thumb: rgba(166, 180, 200, 0.35);
+  --scrollbar-thumb-hover: rgba(166, 180, 200, 0.55);
+}
+
+/* Follow the system before the theme script runs as well as while it is open. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101722;
+    --card: #172233;
+    --surface: #202c3e;
+    --input-bg: #101a2a;
+    --text: #edf2fa;
+    --muted: #a6b4c8;
+    --primary: #8ab4ff;
+    --button-bg: #2563eb;
+    --button-text: #ffffff;
+    --border: #344156;
+    --danger: #fda4af;
+    --focus: #93bbff;
+    --ambient: rgba(88, 143, 231, 0.08);
+    --action-bg: #1b2739;
+    --active-border: #598cda;
+    --active-bg: #203b60;
+    --icon-bg: rgba(138, 180, 255, 0.14);
+    --overlay-border: #43526a;
+    --overlay-bg: rgba(27, 39, 57, 0.98);
+    --badge-border: #3c567c;
+    --badge-bg: #253d60;
+    --badge-text: #bbd3ff;
+    --hover-border: #598cda;
+    --hover-bg: #263953;
+    --menu-hover: rgba(138, 180, 255, 0.14);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+    --action-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    --active-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+    --overlay-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+    --scrollbar-thumb: rgba(166, 180, 200, 0.35);
+    --scrollbar-thumb-hover: rgba(166, 180, 200, 0.55);
+  }
 }
 
 *,
@@ -29,7 +124,7 @@ body {
   margin: 0;
   padding: 12px 12px 0;
   background:
-    radial-gradient(circle at top, rgba(37, 99, 235, 0.08), transparent 34%),
+    radial-gradient(circle at top, var(--ambient), transparent 34%),
     var(--bg);
   color: var(--text);
   width: 380px;
@@ -114,7 +209,7 @@ p {
   border-radius: 12px;
   padding: 10px;
   margin-bottom: 0;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--card-shadow);
 }
 
 .action-grid {
@@ -135,16 +230,16 @@ p {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--action-bg);
   color: var(--text);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--action-shadow);
   transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
 .action-card.is-active {
-  border-color: rgba(37, 99, 235, 0.35);
-  background: rgba(219, 234, 254, 0.7);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  border-color: var(--active-border);
+  background: var(--active-bg);
+  box-shadow: var(--active-shadow);
 }
 
 .action-card-title {
@@ -164,7 +259,7 @@ p {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.1);
+  background: var(--icon-bg);
   color: var(--primary);
   font-size: 13px;
   font-weight: 700;
@@ -292,11 +387,15 @@ p {
   bottom: 22px;
   z-index: 40;
   width: 248px;
+  max-height: calc(100% - 34px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
   padding: 9px 10px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid var(--overlay-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
+  background: var(--overlay-bg);
+  box-shadow: var(--overlay-shadow);
   backdrop-filter: blur(10px);
 }
 
@@ -363,7 +462,7 @@ p {
   padding: 7px 8px;
   font-size: 12px;
   color: var(--text);
-  background: #fff;
+  background: var(--input-bg);
 }
 
 form {
@@ -381,17 +480,25 @@ label {
 }
 
 input {
+  color: var(--text);
+  background: var(--input-bg);
+  accent-color: var(--primary);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 7px 8px;
   font-size: 13px;
 }
 
+input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
 button {
   border: none;
   border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
+  background: var(--button-bg);
+  color: var(--button-text);
   padding: 6px 8px;
   font-weight: 600;
   cursor: pointer;
@@ -401,12 +508,12 @@ button {
 button.action-card {
   min-height: 68px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--action-bg);
   color: var(--text);
 }
 
 button.action-card.is-active {
-  background: rgba(219, 234, 254, 0.7);
+  background: var(--active-bg);
 }
 
 .ghost-btn {
@@ -517,10 +624,10 @@ button.action-card.is-active {
   right: 0;
   z-index: 20;
   padding: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid var(--overlay-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16);
+  background: var(--overlay-bg);
+  box-shadow: var(--overlay-shadow);
   backdrop-filter: blur(10px);
 }
 
@@ -597,7 +704,7 @@ button.action-card.is-active {
   padding: 7px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--surface);
 }
 
 .import-item-header {
@@ -628,10 +735,10 @@ button.action-card.is-active {
   max-width: 100%;
   overflow: hidden;
   padding: 2px 5px;
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid var(--badge-border);
   border-radius: 999px;
-  background: rgba(219, 234, 254, 0.55);
-  color: #1d4ed8;
+  background: var(--badge-bg);
+  color: var(--badge-text);
   font-size: 10px;
   line-height: 1.15;
   text-overflow: ellipsis;
@@ -640,8 +747,8 @@ button.action-card.is-active {
 
 .import-add {
   border: none;
-  background: var(--primary);
-  color: #fff;
+  background: var(--button-bg);
+  color: var(--button-text);
   padding: 3px 7px;
   border-radius: 6px;
   font-size: 11px;
@@ -655,7 +762,7 @@ button.action-card.is-active {
   padding: 7px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--surface);
 }
 
 .item.is-linkable {
@@ -665,9 +772,9 @@ button.action-card.is-active {
 
 .item.is-linkable:hover,
 .item.is-linkable:focus-visible {
-  border-color: rgba(37, 99, 235, 0.3);
-  background: rgba(239, 246, 255, 0.9);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  border-color: var(--hover-border);
+  background: var(--hover-bg);
+  box-shadow: var(--active-shadow);
   outline: none;
 }
 
@@ -714,10 +821,10 @@ button.action-card.is-active {
   gap: 2px;
   min-width: 204px;
   padding: 7px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid var(--overlay-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+  background: var(--overlay-bg);
+  box-shadow: var(--overlay-shadow);
   backdrop-filter: blur(10px);
 }
 
@@ -750,7 +857,7 @@ button.action-card.is-active {
 
 .context-menu-item:hover,
 .context-menu-item:focus-visible {
-  background: rgba(37, 99, 235, 0.08);
+  background: var(--menu-hover);
   outline: none;
 }
 
@@ -771,4 +878,66 @@ button.action-card.is-active {
 
 .context-menu-item-label {
   line-height: 1.15;
+}
+
+/* A radio group keeps all three choices available to keyboard users. */
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--input-bg);
+}
+
+.theme-option {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.theme-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.theme-option span {
+  display: block;
+  padding: 6px 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.theme-option:hover span {
+  color: var(--text);
+  background: var(--menu-hover);
+}
+
+.theme-option input:checked + span {
+  border-color: var(--active-border);
+  background: var(--active-bg);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.item.is-linkable:focus-visible,
+.context-menu-item:focus-visible,
+.theme-option input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
