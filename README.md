@@ -5,7 +5,7 @@
 
   Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage.
 
-  **Version:** `v2.3`
+  **Version:** `v2.4`
 
   [中文版本](README.zh-CN.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,9 +23,9 @@
   <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="720" />
 </div>
 
-The current popup keeps the compact layout, adds manual card links and draft restoration, defaults countdowns to minute precision, and refines footer shortcuts for GitHub, the extension home, and CCFDDL.
+v2.4 keeps the compact popup and adds System / Light / Dark appearance settings, lighter startup with on-demand time-zone settings and reused date formatters, local-loading error feedback with Retry, and a regular-tab fallback through extension Options. Manual links, draft restoration, minute-level countdowns, conference metadata, and calendar exports remain available. The image above is a historical v2.0 layout preview.
 
-The source checkout also includes unreleased dark mode settings. Load the extension unpacked to try them; pushing source updates to GitHub does not update the Chrome Web Store package.
+This repository is versioned as v2.4. Load it unpacked to try the changes; pushing source updates to GitHub does not update the Chrome Web Store package. Store distribution requires a separate submission and review.
 
 ---
 
@@ -67,6 +67,8 @@ Install directly from the Chrome Web Store:
 - **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
 - **Display preferences**: Choose a display time zone, switch between `24-hour` and `12-hour`, and change date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
 - **Dark mode**: Follow system appearance by default, update immediately when it changes, or choose a fixed light or dark theme in settings.
+- **Lighter startup and recovery**: Time-zone settings initialize on demand, date formatters are reused, and failed or timed-out local reads offer Retry without clearing saved deadlines.
+- **Tab fallback**: Right-click the extension icon and choose Options to open the same tracker and saved data in a regular tab.
 - **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
 
 ---
@@ -112,16 +114,22 @@ Install directly from the Chrome Web Store:
 
 ## Troubleshooting
 
-If the toolbar popup is slow to open or **Inspect popup** also hangs on macOS, see the [popup troubleshooting guide](chrome/POPUP-TROUBLESHOOTING.md#english). It covers a Chrome restart, the temporary `PMLoadingPageVoter` launch option, and the limits of our verification. Updating this extension does not automatically enable that browser option.
+If the toolbar popup stops opening in Edge or Chrome, see the [popup troubleshooting guide](chrome/POPUP-TROUBLESHOOTING.md#english). For Chrome on macOS, update at `chrome://settings/help` and relaunch to apply the official browser fix before testing recovery after an idle period. In v2.4, right-click icon → Options opens the tracker in a regular tab. Startup optimizations reduce extension-side work, but do not guarantee a fix when the browser does not display the popup or execute its JavaScript.
 
 ## Changelog
 
 <details open>
-  <summary><strong>Unreleased</strong> - Appearance settings and popup troubleshooting</summary>
+  <summary><strong>v2.4</strong> - Appearance settings, faster startup, and popup troubleshooting</summary>
 
   - Added System (default), Light, and Dark appearance settings with local persistence
   - Applied dark colors to cards, forms, settings, search results, and calendar menus
+  - Deferred full time-zone validation and settings options, reused date formatters, and combined preferences/deadlines into one startup read
+  - Added a 3-second local-read timeout with error feedback and retry; malformed saved data is never automatically cleared
   - Documented the Chrome popup delay issue and a temporary browser launch option; this is not an extension-side fix
+  - Added a regular-tab fallback via extension Options and Edge-specific troubleshooting steps
+  - Updated Chrome/macOS recovery guidance to prioritize the official browser fix and recorded local update verification
+  - Added 11 dependency-free popup regression tests and initialization timing marks for troubleshooting
+  - Synced v2.4 copy across the website and bilingual docs, with release-version, translation, and local-link checks
 </details>
 
 <details>

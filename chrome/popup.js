@@ -2,6 +2,8 @@ const STORAGE_KEY = "deadlines";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const REFRESH_INTERVAL_MS = 60 * 1000;
 const STARTUP_CLICK_GUARD_MS = 300;
+const STORAGE_READ_TIMEOUT_MS = 3000;
+const MAX_CACHED_FORMATTERS = 128;
 const CONTEXT_MENU_MARGIN_PX = 8;
 const CALENDAR_EVENT_DURATION_MINUTES = 1;
 const TIME_FORMAT_STORAGE_KEY = "timeFormat";
@@ -114,6 +116,9 @@ const cardInfoToggle = document.getElementById("card-info-toggle");
 const cardInfoFieldInputs = Array.from(document.querySelectorAll('input[name="card-info-field"]'));
 const deadlineContextMenu = document.getElementById("deadline-context-menu");
 const contextMenuButtons = Array.from(document.querySelectorAll("[data-context-action]"));
+const popupStatus = document.getElementById("popup-status");
+const popupStatusMessage = document.getElementById("popup-status-message");
+const popupRetryBtn = document.getElementById("popup-retry");
 
 let ccfddlItems = [];
 let currentLang = "zh";
@@ -133,8 +138,12 @@ let isCcfddlLoading = false;
 let isSettingsOpen = false;
 let activeContextDeadline = null;
 const popupOpenedAt = performance.now();
-const SUPPORTED_TIME_ZONES = getSupportedTimeZones();
-const AVAILABLE_TIME_ZONES = getAvailableTimeZones();
+const timeZoneSupportCache = new Map();
+const dateTimeFormatterCache = new Map();
+let availableTimeZones = null;
+let popupInitialization = null;
+let deadlineLoadPromise = null;
+let isPopupReady = false;
 
 const translations = {
   zh: {
@@ -157,6 +166,9 @@ const translations = {
     import_section: "从 CCFDDL 导入",
     import_hint_short: "加载推荐会议并一键加入",
     loading: "加载中...",
+    popup_loading: "正在读取已保存的截止日期...",
+    popup_load_failed: "读取本地数据失败，请重试。已保存的数据不会被清空。",
+    retry: "重试",
     search_label: "搜索会议",
     search_placeholder: "例如：ICML / SIGMOD",
     import_click_hint: "点击搜索框可获取最新会议列表",
@@ -241,6 +253,9 @@ const translations = {
     import_section: "Import CCFDDL",
     import_hint_short: "Browse conferences and add them fast",
     loading: "Loading...",
+    popup_loading: "Loading saved deadlines...",
+    popup_load_failed: "Could not load local data. Retry; your saved data has not been cleared.",
+    retry: "Retry",
     search_label: "Search",
     search_placeholder: "e.g., ICML / SIGMOD",
     import_click_hint: "Click the search box to load the latest conferences",
@@ -307,31 +322,24 @@ const translations = {
   },
 };
 
-function getSupportedTimeZones() {
-  if (typeof Intl.supportedValuesOf !== "function") {
-    return new Set(STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value));
+function getDateTimeFormatter(locale, options) {
+  const key = JSON.stringify([locale, options]);
+  if (!dateTimeFormatterCache.has(key)) {
+    const formatter = new Intl.DateTimeFormat(locale, options);
+    if (dateTimeFormatterCache.size >= MAX_CACHED_FORMATTERS) {
+      dateTimeFormatterCache.delete(dateTimeFormatterCache.keys().next().value);
+    }
+    dateTimeFormatterCache.set(key, formatter);
   }
-
-  try {
-    const supported = new Set(["UTC", ...Intl.supportedValuesOf("timeZone")]);
-
-    STANDARD_TIME_ZONE_OPTIONS.forEach(({ value }) => {
-      try {
-        new Intl.DateTimeFormat("en-US", { timeZone: value }).format(new Date());
-        supported.add(value);
-      } catch (error) {
-        // Ignore zones unsupported by the current runtime.
-      }
-    });
-
-    return supported;
-  } catch (error) {
-    return new Set(STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value));
-  }
+  return dateTimeFormatterCache.get(key);
 }
 
 function getAvailableTimeZones() {
-  return STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value).filter((value) => SUPPORTED_TIME_ZONES.has(value));
+  // Only validate the full menu when settings are actually opened.
+  if (!availableTimeZones) {
+    availableTimeZones = STANDARD_TIME_ZONE_OPTIONS.map(({ value }) => value).filter(isSupportedTimeZone);
+  }
+  return availableTimeZones;
 }
 
 function t(key, fallback = "") {
@@ -345,7 +353,16 @@ function getLocale() {
 }
 
 function isSupportedTimeZone(timeZone) {
-  return SUPPORTED_TIME_ZONES.has(timeZone);
+  if (typeof timeZone !== "string" || !timeZone.trim()) return false;
+  if (!timeZoneSupportCache.has(timeZone)) {
+    try {
+      getDateTimeFormatter("en-US", { timeZone });
+      timeZoneSupportCache.set(timeZone, true);
+    } catch {
+      timeZoneSupportCache.set(timeZone, false);
+    }
+  }
+  return timeZoneSupportCache.get(timeZone);
 }
 
 function sanitizeTimeZone(timeZone) {
@@ -356,7 +373,8 @@ function sanitizeTimeZone(timeZone) {
 }
 
 function getRenderableTimeZoneOptions(selectedTimeZone) {
-  const options = STANDARD_TIME_ZONE_OPTIONS.filter(({ value }) => AVAILABLE_TIME_ZONES.includes(value));
+  const supported = getAvailableTimeZones();
+  const options = STANDARD_TIME_ZONE_OPTIONS.filter(({ value }) => supported.includes(value));
 
   if (
     selectedTimeZone &&
@@ -377,7 +395,7 @@ function getRenderableTimeZoneOptions(selectedTimeZone) {
 function getTimeZoneNamePart(locale, timeZone, timeZoneName) {
   try {
     return (
-      new Intl.DateTimeFormat(locale, {
+      getDateTimeFormatter(locale, {
         timeZone,
         hour: "2-digit",
         minute: "2-digit",
@@ -425,7 +443,7 @@ function getTimeZoneDisplayLabel(timeZone) {
 }
 
 function syncTimeZoneSelect() {
-  if (!timeZoneSelect) return;
+  if (!timeZoneSelect || !isSettingsOpen) return;
 
   const selectedTimeZone = sanitizeTimeZone(currentTimeZone);
   const renderableOptions = getRenderableTimeZoneOptions(selectedTimeZone);
@@ -465,7 +483,7 @@ function syncTimeZoneSelect() {
 }
 
 function syncTimeZoneNote() {
-  if (!timeZoneNote) return;
+  if (!timeZoneNote || !isAddFormExpanded) return;
   const renderNote = t("timezone_note", (label) => `按当前时区保存：${label}`);
   timeZoneNote.textContent = renderNote(getTimeZoneDisplayLabel(sanitizeTimeZone(currentTimeZone)));
 }
@@ -536,6 +554,7 @@ function setAddFormExpanded(expanded) {
   addPanel.hidden = !expanded;
   if (expanded) {
     setCcfddlDropdownOpen(false);
+    syncTimeZoneNote();
   }
   syncActionButtons();
 }
@@ -617,7 +636,7 @@ function formatTimeZoneAbbreviation(value) {
 }
 
 function getDateTimeParts(date, includeTimeZoneName = false) {
-  const formatter = new Intl.DateTimeFormat(getLocale(), {
+  const formatter = getDateTimeFormatter(getLocale(), {
     timeZone: sanitizeTimeZone(currentTimeZone),
     year: "numeric",
     month: "2-digit",
@@ -669,7 +688,7 @@ function addMinutes(date, minutes) {
 }
 
 function getTimeZoneDateTimeParts(date, timeZone) {
-  return new Intl.DateTimeFormat("en-CA", {
+  return getDateTimeFormatter("en-CA", {
     timeZone,
     year: "numeric",
     month: "2-digit",
@@ -903,7 +922,7 @@ function syncCardInfoFieldInputs() {
 }
 
 function getTimeZoneOffsetMinutes(timeZone, date) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  const parts = getDateTimeFormatter("en-CA", {
     timeZone,
     year: "numeric",
     month: "2-digit",
@@ -1024,6 +1043,7 @@ function splitIcsLine(line) {
 
 function setSettingsOpen(open) {
   isSettingsOpen = open;
+  if (open) syncTimeZoneSelect();
   if (settingsPanel) {
     settingsPanel.hidden = !open;
   }
@@ -1684,12 +1704,12 @@ function render(deadlines) {
   const sorted = getSortedDeadlines(deadlines);
 
   if (sorted.length === 0) {
-    emptyEl.style.display = "block";
+    emptyEl.hidden = false;
     countEl.textContent = "";
     return;
   }
 
-  emptyEl.style.display = "none";
+  emptyEl.hidden = true;
   countEl.textContent = currentLang === "zh" ? `(${sorted.length} 项)` : `(${sorted.length})`;
 
   sorted.forEach((item) => {
@@ -1771,10 +1791,63 @@ function openDeadlineLink(url) {
   openUrlInTab(normalizedUrl);
 }
 
-function loadDeadlines() {
-  chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
-    render(result[STORAGE_KEY]);
+function readLocalStorage(defaults) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (error, result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timeout = setTimeout(() => {
+      finish(new Error("Local storage read timed out"));
+    }, STORAGE_READ_TIMEOUT_MS);
+
+    try {
+      chrome.storage.local.get(defaults, (result) => {
+        // Read lastError even for a late callback to avoid an unchecked error.
+        const error = chrome.runtime.lastError;
+        finish(error ? new Error(error.message) : null, result);
+      });
+    } catch (error) {
+      finish(error);
+    }
   });
+}
+
+function validateStoredDeadlines(deadlines) {
+  if (!Array.isArray(deadlines) || deadlines.some((item) => !item || typeof item !== "object" || Array.isArray(item))) {
+    throw new Error("Saved deadlines have an invalid format");
+  }
+  return deadlines;
+}
+
+function setPopupStatus(state) {
+  popupStatus.hidden = state === "ready";
+  popupStatus.dataset.state = state;
+  popupStatusMessage.textContent = t(state === "error" ? "popup_load_failed" : "popup_loading");
+  popupRetryBtn.textContent = t("retry");
+  popupRetryBtn.hidden = state !== "error";
+}
+
+function loadDeadlines() {
+  if (!isPopupReady) return initializePopup();
+  if (deadlineLoadPromise) return deadlineLoadPromise;
+  listEl.setAttribute("aria-busy", "true");
+  setPopupStatus("loading");
+  deadlineLoadPromise = readLocalStorage({ [STORAGE_KEY]: [] }).then((result) => {
+    render(validateStoredDeadlines(result[STORAGE_KEY]));
+    setPopupStatus("ready");
+  }).catch((error) => {
+    console.error("[CCF DDL Tracker] Could not reload deadlines:", error);
+    setPopupStatus("error");
+  }).finally(() => {
+    listEl.setAttribute("aria-busy", "false");
+    deadlineLoadPromise = null;
+  });
+  return deadlineLoadPromise;
 }
 
 function animateRefreshButton() {
@@ -1855,8 +1928,19 @@ langToggle.addEventListener("click", () => {
   setLanguage(next);
 });
 
-chrome.storage.local.get(
-  {
+function initializePopup() {
+  if (isPopupReady) return Promise.resolve();
+  if (popupInitialization) return popupInitialization;
+  setPopupStatus("loading");
+  listEl.setAttribute("aria-busy", "true");
+  const controls = [addActionBtn, importActionBtn, langToggle, settingsToggle];
+  controls.forEach((control) => { control.disabled = true; });
+  performance.mark("ccf-popup-initialize");
+
+  // Preferences and deadlines share one read, so the first list render does
+  // not wait for a second storage round trip or for the background worker.
+  popupInitialization = readLocalStorage({
+    [STORAGE_KEY]: [],
     [LANG_STORAGE_KEY]: "zh",
     [TIME_FORMAT_STORAGE_KEY]: "24h",
     [DATE_ORDER_STORAGE_KEY]: "ymd",
@@ -1866,8 +1950,8 @@ chrome.storage.local.get(
     [CARD_INFO_FIELDS_STORAGE_KEY]: DEFAULT_CARD_INFO_FIELDS,
     [ACTIVE_PANEL_STORAGE_KEY]: "import",
     [ADD_FORM_DRAFT_STORAGE_KEY]: null,
-  },
-  (result) => {
+  }).then((result) => {
+    const deadlines = validateStoredDeadlines(result[STORAGE_KEY]);
     currentLang = result[LANG_STORAGE_KEY] || "zh";
     currentTimeFormat = result[TIME_FORMAT_STORAGE_KEY] || "24h";
     currentDateOrder = result[DATE_ORDER_STORAGE_KEY] || "ymd";
@@ -1881,10 +1965,24 @@ chrome.storage.local.get(
     restoreActivePanelPreference(activePanel);
     setSettingsOpen(false);
     renderCcfddlList(ccfddlItems);
-    loadDeadlines();
+    render(deadlines);
+    isPopupReady = true;
+    setPopupStatus("ready");
     startAutoRefresh();
-  }
-);
+    performance.mark("ccf-popup-ready");
+    performance.measure("ccf-popup-initialization", "ccf-popup-initialize", "ccf-popup-ready");
+  }).catch((error) => {
+    console.error("[CCF DDL Tracker] Popup initialization failed:", error);
+    setPopupStatus("error");
+  }).finally(() => {
+    controls.forEach((control) => { control.disabled = !isPopupReady; });
+    listEl.setAttribute("aria-busy", "false");
+    popupInitialization = null;
+  });
+  return popupInitialization;
+}
+
+popupRetryBtn.addEventListener("click", loadDeadlines);
 
 addActionBtn.addEventListener("click", () => {
   setSettingsOpen(false);
@@ -1971,3 +2069,7 @@ document.addEventListener("pointerdown", (event) => {
   setCcfddlDropdownOpen(false);
 });
 window.addEventListener("blur", closeDeadlineContextMenu);
+
+// Do not wait for requestAnimationFrame: a still-hidden popup may not receive
+// frames. Yield to document loading before touching storage or formatting dates.
+window.setTimeout(initializePopup, 0);

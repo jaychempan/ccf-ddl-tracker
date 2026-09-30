@@ -17,16 +17,16 @@
         <p class="subtitle" data-i18n="subtitle_en">Add and manage your deadlines in one click, and show the nearest days left</p>
         </div>
       </div>
-      <span class="version-tag" aria-label="Version 2.3">v2.3</span>
+      <span class="version-tag" aria-label="Version 2.4">v2.4</span>
     </header>
 
     <section class="action-grid">
-      <button id="show-add-panel" type="button" class="action-card" aria-pressed="false">
+      <button id="show-add-panel" type="button" class="action-card" aria-pressed="false" disabled>
         <span class="action-card-icon" aria-hidden="true">+</span>
         <span class="action-card-title" data-i18n="add_section">新增截止日期</span>
         <span class="action-card-text" data-i18n="add_hint">手动填写标题、日期和时间</span>
       </button>
-      <button id="show-import-panel" type="button" class="action-card" aria-pressed="false">
+      <button id="show-import-panel" type="button" class="action-card" aria-pressed="false" disabled>
         <span class="action-card-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20" focusable="false">
             <circle cx="8.5" cy="8.5" r="4.5" fill="none" stroke="currentColor" stroke-width="1.8" />
@@ -108,13 +108,17 @@
         </div>
       </div>
       <p class="section-hint" data-i18n="context_hint">右键条目可添加到日历</p>
-      <ul id="deadline-list"></ul>
-      <p id="empty-state" class="empty" data-i18n="empty_state">还没有添加任何截止日期</p>
+      <div id="popup-status" class="popup-status" role="status" aria-live="polite">
+        <span id="popup-status-message">正在读取已保存的截止日期...</span>
+        <button id="popup-retry" type="button" class="ghost-btn" hidden>重试</button>
+      </div>
+      <ul id="deadline-list" aria-busy="true"></ul>
+      <p id="empty-state" class="empty" data-i18n="empty_state" hidden>还没有添加任何截止日期</p>
     </section>
 
     <footer class="footer-tools">
       <div class="footer-actions">
-        <button id="lang-toggle" type="button" class="ghost-btn footer-toggle">EN</button>
+        <button id="lang-toggle" type="button" class="ghost-btn footer-toggle" disabled>EN</button>
         <button
           id="settings-toggle"
           type="button"
@@ -122,6 +126,7 @@
           data-i18n-title="settings_button"
           aria-label="设置"
           aria-expanded="false"
+          disabled
         >
           <svg viewBox="0 0 20 20" focusable="false" aria-hidden="true">
             <path

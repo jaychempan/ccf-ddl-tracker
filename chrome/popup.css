@@ -811,6 +811,31 @@ button.action-card.is-active {
   font-size: 11px;
 }
 
+.popup-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 6px 0;
+}
+
+.popup-status[data-state="error"] {
+  color: var(--danger);
+}
+
+.popup-status[hidden],
+#popup-retry[hidden],
+#empty-state[hidden] {
+  display: none;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .context-menu {
   position: fixed;
   left: 0;

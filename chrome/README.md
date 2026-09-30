@@ -1,6 +1,6 @@
 # CCF DDL Tracker (Chrome Extension)
 
-当前源码包含尚未发布的夜间模式，可按下方步骤加载体验；GitHub 更新不会自动更新商店安装包。/ This source checkout includes unreleased dark mode. Load it unpacked using the steps below; GitHub updates do not update the Web Store package.
+当前源码版本为 **v2.4**（manifest：`2.4.0`），包含夜间模式、启动优化、加载失败重试和标签页备用入口。可按下方步骤加载体验；GitHub 更新不会自动更新商店安装包，商店发布需单独提交审核。/ This source checkout is **v2.4** (manifest: `2.4.0`), with dark mode, lighter startup, loading retries, and a tab fallback. Load it unpacked below; Web Store distribution requires a separate submission and review.
 
 ## 使用方法 / Usage
 
@@ -9,9 +9,11 @@
 3. 点击“加载已解压的扩展程序”，选择本仓库的 `chrome/` 目录。/ Click “Load unpacked” and select `chrome/`.
 4. 安装完成后，点击浏览器工具栏的“CCF DDL Tracker”图标。/ Click the toolbar icon.
 
+Edge 用户可在 `edge://extensions/` 按相同步骤加载。v2.4 提供右键图标 →“选项”，在普通标签页中打开同一工具和同一份本地数据。/ In Edge, use the same steps at `edge://extensions/`. In v2.4, right-click icon → Options opens the same tracker and local data in a regular tab.
+
 ## 功能说明 / Features
 
-- **当前版本**：扩展版本已更新为 `v2.3`，弹窗右上角会显示版本标记。/ The extension is now `v2.3`, and the popup header shows the current version.
+- **当前版本**：扩展版本已更新为 `v2.4`，弹窗右上角会显示版本标记。/ The extension is now `v2.4`, and the popup header shows the current version.
 - **添加 DDL**：填写标题、日期、时间，点击“添加”。/ Add title/date/time and click “Add”.
 - **查看详情**：弹窗中会按时间排序展示多个 DDL，并显示剩余天数。/ Sorted list with remaining days.
 - **徽标提示**：工具栏图标会显示最近一个 DDL 的剩余天数。/ Badge shows the nearest days left.
@@ -56,6 +58,25 @@ Note: Imports prefer GitHub repository data and fall back to the CCFDDL ICS feed
 
 ## 弹窗卡顿 / Popup troubleshooting
 
-macOS 上点击图标无反应或“审查弹出内容”打不开时，请查看[排查指南](POPUP-TROUBLESHOOTING.md#中文)。其中的 `PMLoadingPageVoter` 是 Chrome 启动参数，扩展无法自行启用；本次验证表明普通重启也能恢复，尚不能认定永久修复。
+v2.4 将时区设置改为按需初始化，复用日期格式器，并一次读取首屏所需的本地数据。读取超过 3 秒或失败时显示重试入口，不会自动清空截止日期。升级本地源码后，需要重新加载已解压的扩展程序才会生效；商店版本不会随源码修改自动更新。
 
-If the popup or **Inspect popup** hangs on macOS, see the [troubleshooting guide](POPUP-TROUBLESHOOTING.md#english). `PMLoadingPageVoter` is a Chrome launch option that the extension cannot enable itself. A normal restart also restored the popup in our test, so a permanent fix has not been established.
+v2.4 initializes time-zone settings on demand, reuses date formatters, and reads first-view data in one local-storage call. A read failure or 3-second timeout offers Retry without clearing saved deadlines. Reload an unpacked extension to apply source changes; the store build does not update automatically.
+
+回归测试 / Regression tests (Node.js, no dependencies):
+
+```sh
+node chrome/tests/popup.test.mjs
+node chrome/tests/release.test.mjs
+```
+
+弹窗开发者工具的 Console 中可查看初始化计时 / In the popup DevTools Console, inspect initialization timings:
+
+```js
+performance.getEntriesByName("ccf-popup-initialization").map(({ duration }) => ({ initializationMs: Math.round(duration) }))
+```
+
+该计时从扩展开始初始化到首屏数据渲染结束，不包含点击图标后 Chrome 尚未执行弹窗脚本的等待；超时提示也需要 JavaScript 能运行。/ This measures extension initialization through the first data render, not the wait before Chrome starts executing popup JavaScript. The timeout UI also requires JavaScript to be running.
+
+Edge 或 Chrome 点击图标无反应时，请查看[排查指南](POPUP-TROUBLESHOOTING.md#中文)。macOS 上的 Chrome 已有浏览器官方修复，优先在 `chrome://settings/help` 更新并重新启动，再测试闲置后的首次点击。指南同时提供标签页备用入口和错误收集步骤。
+
+If the popup stops opening in Edge or Chrome, see the [troubleshooting guide](POPUP-TROUBLESHOOTING.md#english). For Chrome on macOS, first apply the official browser fix by updating at `chrome://settings/help` and relaunching, then test the first click after an idle period. The guide also covers the tab fallback and error collection.
