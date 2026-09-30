@@ -63,6 +63,7 @@ Install directly from the Chrome Web Store:
 - **Native popup experience**: Clicking the extension icon opens a compact Chrome popup instead of a separate window.
 - **Manual + imported deadlines**: You can add custom deadlines or import recommended conferences from CCFDDL.
 - **Official site shortcuts**: Imported conferences retain homepage links, and added cards can open the conference website directly.
+- **Conference tags**: My DDLs shows available CCF rank and category tags by default, with optional CORE, TH-CPL, and place fields in settings. Loading recommendations fills missing tags on matching older entries.
 - **Calendar handoff**: Right-click saved or imported cards to send a deadline to Google Calendar or download ICS for Apple/iCloud and other calendar apps.
 - **Bilingual UI**: Switch between Chinese and English from the bottom toolbar.
 - **Display preferences**: Choose a display time zone, switch between `24-hour` and `12-hour`, and change date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
@@ -80,6 +81,7 @@ Install directly from the Chrome Web Store:
 - **Time zone**: Switch deadline display between supported time zones. The default is `Asia/Shanghai`.
 - **Time format**: Choose `24-hour` or `12-hour (AM/PM)` in the settings panel.
 - **Date order**: Choose `YYYY/MM/DD` or `MM/DD/YYYY`.
+- **Conference tags**: Use Settings → Conference Tags to toggle visibility and choose fields. Saved opt-outs are preserved. For older entries with missing tags, click the import search field to load recommendations; only unique matches by conference title and deadline are filled.
 - **Calendar actions**: Right-click a saved or imported deadline card to open the calendar menu.
 - **Imported conference cards**: Imported items can be added to your own list and opened directly on the conference website.
 

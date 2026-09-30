@@ -127,7 +127,7 @@ let currentTimeFormat = "24h";
 let currentDateOrder = "ymd";
 let currentTimeZone = DEFAULT_TIME_ZONE;
 let isPreciseCountdownEnabled = true;
-let isCardInfoEnabled = false;
+let isCardInfoEnabled = true;
 let currentCardInfoFields = { ...DEFAULT_CARD_INFO_FIELDS };
 let refreshTimer = null;
 let refreshButtonAnimationTimer = null;
@@ -197,8 +197,8 @@ const translations = {
     date_order_mdy: "月日年",
     countdown_label: "倒计时显示",
     countdown_precise: "显示小时和分钟",
-    card_info_label: "卡片信息",
-    card_info_show: "在已保存卡片中显示分类和等级",
+    card_info_label: "会议标签",
+    card_info_show: "在我的截止日期中显示会议标签",
     card_info_field_ccf: "CCF 等级",
     card_info_field_sub: "CCF 分类",
     card_info_field_core: "CORE 等级",
@@ -284,8 +284,8 @@ const translations = {
     date_order_mdy: "Month / Day / Year",
     countdown_label: "Countdown Display",
     countdown_precise: "Show hours and minutes",
-    card_info_label: "Card Info",
-    card_info_show: "Show category and ranking on saved cards",
+    card_info_label: "Conference Tags",
+    card_info_show: "Show conference tags in My DDLs",
     card_info_field_ccf: "CCF rank",
     card_info_field_sub: "CCF category",
     card_info_field_core: "CORE rank",
@@ -1568,7 +1568,7 @@ function filterCcfddlList() {
   renderCcfddlList(filtered);
 }
 
-function applyLoadedCcfddlItems(items) {
+async function applyLoadedCcfddlItems(items) {
   if (items.length === 0) {
     if (ccfddlItems.length === 0) {
       ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里");
@@ -1580,6 +1580,61 @@ function applyLoadedCcfddlItems(items) {
   ccfddlItems = items;
   ccfddlEmpty.textContent = t("import_empty", "推荐会议会显示在这里");
   filterCcfddlList();
+  await backfillSavedConferenceTags(items);
+}
+
+function mergeConferenceTags(item, source) {
+  const merged = { ...item };
+  let changed = false;
+  for (const field of ["sub", "place"]) {
+    if (!item[field] && source[field]) {
+      merged[field] = source[field];
+      changed = true;
+    }
+  }
+  const rank = { ...item.rank };
+  for (const field of ["ccf", "core", "thcpl"]) {
+    if (!rank[field] && source.rank?.[field]) {
+      rank[field] = source.rank[field];
+      merged.rank = rank;
+      changed = true;
+    }
+  }
+  return changed ? merged : item;
+}
+
+function getConferenceTagMatchKey(item) {
+  const timestamp = toTimestamp(item.datetime);
+  if (timestamp === null || typeof item.title !== "string") return null;
+  // Older ICS imports omit the year. Keep stage suffixes such as (abstract)
+  // and require the same deadline so different conference rounds stay separate.
+  const title = item.title.replace(/\b(?:19|20)\d{2}\b/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+  return title ? JSON.stringify([title, timestamp]) : null;
+}
+
+async function backfillSavedConferenceTags(items) {
+  const sources = new Map();
+  for (const item of items) {
+    const key = getConferenceTagMatchKey(item);
+    if (key === null || getConferenceBadges(item).length === 0) continue;
+    // Skip ambiguous matches rather than copying metadata from another edition.
+    sources.set(key, sources.has(key) ? null : item);
+  }
+  if (sources.size === 0) return;
+
+  try {
+    const result = await readLocalStorage({ [STORAGE_KEY]: [] });
+    const existing = validateStoredDeadlines(result[STORAGE_KEY]);
+    const updated = existing.map((item) => {
+      const source = sources.get(getConferenceTagMatchKey(item));
+      return source ? mergeConferenceTags(item, source) : item;
+    });
+    if (updated.some((item, index) => item !== existing[index])) {
+      saveDeadlines(updated);
+    }
+  } catch (error) {
+    console.error("[CCF DDL Tracker] Could not fill saved conference tags:", error);
+  }
 }
 
 function addImportedDeadline(item) {
@@ -1591,12 +1646,9 @@ function addImportedDeadline(item) {
     if (matchIndex >= 0) {
       const matchedItem = existing[matchIndex];
       const mergedItem = {
-        ...matchedItem,
+        ...mergeConferenceTags(matchedItem, item),
         url: matchedItem.url || item.url || "",
         description: matchedItem.description || item.description || "",
-        sub: matchedItem.sub || item.sub || "",
-        rank: Object.keys(matchedItem.rank || {}).length > 0 ? matchedItem.rank : item.rank || {},
-        place: matchedItem.place || item.place || "",
       };
       if (JSON.stringify(mergedItem) === JSON.stringify(matchedItem)) return;
       const updated = [...existing];
@@ -1634,7 +1686,7 @@ async function loadCcfddlData() {
       const parsedItems = mergeCcfddlItems(parseAllConfYaml(repoText))
         .filter((item) => toTimestamp(item.datetime) >= now)
         .sort((a, b) => toTimestamp(a.datetime) - toTimestamp(b.datetime));
-      applyLoadedCcfddlItems(parsedItems);
+      await applyLoadedCcfddlItems(parsedItems);
       return;
     }
 
@@ -1649,7 +1701,7 @@ async function loadCcfddlData() {
     const parsedItems = mergeCcfddlItems(texts.flatMap((text) => parseIcs(text)))
       .filter((item) => toTimestamp(item.datetime) >= now)
       .sort((a, b) => toTimestamp(a.datetime) - toTimestamp(b.datetime));
-    applyLoadedCcfddlItems(parsedItems);
+    await applyLoadedCcfddlItems(parsedItems);
   } catch (error) {
     if (ccfddlItems.length === 0) {
       ccfddlEmpty.textContent = t("load_failed", "加载失败，请稍后重试");
@@ -1946,7 +1998,7 @@ function initializePopup() {
     [DATE_ORDER_STORAGE_KEY]: "ymd",
     [TIMEZONE_STORAGE_KEY]: DEFAULT_TIME_ZONE,
     [PRECISE_COUNTDOWN_STORAGE_KEY]: true,
-    [CARD_INFO_STORAGE_KEY]: false,
+    [CARD_INFO_STORAGE_KEY]: true,
     [CARD_INFO_FIELDS_STORAGE_KEY]: DEFAULT_CARD_INFO_FIELDS,
     [ACTIVE_PANEL_STORAGE_KEY]: "import",
     [ADD_FORM_DRAFT_STORAGE_KEY]: null,

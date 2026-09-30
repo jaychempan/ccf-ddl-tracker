@@ -190,6 +190,92 @@ export async function runPopupTests() {
     assert.ok(h.evaluate("dateTimeFormatterCache.size <= MAX_CACHED_FORMATTERS"));
   });
 
+  const tagged = {
+    title: "CVPR 2027", datetime: "2026-11-17T11:59:00.000Z",
+    sub: "AI", rank: { ccf: "A", core: "A*", thcpl: "A" }, place: "Example City",
+  };
+  const savedBadges = (h, index = 0) => h.getElement("deadline-list").children[index]
+    .children.find((child) => child.className === "item-badges")?.children.map((child) => child.textContent) || [];
+
+  await check("saved conference tags appear by default without adding startup reads", async () => {
+    const h = createPopupHarness(source, { deadlines: [tagged, sample] });
+    await h.runTimers(0);
+    assert.equal(h.getElement("card-info-toggle").checked, true);
+    assert.deepEqual(savedBadges(h, 1), ["CCF A", "AI · 人工智能"]);
+    assert.deepEqual(savedBadges(h), []);
+    assert.equal(h.state.reads.length, 1);
+    assert.equal(h.state.writes.length, 0);
+  });
+
+  await check("saved tag opt-outs and field choices survive and labels follow language", async () => {
+    const h = createPopupHarness(source, {
+      deadlines: [tagged], language: "en", cardInfo: false,
+      cardInfoFields: { ccf: false, sub: true, core: true, thcpl: false, place: true },
+    });
+    await h.runTimers(0);
+    assert.equal(h.getElement("card-info-toggle").checked, false);
+    assert.deepEqual(savedBadges(h), []);
+    h.evaluate("setCardInfo(true)");
+    await h.settle();
+    assert.deepEqual(savedBadges(h), ["AI · Artificial Intelligence", "CORE A*", "Example City"]);
+    assert.equal(h.state.data.cardInfo, true);
+    h.evaluate('setCardInfoFields({ ccf: true, sub: false, core: false, thcpl: true, place: false })');
+    await h.settle();
+    assert.deepEqual(savedBadges(h), ["CCF A", "TH-CPL A"]);
+    const reopened = createPopupHarness(source, h.state.data);
+    await reopened.runTimers(0);
+    assert.deepEqual(savedBadges(reopened), ["CCF A", "TH-CPL A"]);
+  });
+
+  await check("loading recommendations fills older ICS tags while preserving saved fields", async () => {
+    const paper = { title: "CVPR", datetime: tagged.datetime, rank: { core: "Local" }, url: "https://example.com/saved" };
+    const abstract = { title: "CVPR (abstract)", datetime: "2026-11-11T11:59:00.000Z" };
+    const unrelated = { title: "Different Conference", datetime: tagged.datetime };
+    const otherRound = { title: "CVPR", datetime: "2026-11-18T11:59:00.000Z" };
+    const h = createPopupHarness(source, { deadlines: [paper, abstract, unrelated, otherRound] });
+    await h.runTimers(0);
+    const yaml = `- title: CVPR
+  sub: AI
+  rank:
+    ccf: A
+    core: A*
+  confs:
+    - year: 2027
+      timezone: UTC-12
+      place: Example City
+      timeline:
+        - abstract_deadline: '2026-11-10 23:59:00'
+        - deadline: '2026-11-16 23:59:00'
+`;
+    await h.evaluate(`applyLoadedCcfddlItems(parseAllConfYaml(${JSON.stringify(yaml)}))`);
+    const [savedPaper, savedAbstract, savedUnrelated, savedOtherRound] = JSON.parse(JSON.stringify(h.state.data.deadlines));
+    assert.deepEqual(savedPaper, { ...paper, sub: "AI", rank: { core: "Local", ccf: "A" }, place: "Example City" });
+    assert.deepEqual(savedAbstract, { ...abstract, sub: "AI", rank: { ccf: "A", core: "A*" }, place: "Example City" });
+    assert.deepEqual(savedUnrelated, unrelated);
+    assert.deepEqual(savedOtherRound, otherRound);
+    assert.deepEqual(savedBadges(h), ["CCF A", "AI · 人工智能"]);
+    assert.equal(h.state.writes.length, 1);
+    await h.evaluate(`applyLoadedCcfddlItems(parseAllConfYaml(${JSON.stringify(yaml)}))`);
+    assert.equal(h.state.writes.length, 1, "complete tags do not trigger another write");
+  });
+
+  await check("ambiguous recommendations and failed reads never change saved deadlines", async () => {
+    const h = createPopupHarness(source, { deadlines: [{ title: "CVPR", datetime: tagged.datetime }] });
+    await h.runTimers(0);
+    await h.evaluate(`applyLoadedCcfddlItems(${JSON.stringify([tagged, { ...tagged, title: "CVPR", sub: "CG" }])})`);
+    assert.equal(h.state.writes.length, 0);
+    assert.deepEqual(savedBadges(h), []);
+    h.state.behavior = "error";
+    await h.evaluate(`applyLoadedCcfddlItems(${JSON.stringify([tagged])})`);
+    assert.equal(h.state.writes.length, 0);
+    assert.equal(h.state.errors.length, 1);
+    h.state.behavior = "ok";
+    h.state.data.deadlines = "invalid";
+    await h.evaluate(`applyLoadedCcfddlItems(${JSON.stringify([tagged])})`);
+    assert.equal(h.state.writes.length, 0);
+    assert.equal(h.state.data.deadlines, "invalid");
+  });
+
   await check("language, date/time preferences, custom zones and drafts survive", async () => {
     const h = createPopupHarness(source, {
       deadlines: [sample], language: "en", timeFormat: "12h", dateOrder: "mdy",

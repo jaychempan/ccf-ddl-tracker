@@ -16,6 +16,7 @@ Edge 用户可在 `edge://extensions/` 按相同步骤加载。v2.4 提供右键
 - **当前版本**：扩展版本已更新为 `v2.4`，弹窗右上角会显示版本标记。/ The extension is now `v2.4`, and the popup header shows the current version.
 - **添加 DDL**：填写标题、日期、时间，点击“添加”。/ Add title/date/time and click “Add”.
 - **查看详情**：弹窗中会按时间排序展示多个 DDL，并显示剩余天数。/ Sorted list with remaining days.
+- **会议标签**：“我的截止日期”默认显示已有的 CCF 等级和分类，可在设置 → 会议标签中开关显示或选择 CORE、TH-CPL、地点。此前关闭显示的选择会保留。旧条目缺少标签时，点击导入区搜索框加载推荐会议，会补全标题与截止时间唯一匹配的条目。/ My DDLs shows available CCF rank and category tags by default. Settings → Conference Tags controls visibility and optional CORE, TH-CPL, and place fields; saved opt-outs are preserved. Loading recommendations via the import search field fills missing tags only for unique title-and-deadline matches.
 - **徽标提示**：工具栏图标会显示最近一个 DDL 的剩余天数。/ Badge shows the nearest days left.
 - **删除 DDL**：在条目右侧点击“删除”。/ Delete from the list.
 - **右键日历菜单**：在已保存或导入的条目上右键，可添加到 Google Calendar，或导出适用于 Apple / iCloud 的 `.ics` 文件。/ Right-click any saved or imported item to add it to Google Calendar or export an Apple / iCloud compatible `.ics` file.
