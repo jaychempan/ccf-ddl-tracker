@@ -48,6 +48,16 @@ for (const path of pages) {
   assert.ok(page, `${path}: page identifier`);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, `${path}: unique DOM IDs`);
+  if (page === "home") {
+    const slides = [...html.matchAll(/<article[^>]*\bid="([^"]+)"[^>]*\bdata-preview-slide/g)].map((match) => match[1]);
+    const tabs = [...html.matchAll(/data-preview-target="(\d+)"\s+aria-controls="([^"]+)"/g)];
+    assert.equal(slides[0], `preview-v${major}${minor}`, "current release is the first preview");
+    assert.equal(tabs.length, slides.length, "each preview has a navigation dot");
+    tabs.forEach(([, index, target], position) => {
+      assert.equal(Number(index), position, "preview dots use consecutive indexes");
+      assert.equal(target, slides[position], "preview dot targets its matching slide");
+    });
+  }
   for (const language of ["en", "zh"]) {
     const messages = { ...translations[language].common, ...translations[language].pages[page] };
     for (const [, key] of html.matchAll(/\bdata-i18n(?:-html|-alt|-content|-aria-label)?="([^"]+)"/g)) {

@@ -20,10 +20,10 @@
 ## Preview
 
 <div align="center">
-  <img src="assets/previewv2.0.png" alt="CCF DDL Tracker v2.0 Preview" width="720" />
+  <img src="website/previewv2.4.svg" alt="CCF DDL Tracker v2.4 light and dark appearance illustration" width="720" />
 </div>
 
-v2.4 keeps the compact popup and adds System / Light / Dark appearance settings, lighter startup with on-demand time-zone settings and reused date formatters, local-loading error feedback with Retry, and a regular-tab fallback through extension Options. Manual links, draft restoration, minute-level countdowns, conference metadata, and calendar exports remain available. The image above is a historical v2.0 layout preview.
+v2.4 keeps the compact popup and adds System / Light / Dark appearance settings, lighter startup with on-demand time-zone settings and reused date formatters, local-loading error feedback with Retry, and a regular-tab fallback through extension Options. Manual links, draft restoration, minute-level countdowns, conference metadata, and calendar exports remain available. The illustration above uses example data, not live conference deadlines.
 
 This repository is versioned as v2.4. Load it unpacked to try the changes; pushing source updates to GitHub does not update the Chrome Web Store package. Store distribution requires a separate submission and review.
 

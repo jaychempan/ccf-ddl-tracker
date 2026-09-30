@@ -101,6 +101,26 @@
 
         <section class="preview-showcase">
             <div class="preview-scroller" data-preview-scroller>
+                <article class="preview-panel" id="preview-v24" data-preview-slide>
+                    <div class="preview-copy">
+                        <span class="eyebrow" data-i18n="home.preview.v24.eyebrow">Version 2.4</span>
+                        <h3 data-i18n="home.preview.v24.title">Your deadlines, in light or dark</h3>
+                        <p data-i18n="home.preview.v24.body">
+                            Follow your system appearance or choose Light or Dark. v2.4 reduces popup startup
+                            work, initializes time-zone settings only when needed, and offers Retry if local
+                            data loading fails, without clearing your saved deadlines.
+                        </p>
+                    </div>
+                    <img
+                        src="./previewv2.4.svg"
+                        alt="Illustration of CCF DDL Tracker v2.4 light and dark appearance with theme settings and a loading retry option"
+                        width="1040"
+                        height="800"
+                        fetchpriority="high"
+                        data-i18n-alt="home.preview.v24.imageAlt"
+                    >
+                </article>
+
                 <article class="preview-panel" id="preview-v23" data-preview-slide>
                     <div class="preview-copy">
                         <span class="eyebrow" data-i18n="home.preview.eyebrow">v2.3 layout preview</span>
@@ -115,6 +135,7 @@
                         alt="Preview of the CCF DDL Tracker v2.3 popup"
                         width="3180"
                         height="2475"
+                        loading="lazy"
                         data-i18n-alt="home.preview.imageAlt"
                     >
                 </article>
@@ -178,10 +199,11 @@
             </div>
 
             <div class="preview-dots" role="group" aria-label="Choose a release preview" data-i18n-aria-label="home.preview.tabsLabel">
-                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v23" aria-pressed="true" aria-label="v2.3" title="v2.3"></button>
-                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v22" aria-pressed="false" aria-label="v2.2" title="v2.2"></button>
-                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
-                <button class="preview-dot" type="button" data-preview-target="3" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
+                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v24" aria-pressed="true" aria-label="v2.4" title="v2.4"></button>
+                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v23" aria-pressed="false" aria-label="v2.3" title="v2.3"></button>
+                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v22" aria-pressed="false" aria-label="v2.2" title="v2.2"></button>
+                <button class="preview-dot" type="button" data-preview-target="3" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
+                <button class="preview-dot" type="button" data-preview-target="4" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
             </div>
         </section>
 
