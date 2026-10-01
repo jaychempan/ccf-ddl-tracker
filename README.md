@@ -5,7 +5,7 @@
 
   Chrome extension for tracking CCF deadlines with a compact popup, import flow, and local-only storage.
 
-  **Version:** `v2.4`
+  **Version:** `v2.5`
 
   [中文版本](README.zh-CN.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -20,12 +20,12 @@
 ## Preview
 
 <div align="center">
-  <img src="website/previewv2.4.svg" alt="CCF DDL Tracker v2.4 light and dark appearance illustration" width="720" />
+  <img src="website/previewv2.5.svg" alt="CCF DDL Tracker v2.5 light and dark appearance illustration" width="720" />
 </div>
 
-v2.4 keeps the compact popup and adds System / Light / Dark appearance settings, lighter startup with on-demand time-zone settings and reused date formatters, local-loading error feedback with Retry, and a regular-tab fallback through extension Options. Manual links, draft restoration, minute-level countdowns, conference metadata, and calendar exports remain available. The illustration above uses example data, not live conference deadlines.
+v2.5 schedules badge updates when the day count changes or a deadline expires, defers theme loading without synchronous Web Storage, and loads conference parsers only when needed. A smaller header image and deferred parsing reduce first-view files from about 203 KB to 109 KB. Conference search uses HTTPS with independent calendar fallbacks and request timeouts. The original toolbar clock, appearance settings, and calendar exports remain available. The illustration above uses example data, not live conference deadlines.
 
-This repository is versioned as v2.4. Load it unpacked to try the changes; pushing source updates to GitHub does not update the Chrome Web Store package. Store distribution requires a separate submission and review.
+This repository is versioned as v2.5 (manifest: `2.5.0`). Load it unpacked to try the changes; pushing source updates to GitHub does not update the Chrome Web Store package. Store distribution requires a separate submission and review.
 
 ---
 
@@ -69,6 +69,8 @@ Install directly from the Chrome Web Store:
 - **Display preferences**: Choose a display time zone, switch between `24-hour` and `12-hour`, and change date order between `YYYY/MM/DD` and `MM/DD/YYYY`.
 - **Dark mode**: Follow system appearance by default, update immediately when it changes, or choose a fixed light or dark theme in settings.
 - **Lighter startup and recovery**: Time-zone settings initialize on demand, date formatters are reused, and failed or timed-out local reads offer Retry without clearing saved deadlines.
+- **Less background work**: The badge updates when its day count changes, when a deadline expires, and immediately after deadline edits. No deadline alarm is scheduled without upcoming items.
+- **Reliable conference loading**: Direct HTTPS imports fall back to either working Chinese or English ICS feed, with 10-second request timeouts.
 - **Tab fallback**: Right-click the extension icon and choose Options to open the same tracker and saved data in a regular tab.
 - **Local-only data**: All data stays in `chrome.storage.local`, with no account or cloud sync.
 
@@ -98,8 +100,8 @@ Install directly from the Chrome Web Store:
 
 ## Data Source & Privacy
 
-- **Primary source**: [`ccfddl/ccf-deadlines`](https://github.com/ccfddl/ccf-deadlines)
-- **Fallback**: CCFDDL ICS feeds when GitHub data is unavailable
+- **Primary source**: [CCFDDL HTTPS YAML](https://ccfddl.com/conference/allconf.yml), maintained by [`ccfddl/ccf-deadlines`](https://github.com/ccfddl/ccf-deadlines)
+- **Fallback**: Chinese and English CCFDDL ICS feeds; either working feed can recover a failed YAML request
 - **Storage**: `chrome.storage.local`
 - **Privacy**: no account, no cloud sync, no telemetry
 
@@ -121,6 +123,19 @@ If the toolbar popup stops opening in Edge or Chrome, see the [popup troubleshoo
 ## Changelog
 
 <details open>
+  <summary><strong>v2.5</strong> - Badge scheduling, smaller first view, and conference search recovery</summary>
+
+  - Replaced one-minute badge polling with one-shot updates at day-count changes or deadline expiration, while deadline edits update immediately
+  - Added alarm recovery, a 3-second background-read timeout, 5-minute failure retries, and protection against stale asynchronous updates
+  - Preserved the original toolbar clock assets and drawing style
+  - Deferred the theme script and removed synchronous Web Storage caching; saved themes load asynchronously using system colors while pending
+  - Loaded YAML/ICS parsers on demand and resized the popup header image for its 28-pixel display, reducing first-view files by about 46% (203 KB to 109 KB)
+  - Fixed conference imports to use direct HTTPS, recover from either calendar feed, and time out stalled requests and response bodies after 10 seconds
+  - Skipped periodic local reads in hidden pages and expanded startup diagnostics; long-running browser popup failures still need validation
+  - Expanded regression coverage to 26 popup, 24 background, and 4 theme scenarios, plus release consistency checks
+</details>
+
+<details>
   <summary><strong>v2.4</strong> - Appearance settings, faster startup, and popup troubleshooting</summary>
 
   - Added System (default), Light, and Dark appearance settings with local persistence

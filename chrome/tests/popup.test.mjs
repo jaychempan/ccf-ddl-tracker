@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 const source = await readFile(new URL("../popup.js", import.meta.url), "utf8");
+const parserSource = await readFile(new URL("../conference-parser.js", import.meta.url), "utf8");
 
 class Element {
   constructor(tagName = "div") {
@@ -26,8 +27,18 @@ class Element {
   get options() {
     return this.children.flatMap((child) => child.tagName === "optgroup" ? child.children : [child]);
   }
-  append(...children) { this.children.push(...children); }
+  append(...children) {
+    for (const child of children) {
+      child.parentElement = this;
+      this.children.push(child);
+    }
+  }
   appendChild(child) { this.append(child); return child; }
+  remove() {
+    if (!this.parentElement) return;
+    this.parentElement.children = this.parentElement.children.filter((child) => child !== this);
+    this.parentElement = null;
+  }
   setAttribute(key, value) { this.attributes[key] = value; }
   getAttribute(key) { return this.attributes[key] ?? null; }
   addEventListener(name, listener) {
@@ -58,17 +69,22 @@ export function createPopupHarness(script = source, data = {}) {
   }
   const document = new Element();
   document.documentElement = new Element("html");
+  document.head = new Element("head");
   document.getElementById = getElement;
   document.createElement = (tag) => new Element(tag);
   document.hidden = false;
   const timers = new Map();
   let nextTimer = 1;
-  const state = { data, behavior: "ok", reads: [], writes: [], errors: [], formatters: 0, lastErrorReads: 0 };
+  const state = { data, behavior: "ok", parserBehavior: "ok", scriptLoads: [], scripts: [], reads: [], writes: [], errors: [], warnings: [], frameCallbacks: [], formatters: 0, lastErrorReads: 0 };
   const runtime = {
     error: null,
     get lastError() { state.lastErrorReads += 1; return this.error; },
   };
   const window = new Element();
+  window.requestAnimationFrame = (callback) => {
+    state.frameCallbacks.push(callback);
+    return state.frameCallbacks.length;
+  };
   const setTimeout = (callback, delay) => {
     const id = nextTimer++;
     timers.set(id, { callback, delay });
@@ -80,13 +96,17 @@ export function createPopupHarness(script = source, data = {}) {
     document,
     window,
     performance: { now: () => 1000, mark() {}, measure: (name) => performanceEntries.push(name) },
-    console: { error: (...args) => state.errors.push(args) },
+    console: {
+      error: (...args) => state.errors.push(args),
+      warn: (...args) => state.warnings.push(args),
+    },
     setTimeout,
     clearTimeout: (id) => timers.delete(id),
     setInterval: () => nextTimer++,
     clearInterval() {},
     URL,
     URLSearchParams,
+    AbortController,
     fetch: () => { throw new Error("Popup startup must not fetch network data"); },
     Intl: {
       supportedValuesOf: Intl.supportedValuesOf?.bind(Intl),
@@ -121,10 +141,35 @@ export function createPopupHarness(script = source, data = {}) {
       },
     },
   });
+  const completeParserLoad = (index = state.scripts.length - 1) => {
+    const script = state.scripts[index];
+    vm.runInContext(parserSource, context, { filename: "conference-parser.js" });
+    script.onload?.();
+  };
+  const appendHeadChild = document.head.appendChild.bind(document.head);
+  document.head.appendChild = (script) => {
+    appendHeadChild(script);
+    state.scriptLoads.push(script.src);
+    state.scripts.push(script);
+    const behavior = state.parserBehavior;
+    if (behavior !== "hang") {
+      queueMicrotask(() => {
+        if (behavior === "error") script.onerror?.();
+        else if (behavior === "invalid") script.onload?.();
+        else completeParserLoad(state.scripts.indexOf(script));
+      });
+    }
+    return script;
+  };
   vm.runInContext(script, context, { filename: "popup.js" });
-  const settle = async () => { for (let i = 0; i < 12; i += 1) await Promise.resolve(); };
+  // Drain promise jobs before advancing the fake clock, including script load
+  // and fetch/body-read chains whose depth changes as features are extracted.
+  const settle = async () => { await new Promise((resolve) => setImmediate(resolve)); };
   return {
-    state, getElement, runtime, performanceEntries, context, settle,
+    state, getElement, runtime, performanceEntries, context, settle, completeParserLoad,
+    async loadParser() {
+      await vm.runInContext("loadConferenceParser()", context);
+    },
     evaluate: (code) => vm.runInContext(code, context),
     async runTimers(delay) {
       for (const [id, timer] of [...timers]) {
@@ -155,13 +200,17 @@ export async function runPopupTests() {
     assert.equal(h.state.reads.length, 1);
     assert.ok("deadlines" in h.state.reads[0].defaults);
     assert.ok("language" in h.state.reads[0].defaults);
+    assert.deepEqual(h.state.scriptLoads, []);
+    assert.equal(h.evaluate("typeof parseAllConfYaml"), "undefined");
     assert.equal(h.getElement("show-add-panel").disabled, false);
     assert.equal(h.getElement("popup-status").hidden, true);
     assert.equal(h.getElement("empty-state").hidden, false);
     assert.equal(h.getElement("deadline-list").attributes["aria-busy"], "false");
     assert.equal(h.getElement("timezone-select").options.length, 0);
     assert.ok(h.state.formatters <= 1);
-    assert.deepEqual(h.performanceEntries, ["ccf-popup-initialization"]);
+    assert.deepEqual(h.performanceEntries, [
+      "ccf-popup-document-to-script", "ccf-popup-storage-read", "ccf-popup-initialization",
+    ]);
   });
 
   await check("an early refresh and the startup timer cannot initialize twice", async () => {
@@ -172,7 +221,7 @@ export async function runPopupTests() {
     await h.runTimers(0);
     assert.equal(h.state.reads.length, 1);
     assert.equal(h.getElement("deadline-list").children.length, 1);
-    assert.equal(h.performanceEntries.length, 1);
+    assert.equal(h.performanceEntries.filter((name) => name === "ccf-popup-initialization").length, 1);
   });
 
   await check("100 deadlines share formatters and settings initialize lazily", async () => {
@@ -190,6 +239,20 @@ export async function runPopupTests() {
     assert.ok(h.evaluate("dateTimeFormatterCache.size <= MAX_CACHED_FORMATTERS"));
   });
 
+  await check("a hidden popup becomes ready without waiting for an animation frame", async () => {
+    const h = createPopupHarness(source, { deadlines: [sample] });
+    h.context.document.hidden = true;
+    await h.runTimers(0);
+    assert.equal(h.getElement("popup-status").hidden, true);
+    assert.equal(h.getElement("show-add-panel").disabled, false);
+    assert.equal(h.state.frameCallbacks.length, 1);
+    assert.ok(h.performanceEntries.includes("ccf-popup-document-to-script"));
+    assert.ok(h.performanceEntries.includes("ccf-popup-storage-read"));
+    assert.ok(!h.performanceEntries.includes("ccf-popup-ready-to-frame"));
+    h.state.frameCallbacks[0]();
+    assert.ok(h.performanceEntries.includes("ccf-popup-ready-to-frame"));
+  });
+
   const tagged = {
     title: "CVPR 2027", datetime: "2026-11-17T11:59:00.000Z",
     sub: "AI", rank: { ccf: "A", core: "A*", thcpl: "A" }, place: "Example City",
@@ -205,6 +268,7 @@ export async function runPopupTests() {
     assert.deepEqual(savedBadges(h), []);
     assert.equal(h.state.reads.length, 1);
     assert.equal(h.state.writes.length, 0);
+    assert.deepEqual(h.state.scriptLoads, []);
   });
 
   await check("saved tag opt-outs and field choices survive and labels follow language", async () => {
@@ -234,6 +298,7 @@ export async function runPopupTests() {
     const otherRound = { title: "CVPR", datetime: "2026-11-18T11:59:00.000Z" };
     const h = createPopupHarness(source, { deadlines: [paper, abstract, unrelated, otherRound] });
     await h.runTimers(0);
+    await h.loadParser();
     const yaml = `- title: CVPR
   sub: AI
   rank:
@@ -363,6 +428,215 @@ export async function runPopupTests() {
     h.state.behavior = "ok";
     await h.evaluate("loadDeadlines()");
     assert.equal(h.getElement("popup-status").hidden, true);
+  });
+
+  const primaryUrl = "https://ccfddl.com/conference/allconf.yml";
+  const zhUrl = "https://ccfddl.com/conference/deadlines_zh.ics";
+  const enUrl = "https://ccfddl.com/conference/deadlines_en.ics";
+  const calendar = `BEGIN:VCALENDAR
+BEGIN:VEVENT
+SUMMARY:Upcoming Conference
+DTSTART:20990101T235959Z
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Expired Conference
+DTSTART:20000101T235959Z
+END:VEVENT
+END:VCALENDAR`;
+  const ok = (body) => ({ ok: true, status: 200, text: async () => body });
+  const prepareImport = async (fetch) => {
+    const h = createPopupHarness();
+    await h.runTimers(0);
+    h.context.fetch = fetch;
+    h.evaluate("setCcfddlExpanded(true); setCcfddlDropdownOpen(true)");
+    return h;
+  };
+
+  await check("the first search shares one parser load and cached recommendations need no new script", async () => {
+    const requested = [];
+    const h = await prepareImport(async (url) => {
+      requested.push(url);
+      return ok(calendar);
+    });
+    h.state.parserBehavior = "hang";
+    const first = h.evaluate("openCcfddlDropdown()");
+    const second = h.evaluate("openCcfddlDropdown()");
+    assert.deepEqual(h.state.scriptLoads, ["conference-parser.js"]);
+    assert.equal(h.evaluate("loadConferenceParser()"), h.evaluate("conferenceParserLoadPromise"));
+    assert.deepEqual(requested, [], "network requests wait for the local parser");
+    h.completeParserLoad();
+    await Promise.all([first, second]);
+    assert.equal(h.getElement("ccfddl-list").children.length, 1);
+    const loadedRequests = [...requested];
+    await h.evaluate("openCcfddlDropdown()");
+    assert.deepEqual(requested, loadedRequests);
+    assert.deepEqual(h.state.scriptLoads, ["conference-parser.js"]);
+  });
+
+  await check("a local script error or missing parser reports failure and can be retried", async () => {
+    for (const behavior of ["error", "invalid"]) {
+      const requested = [];
+      const h = await prepareImport(async (url) => {
+        requested.push(url);
+        return ok(calendar);
+      });
+      h.state.parserBehavior = behavior;
+      await h.evaluate("openCcfddlDropdown()");
+      assert.deepEqual(requested, [], "local failures must not request remote sources");
+      assert.equal(h.state.errors.length, 1);
+      assert.equal(h.context.document.head.children.length, 0);
+      assert.equal(h.evaluate("conferenceParserLoadPromise"), null);
+      assert.equal(h.evaluate("isCcfddlLoading"), false);
+      assert.match(h.getElement("ccfddl-empty").textContent, /加载失败/);
+      h.state.parserBehavior = "ok";
+      await h.evaluate("openCcfddlDropdown()");
+      assert.equal(h.getElement("ccfddl-list").children.length, 1);
+      assert.equal(h.state.scriptLoads.length, 2);
+    }
+  });
+
+  await check("a stalled parser times out and a late callback cannot replace the retry", async () => {
+    const requested = [];
+    const h = await prepareImport(async (url) => {
+      requested.push(url);
+      return ok(calendar);
+    });
+    h.state.parserBehavior = "hang";
+    const first = h.evaluate("openCcfddlDropdown()");
+    const lateCallback = h.state.scripts[0].onload;
+    await h.runTimers(3000);
+    await first;
+    assert.equal(h.state.errors.length, 1);
+    assert.deepEqual(requested, []);
+    assert.equal(h.context.document.head.children.length, 0);
+    const retry = h.evaluate("openCcfddlDropdown()");
+    const retryParserPromise = h.evaluate("conferenceParserLoadPromise");
+    h.completeParserLoad(0);
+    lateCallback();
+    assert.equal(h.evaluate("conferenceParserLoadPromise"), retryParserPromise);
+    assert.deepEqual(requested, []);
+    h.completeParserLoad(1);
+    await retry;
+    assert.equal(h.getElement("ccfddl-list").children.length, 1);
+    assert.equal(h.state.scriptLoads.length, 2);
+    assert.equal(h.evaluate("isCcfddlLoading"), false);
+  });
+
+  await check("the extracted ICS parser still uses shared IANA timezone helpers", async () => {
+    const h = createPopupHarness();
+    await h.runTimers(0);
+    await h.loadParser();
+    const ics = `BEGIN:VCALENDAR
+BEGIN:VEVENT
+SUMMARY:Zoned Conference
+DTSTART;TZID=America/New_York:20261001T090000
+END:VEVENT
+END:VCALENDAR`;
+    assert.equal(h.evaluate(`parseIcs(${JSON.stringify(ics)})[0].datetime`), "2026-10-01T13:00:00.000Z");
+  });
+
+  await check("primary network failures fall back to calendars and deduplicate future deadlines", async () => {
+    const requested = [];
+    const h = await prepareImport(async (url) => {
+      requested.push(url);
+      if (url === primaryUrl) throw new TypeError("Failed to fetch");
+      return ok(calendar);
+    });
+    await h.evaluate("loadCcfddlData()");
+    assert.deepEqual(requested, [primaryUrl, zhUrl, enUrl]);
+    assert.equal(h.getElement("ccfddl-list").children.length, 1);
+    assert.equal(h.evaluate("ccfddlItems[0].title"), "Upcoming Conference");
+    assert.equal(h.state.errors.length, 0);
+    assert.equal(h.state.writes.length, 0);
+  });
+
+  await check("HTTP errors and unreadable primary responses reach a working fallback feed", async () => {
+    for (const primary of [
+      { ok: false, status: 503 },
+      ok("<html>Temporary gateway error</html>"),
+      { ok: true, status: 200, text: async () => { throw new Error("Body read failed"); } },
+    ]) {
+      const h = await prepareImport(async (url) => {
+        if (url === primaryUrl) return primary;
+        if (url === zhUrl) throw new TypeError("Calendar unavailable");
+        return ok(calendar);
+      });
+      await h.evaluate("loadCcfddlData()");
+      assert.equal(h.getElement("ccfddl-list").children.length, 1);
+      assert.equal(h.state.errors.length, 0);
+      assert.equal(h.state.warnings.length, 2);
+    }
+  });
+
+  await check("stalled primary requests and response bodies time out, abort and use fallback", async () => {
+    for (const stallBody of [false, true]) {
+      let primarySignal;
+      const h = await prepareImport(async (url, { signal }) => {
+        if (url !== primaryUrl) return ok(calendar);
+        primarySignal = signal;
+        const stalled = new Promise(() => {});
+        return stallBody ? { ok: true, status: 200, text: () => stalled } : stalled;
+      });
+      const loading = h.evaluate("loadCcfddlData()");
+      await h.settle();
+      await h.runTimers(10000);
+      await loading;
+      assert.equal(primarySignal.aborted, true);
+      assert.equal(h.getElement("ccfddl-list").children.length, 1);
+      assert.equal(h.evaluate("isCcfddlLoading"), false);
+      assert.equal(h.state.errors.length, 0);
+    }
+  });
+
+  await check("a stalled calendar cannot discard another working calendar", async () => {
+    let stalledSignal;
+    const h = await prepareImport(async (url, { signal }) => {
+      if (url === primaryUrl) throw new TypeError("Failed to fetch");
+      if (url === enUrl) return ok(calendar);
+      stalledSignal = signal;
+      return new Promise(() => {});
+    });
+    const loading = h.evaluate("loadCcfddlData()");
+    await h.settle();
+    await h.runTimers(10000);
+    await loading;
+    assert.equal(stalledSignal.aborted, true);
+    assert.equal(h.getElement("ccfddl-list").children.length, 1);
+    assert.equal(h.evaluate("isCcfddlLoading"), false);
+  });
+
+  await check("a valid primary calendar with only expired dates does not trigger network fallback", async () => {
+    const requested = [];
+    const yaml = `- title: Expired Conference
+  confs:
+  - year: 2000
+    timeline:
+    - deadline: '2000-01-01 23:59:59'
+    timezone: UTC+0`;
+    const h = await prepareImport(async (url) => {
+      requested.push(url);
+      return ok(yaml);
+    });
+    await h.evaluate("loadCcfddlData()");
+    assert.deepEqual(requested, [primaryUrl]);
+    assert.equal(h.evaluate("ccfddlItems.length"), 0);
+    assert.equal(h.state.errors.length, 0);
+  });
+
+  await check("all import sources failing reports an error and a later retry recovers", async () => {
+    const h = await prepareImport(async () => { throw new TypeError("Failed to fetch"); });
+    await h.evaluate("loadCcfddlData()");
+    assert.equal(h.getElement("ccfddl-empty").textContent, "加载失败，请稍后重试");
+    assert.equal(h.evaluate("isCcfddlLoading"), false);
+    assert.equal(h.state.errors.length, 1);
+    assert.equal(h.state.writes.length, 0);
+    h.context.fetch = async (url) => {
+      if (url === primaryUrl) throw new TypeError("Failed to fetch");
+      return ok(calendar);
+    };
+    await h.evaluate("loadCcfddlData()");
+    assert.equal(h.getElement("ccfddl-list").children.length, 1);
+    assert.equal(h.evaluate("isCcfddlLoading"), false);
   });
 
   return { passed: results.length, tests: results };

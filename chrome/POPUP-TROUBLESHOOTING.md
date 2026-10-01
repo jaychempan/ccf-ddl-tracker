@@ -20,6 +20,34 @@ On macOS 26.6.2 (25G83), we applied Chrome's built-in update from **153.0.8010.5
 
 The installed store copy and the second installed tracker both opened after the update, at the first observation approximately 1.3 seconds after each click including automation overhead. After closing both popups and leaving Chrome idle for **143 seconds**, the store copy opened on the first click, again visible at the first observation approximately 1.3 seconds later. A subsequent click on the second tracker also opened normally. The store popup had also opened before updating, so these observations do not prove a before/after performance improvement or permanent recovery.
 
+### Recurrence on the updated browser (2026-10-01)
+
+The store build **2.4.0** failed again on Chrome **154.0.8037.93**, macOS **26.6.2**. At the first inspection, its toolbar button was in the pressed state (`Value: 1`) and no popup window was visible. Subsequent observations retained that state. The running browser had launched at **2026-09-30 11:13:30 +0800**, about **26 hours** before the failure was recorded. The time of the user's initial click was not captured, so these observations do not provide a precise click-to-popup duration.
+
+A three-second sample of the browser main process at **2026-10-01 13:32:02 +0800** found `CrBrowserMain` in the native event-loop wait path for **2260 of 2338 observations**. It did not identify a sustained main-thread busy loop or mutex/semaphore wait during that sample. This does not exclude waiting for a renderer, a renderer-side stall, or a popup display failure. The tracker renderer was not mapped or sampled, and the failing popup's DOM and Console had not been inspected at this point. Inspection-tool input failures are not evidence that Chrome's **Inspect popup** command itself hangs.
+
+By **13:38 +0800**, the user reported that another toolbar click opened the popup. The browser main process remained the same, confirming that Chrome had not restarted. The investigator had not reloaded the extension. The user described recovery after a new click, rather than the originally pending popup appearing by itself. The store popup's DevTools was then observed open with zero Console messages, but no navigation or initialization timing was captured. The recovered page may be a new document; its successful opening does not explain the previous failed attempt, and an empty recovered Console does not rule out earlier errors.
+
+This recurrence means the previous update and short successful tests did **not** establish permanent recovery. The current source removes the synchronous theme cache and adds startup measurements, but the installed store package does not include those changes. Neither this recurrence nor the main-process sample identifies the exact root cause.
+
+### Comparison with the installed Citation Tracker (2026-10-01)
+
+We compared the actual store packages, CCF DDL Tracker **2.4.0** and Citation Tracker **1.4.0**. Both declare a native `action.default_popup` and a Manifest V3 service worker. Neither declares content scripts, and neither contains code for offscreen documents, WebSocket connections, or runtime Port connections. The code does not support a claim that Citation avoids this failure by keeping its background continuously active.
+
+| Startup behavior | CCF DDL Tracker 2.4.0 | Citation Tracker 1.4.0 |
+| --- | --- | --- |
+| Before the body is parsed | Blocking `theme.js` reads and writes `localStorage`, then reads the saved theme asynchronously | Head contains CSS only; page scripts are at the end of the body, with no Web Storage access |
+| Initial saved data | Popup reads `chrome.storage.local` directly, with a three-second timeout | After `DOMContentLoaded`, popup sends `getState`; the worker reads saved data and replies asynchronously |
+| Network required to open | None; conference requests start when search is opened | None; `getState` returns saved data without fetching Scholar |
+| Scheduled background work | One-minute badge alarm; worker startup also draws the toolbar icon and reads badge data | Thirty-minute citation alarm, plus citation refresh after browser startup |
+| Local first-view resources¹ | About 199 KB, including a 92 KB PNG logo and 72 KB of page JavaScript | About 73 KB, including a 1 KB SVG logo and 38 KB of page JavaScript |
+
+¹ Sum of the installed HTML, CSS, page scripts, and logo; not measured transfer time or decoded memory, and not including the background worker. Citation's CSS is larger, and its first render also builds hidden views; it is not uniformly less work.
+
+The head-level synchronous theme access is a concrete additional blocking point in CCF 2.4.0. If it stalls, the body and startup timeout cannot run yet; Citation has no corresponding head storage step. However, CCF **2.3.0** already failed before that theme script existed. Resource-size differences can add loading work but do not establish the cause of a long hang. Alarm definitions also do not establish which worker or renderer was active during the failure. These comparisons identify candidates for measurement, not a confirmed root cause.
+
+The table describes the installed store packages. The local v2.5 source (manifest: `2.5.0`) separately removes synchronous theme caching, replaces minute-level badge polling with one-shot scheduling, shrinks the header logo to 5.7 KB, and loads conference parsers on demand. The toolbar clock retains its original assets and drawing method. Its first-view files total about 109 KB, down from 203 KB before this resource change. Reload the unpacked copy to test these changes; the installed store package is unchanged, and the long-running failure still needs validation.
+
 ### Start here: Microsoft Edge
 
 If the popup stops opening after a while, collect the following information **while it is failing**, before restarting or reloading:
@@ -139,6 +167,34 @@ Because a normal restart also restored the popup, this test does **not** establi
 在 macOS 26.6.2（25G83）上，通过 Chrome 自带更新从 **153.0.8010.53** 升级到 **154.0.8037.93** 并重启。随后 `chrome://version` 显示了上游维护者指出的修复配置标识 **`6bac6c05-c44077d`**；命令行没有显式指定 `PMLoadingPageVoter`。
 
 更新后，已安装的商店版和另一份 Tracker 均能打开，首次检查到完整弹窗约为点击后 1.3 秒，包含自动化操作开销。关闭两份弹窗并让 Chrome 闲置 **143 秒**后，商店版首次点击正常打开，首次观察到完整弹窗同样约为点击后 1.3 秒；随后点击另一份 Tracker 也正常打开。更新前商店版也能打开，因此这些观察不能证明性能改善由更新造成，也不能证明不会复发。
+
+### 更新后的浏览器仍然复发（2026-10-01）
+
+在 Chrome **154.0.8037.93**、macOS **26.6.2** 上，商店版 **2.4.0** 再次无法打开。首次检查时，工具栏按钮处于按下状态（`Value: 1`），没有可见的弹窗窗口；后续观察仍是同一状态。当前浏览器启动于 **2026-09-30 11:13:30 +0800**，记录故障时已连续运行约 **26 小时**。没有捕获用户最初点击的时刻，因此这不能作为精确的点击至弹出耗时。
+
+在 **2026-10-01 13:32:02 +0800** 对浏览器主进程进行的三秒采样中，`CrBrowserMain` 的 **2338 次观测有 2260 次**位于原生事件循环等待路径。采样期间没有定位到持续的主线程忙循环或 mutex/semaphore 等待。这不能排除等待渲染进程、渲染进程自身卡住或弹窗显示失败。此时还未映射和采样 Tracker 的渲染进程，也未检查故障弹窗的 DOM 和控制台。检查工具执行输入失败，不能被当作 Chrome 的“审查弹出内容”命令本身卡住的证据。
+
+截至 **13:38 +0800**，用户报告重新点击工具栏图标后弹窗能够打开。浏览器主进程仍是同一个，确认 Chrome 没有重启；排查期间也未由检查者重新加载扩展。用户描述的是重新点击后恢复，并非原来等待的弹窗自行出现。随后观察到商店版弹窗的开发者工具已打开，Console 显示零条消息，但未取得导航或初始化计时。恢复后的页面可能是新建文档，正常打开不能解释前一次失败；恢复后的空控制台也不能排除之前出现过错误。
+
+此次复发说明，前面的浏览器更新和短时间正常打开**没有证明长期问题已解决**。当前源码移除了同步主题缓存并增加启动计时，但已安装商店包没有这些改动；这次复发与主进程采样均不能确定具体根因。
+
+### 与已安装 Citation Tracker 的对比（2026-10-01）
+
+对比的是实际商店安装包：CCF DDL Tracker **2.4.0**、Citation Tracker **1.4.0**。两者都声明原生 `action.default_popup` 和 Manifest V3 service worker；均未声明内容脚本，也未发现 offscreen document、WebSocket 或 runtime Port 连接代码。源码不支持“Citation 靠后台一直活跃来避免该故障”的解释。
+
+| 启动行为 | CCF DDL Tracker 2.4.0 | Citation Tracker 1.4.0 |
+| --- | --- | --- |
+| body 解析前 | 阻塞式 `theme.js` 同步读写 `localStorage`，再异步读取主题偏好 | head 只有 CSS；页面脚本在 body 尾部，没有 Web Storage 访问 |
+| 首屏已存数据 | 弹窗直接异步读 `chrome.storage.local`，有三秒超时 | `DOMContentLoaded` 后发送 `getState`，后台异步读取数据并回复 |
+| 打开是否依赖网络 | 不依赖；打开搜索才请求会议 | 不依赖；`getState` 只返回已存数据，不请求 Scholar |
+| 定时后台工作 | 每分钟更新角标；worker 启动时还绘制工具栏图标、读取角标数据 | 每 30 分钟刷新引用，浏览器启动后也刷新引用 |
+| 本地首屏资源¹ | 约 199 KB，其中 PNG logo 约 92 KB、页面脚本约 72 KB | 约 73 KB，其中 SVG logo 约 1 KB、页面脚本约 38 KB |
+
+¹ 统计已安装 HTML、CSS、页面脚本和 logo 的文件大小，不代表实际传输时间或解码内存，也不包含后台。Citation 的 CSS 反而更大，首屏还会渲染隐藏视图，因此不能笼统说它处处更省工作。
+
+head 中的同步主题访问是 CCF 2.4.0 确实多出的一个阻塞点：如果它卡住，body 和启动超时都还不能执行；Citation 没有对应步骤。但 **CCF 2.3.0 没有该主题脚本时就发生过故障**。资源量差异可能增加加载工作，不能证明长时间卡住的原因；定时器定义也不能证明故障时哪个 worker 或渲染进程活跃。这些对比用于确定测量对象，尚不能确定具体根因。
+
+上表描述的是已安装商店包。本地 v2.5 源码（manifest：`2.5.0`）另外移除了同步主题缓存，将每分钟角标轮询改为单次调度、顶部 logo 缩至 5.7 KB，并按需加载会议解析器；工具栏小闹钟保留原版资源和绘制方式。这轮资源修改将首屏文件合计从约 203 KB 降至 109 KB。重新加载已解压版本后可测试这些改动；已安装商店包没有变化，长期故障仍需验证。
 
 ### 先从这里开始：Microsoft Edge
 

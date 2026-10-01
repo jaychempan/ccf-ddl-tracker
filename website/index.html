@@ -83,7 +83,7 @@
             </picture>
             <h1>CCF DDL Tracker</h1>
             <p class="project-subtitle" data-i18n="home.subtitle">An open source Chrome extension for tracking CCF deadlines</p>
-            <p class="project-subtitle" data-i18n="home.release">v2.4 · Dark mode, lighter startup, and loading recovery</p>
+            <p class="project-subtitle" data-i18n="home.release">v2.5 · Less background work, lighter startup, and import recovery</p>
         </section>
 
         <div class="hero-actions">
@@ -101,6 +101,22 @@
 
         <section class="preview-showcase">
             <div class="preview-scroller" data-preview-scroller>
+                <article class="preview-panel" id="preview-v25" data-preview-slide>
+                    <div class="preview-copy">
+                        <span class="eyebrow" data-i18n="home.preview.v25.eyebrow">Version 2.5</span>
+                        <h3 data-i18n="home.preview.v25.title">Familiar appearance, less startup work</h3>
+                        <p data-i18n="home.preview.v25.body">Keep the original toolbar clock and your Light / Dark settings. v2.5 schedules badges when their display changes, loads conference parsing only when you search, and recovers through independent calendar feeds when the main import source fails.</p>
+                    </div>
+                    <img
+                        src="./previewv2.5.svg"
+                        alt="Illustration of CCF DDL Tracker v2.5 with the familiar light and dark interface, saved deadlines, theme settings, and local-loading retry"
+                        width="1040"
+                        height="800"
+                        fetchpriority="high"
+                        data-i18n-alt="home.preview.v25.imageAlt"
+                    >
+                </article>
+
                 <article class="preview-panel" id="preview-v24" data-preview-slide>
                     <div class="preview-copy">
                         <span class="eyebrow" data-i18n="home.preview.v24.eyebrow">Version 2.4</span>
@@ -116,7 +132,7 @@
                         alt="Illustration of CCF DDL Tracker v2.4 light and dark appearance with theme settings and a loading retry option"
                         width="1040"
                         height="800"
-                        fetchpriority="high"
+                        loading="lazy"
                         data-i18n-alt="home.preview.v24.imageAlt"
                     >
                 </article>
@@ -199,11 +215,12 @@
             </div>
 
             <div class="preview-dots" role="group" aria-label="Choose a release preview" data-i18n-aria-label="home.preview.tabsLabel">
-                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v24" aria-pressed="true" aria-label="v2.4" title="v2.4"></button>
-                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v23" aria-pressed="false" aria-label="v2.3" title="v2.3"></button>
-                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v22" aria-pressed="false" aria-label="v2.2" title="v2.2"></button>
-                <button class="preview-dot" type="button" data-preview-target="3" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
-                <button class="preview-dot" type="button" data-preview-target="4" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
+                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v25" aria-pressed="true" aria-label="v2.5" title="v2.5"></button>
+                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v24" aria-pressed="false" aria-label="v2.4" title="v2.4"></button>
+                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v23" aria-pressed="false" aria-label="v2.3" title="v2.3"></button>
+                <button class="preview-dot" type="button" data-preview-target="3" aria-controls="preview-v22" aria-pressed="false" aria-label="v2.2" title="v2.2"></button>
+                <button class="preview-dot" type="button" data-preview-target="4" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
+                <button class="preview-dot" type="button" data-preview-target="5" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
             </div>
         </section>
 
@@ -222,13 +239,13 @@
                         <ul>
                             <li data-i18n="home.features.focused.item1">Keep deadlines in a dense popup instead of a separate dashboard.</li>
                             <li data-i18n="home.features.focused.item2">See remaining days quickly with compact cards and sorted lists.</li>
-                            <li data-i18n="home.features.focused.item3">v2.4 reduces startup work and offers Retry when local data loading fails or times out.</li>
+                            <li data-i18n="home.features.focused.item3">v2.5 schedules badge updates when needed and loads fewer resources when the popup opens.</li>
                         </ul>
                     </li>
                     <li>
                         <span class="feature-title" data-i18n="home.features.import.title">CCFDDL import flow</span>
                         <ul>
-                            <li data-i18n="home.features.import.item1">Import recommended conferences from the CCFDDL dataset and ICS fallback.</li>
+                            <li data-i18n="home.features.import.item1">Import the CCFDDL dataset over HTTPS, with independent Chinese and English ICS fallbacks.</li>
                             <li data-i18n="home.features.import.item2">Keep homepage links and source time zone data so each card can jump to the official conference site.</li>
                         </ul>
                     </li>

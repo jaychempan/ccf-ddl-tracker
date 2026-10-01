@@ -1,6 +1,5 @@
 (() => {
   const STORAGE_KEY = "theme";
-  const CACHE_KEY = "popupTheme";
   const THEMES = new Set(["system", "light", "dark"]);
   let preferenceChanged = false;
 
@@ -18,22 +17,11 @@
     const theme = normalizeTheme(value);
     document.documentElement.dataset.theme = theme;
     syncThemeInputs();
-    try {
-      // A synchronous cache prevents a flash when reopening with a manual theme.
-      // chrome.storage.local remains the source of truth.
-      localStorage.setItem(CACHE_KEY, theme);
-    } catch {
-      // System colors still work when the local cache is unavailable.
-    }
   }
 
-  let cachedTheme = "system";
-  try {
-    cachedTheme = localStorage.getItem(CACHE_KEY);
-  } catch {
-    // CSS follows the system before stored preferences finish loading.
-  }
-  applyTheme(cachedTheme);
+  // CSS can paint system colors while the asynchronous preference is pending.
+  // Synchronous Web Storage must not delay popup document loading.
+  applyTheme("system");
 
   document.addEventListener("DOMContentLoaded", syncThemeInputs, { once: true });
   document.addEventListener("change", (event) => {

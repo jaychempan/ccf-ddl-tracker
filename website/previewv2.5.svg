@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="800" viewBox="0 0 1040 800" role="img" aria-labelledby="title description">
+  <title id="title">CCF DDL Tracker v2.5 — familiar appearance, lighter startup</title>
+  <desc id="description">A v2.5 interface illustration retaining light and dark appearance, locally saved deadlines, theme settings, and a retry option after a local-data loading failure. The deadlines shown are examples, not live conference information.</desc>
+  <style>
+    text { font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --blue: #2563eb; --selected: #dbeafe; --danger: #dc2626; --light-bg: #dbeafe; --light-border: #2563eb; --dark-bg: #ffffff; --dark-border: #e2e8f0; --light-dot: inline; --dark-dot: none; --retry: none; }
+    .dark { --bg: #101722; --card: #172233; --text: #edf2fa; --muted: #a6b4c8; --border: #344156; --blue: #8ab4ff; --selected: #203b60; --danger: #fda4af; --light-bg: #172233; --light-border: #344156; --dark-bg: #203b60; --dark-border: #8ab4ff; --light-dot: none; --dark-dot: inline; --retry: inline; }
+    .surface { fill: var(--bg); stroke: var(--border); stroke-width: 1.5; }
+    .card { fill: var(--card); stroke: var(--border); stroke-width: 1.5; }
+    .text { fill: var(--text); }
+    .muted { fill: var(--muted); }
+    .blue { fill: var(--blue); }
+    .selected { fill: var(--selected); stroke: var(--blue); stroke-width: 1.2; }
+    .heading { font-size: 20px; font-weight: 700; }
+    .label { font-size: 16px; font-weight: 650; }
+    .small { font-size: 13px; }
+    .tiny { font-size: 11px; }
+    .theme-option { fill: var(--card); stroke: var(--border); }
+    .theme-light { fill: var(--light-bg); stroke: var(--light-border); stroke-width: 1.5; }
+    .theme-dark { fill: var(--dark-bg); stroke: var(--dark-border); stroke-width: 1.5; }
+    .radio { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+    .radio-dot { fill: var(--blue); }
+    .light-dot { display: var(--light-dot); }
+    .dark-dot { display: var(--dark-dot); }
+    .retry { display: var(--retry); }
+  </style>
+  <defs>
+    <g id="popup">
+      <rect class="surface" width="472" height="664" rx="20"/>
+      <g fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round">
+        <circle cx="31" cy="31" r="11"/>
+        <path d="M31 23v8l6 4"/>
+      </g>
+      <text class="text heading" x="51" y="35">CCF DDL Tracker</text>
+      <text class="muted small" x="416" y="33" font-weight="700">v2.5</text>
+      <text class="muted tiny" x="51" y="55">一键添加和管理你的截止日期</text>
+
+      <rect class="card" x="16" y="76" width="214" height="76" rx="14"/>
+      <rect class="selected" x="242" y="76" width="214" height="76" rx="14"/>
+      <text class="blue heading" x="29" y="103">+</text>
+      <g fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round">
+        <circle cx="260" cy="93" r="5"/>
+        <path d="m264 97 4 4"/>
+      </g>
+      <text class="text label" x="123" y="115" text-anchor="middle">新增截止日期</text>
+      <text class="muted small" x="123" y="135" text-anchor="middle">手动填写标题、日期和时间</text>
+      <text class="text label" x="349" y="115" text-anchor="middle">从 CCFDDL 导入</text>
+      <text class="muted small" x="349" y="135" text-anchor="middle">加载推荐会议并一键加入</text>
+
+      <rect class="card" x="16" y="166" width="440" height="76" rx="14"/>
+      <rect class="surface" x="30" y="178" width="412" height="34" rx="8"/>
+      <text class="muted small" x="43" y="200">搜索会议，例如 ICML / SIGMOD</text>
+      <text class="muted tiny" x="236" y="229" text-anchor="middle">点击搜索框可获取最新会议列表</text>
+
+      <rect class="card" x="16" y="254" width="440" height="170" rx="14"/>
+      <text class="text label" x="32" y="283">我的截止日期</text>
+      <text class="muted small" x="147" y="283">（1 项）</text>
+      <g fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M434 273a7 7 0 1 0 0 10m0-14v5h-5"/>
+      </g>
+      <text class="muted tiny" x="32" y="304">右键条目可添加到日历</text>
+      <rect class="surface" x="30" y="317" width="412" height="90" rx="10"/>
+      <text class="text label" x="43" y="344">示例会议</text>
+      <text x="405" y="343" fill="var(--danger)" font-size="12">删除</text>
+      <rect class="selected" x="43" y="354" width="55" height="20" rx="8"/>
+      <rect class="selected" x="105" y="354" width="97" height="20" rx="8"/>
+      <text class="blue tiny" x="70" y="368" text-anchor="middle">CCF A</text>
+      <text class="blue tiny" x="154" y="368" text-anchor="middle">AI · 人工智能</text>
+      <text class="muted tiny" x="43" y="391">2026/10/07 23:59 UTC+8</text>
+      <text class="muted tiny" x="424" y="391" text-anchor="end">剩余 7 天</text>
+
+      <rect class="card" x="16" y="438" width="440" height="144" rx="14"/>
+      <text class="text label" x="32" y="465">显示设置</text>
+      <text class="muted small" x="32" y="487">外观</text>
+      <rect class="theme-option" x="32" y="498" width="128" height="36" rx="9"/>
+      <rect class="theme-option theme-light" x="172" y="498" width="128" height="36" rx="9"/>
+      <rect class="theme-option theme-dark" x="312" y="498" width="128" height="36" rx="9"/>
+      <circle class="radio" cx="49" cy="516" r="5"/>
+      <circle class="radio" cx="189" cy="516" r="5"/>
+      <circle class="radio" cx="329" cy="516" r="5"/>
+      <circle class="radio-dot light-dot" cx="189" cy="516" r="3"/>
+      <circle class="radio-dot dark-dot" cx="329" cy="516" r="3"/>
+      <text class="text small" x="62" y="521">跟随系统</text>
+      <text class="text small" x="202" y="521">浅色</text>
+      <text class="text small" x="342" y="521">深色</text>
+      <text class="muted small" x="32" y="560">显示时区</text>
+      <text class="text small" x="123" y="560">中国 - 上海（UTC+08:00）</text>
+
+      <g class="retry">
+        <text x="32" y="609" fill="var(--danger)" font-size="12">读取本地数据失败，请重试。</text>
+        <rect class="card" x="378" y="589" width="62" height="29" rx="7"/>
+        <text class="blue small" x="409" y="609" text-anchor="middle">重试</text>
+      </g>
+      <text class="blue small" x="28" y="642" font-weight="650">EN</text>
+      <text class="blue small" x="69" y="642">设置</text>
+      <text class="blue small" x="267" y="642">GitHub</text>
+      <text class="blue small" x="331" y="642">主页</text>
+      <text class="blue small" x="385" y="642">CCFDDL</text>
+    </g>
+  </defs>
+
+  <rect width="1040" height="800" fill="#f8fafc"/>
+  <text x="28" y="40" fill="#172033" font-size="17" font-weight="650">浅色外观 / Light</text>
+  <text x="540" y="40" fill="#172033" font-size="17" font-weight="650">深色外观 / Dark</text>
+  <g class="light" transform="translate(28 64)"><use href="#popup"/></g>
+  <g class="dark" transform="translate(540 64)"><use href="#popup"/></g>
+  <text x="264" y="762" fill="#64748b" font-size="16" text-anchor="middle">保留熟悉外观，首屏资源更轻</text>
+  <text x="776" y="762" fill="#64748b" font-size="16" text-anchor="middle">角标按需更新，导入失败可回退</text>
+  <text x="520" y="789" fill="#64748b" font-size="11" text-anchor="middle">v2.5 界面示意 · 示例数据，非实时会议截止日期</text>
+</svg>

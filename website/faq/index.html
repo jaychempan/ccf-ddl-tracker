@@ -81,10 +81,7 @@
             </p>
 
             <h3 data-i18n="faq.q2">Where do imported conferences come from?</h3>
-            <p data-i18n-html="faq.a2">
-                Imports prefer the upstream <a href="https://github.com/ccfddl/ccf-deadlines" target="_blank" rel="noopener noreferrer">ccfddl/ccf-deadlines</a>
-                repository and fall back to CCFDDL ICS feeds when needed.
-            </p>
+            <p data-i18n-html="faq.a2">Imports use the CCFDDL dataset served over direct HTTPS. The data comes from the upstream <a href="https://github.com/ccfddl/ccf-deadlines" target="_blank" rel="noopener noreferrer">ccfddl/ccf-deadlines</a> project. If that source fails, the Chinese and English ICS feeds can recover independently; each request and response read is limited to 10 seconds.</p>
 
             <h3 data-i18n="faq.q3">Should I trust imported deadlines without checking?</h3>
             <p data-i18n="faq.a3">
@@ -114,14 +111,11 @@
                 Right-click any saved or imported deadline card in the popup. You can open a prefilled
                 Google Calendar event or export an ICS file for Apple / iCloud and other calendar apps.
             </p>
+            <h3 data-i18n="faq.q9">How often does the toolbar badge update?</h3>
+            <p data-i18n="faq.a9">v2.5 recalculates the badge after saved deadlines change and schedules a single update at the next day-count change or expiration. It no longer polls every minute. Background local reads time out after 3 seconds; failures schedule a retry after 5 minutes.</p>
+
             <h3 data-i18n="faq.q8">What if the popup gets stuck or does not open?</h3>
-            <p data-i18n="faq.a8">
-                v2.4 reduces startup work and offers Retry if local data loading fails or exceeds 3 seconds.
-                If the browser does not display the popup at all, fully restarting it may temporarily help.
-                Right-click the extension icon and choose Options to try the tracker in a regular tab.
-                If the problem returns, record your browser and extension versions and any console errors.
-                Extension-side improvements cannot guarantee a fix for browser-level popup failures.
-            </p>
+            <p data-i18n="faq.a8">The v2.5 source reduces startup work and adds timing diagnostics. Failed local data reads or reads taking over 3 seconds offer Retry once the popup script is running. If no popup appears, right-click the extension icon and choose Options to try the same tracker in a regular tab. If the problem returns, record the browser and extension versions and any console errors. These changes do not establish that the long-running browser popup failure is fixed.</p>
         </article>
     </main>
 

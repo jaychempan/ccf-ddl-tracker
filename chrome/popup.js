@@ -1,8 +1,19 @@
+// Navigation-to-script timing includes delays before our initialization runs.
+// It does not measure the earlier toolbar click or when Chrome shows the window.
+performance.mark("ccf-popup-script-start");
+performance.measure("ccf-popup-document-to-script", { start: 0, end: "ccf-popup-script-start" });
+document.addEventListener("DOMContentLoaded", () => {
+  performance.mark("ccf-popup-dom-ready");
+  performance.measure("ccf-popup-document-to-dom", { start: 0, end: "ccf-popup-dom-ready" });
+}, { once: true });
+
 const STORAGE_KEY = "deadlines";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const REFRESH_INTERVAL_MS = 60 * 1000;
 const STARTUP_CLICK_GUARD_MS = 300;
 const STORAGE_READ_TIMEOUT_MS = 3000;
+const CONFERENCE_FETCH_TIMEOUT_MS = 10000;
+const CONFERENCE_PARSER_TIMEOUT_MS = 3000;
 const MAX_CACHED_FORMATTERS = 128;
 const CONTEXT_MENU_MARGIN_PX = 8;
 const CALENDAR_EVENT_DURATION_MINUTES = 1;
@@ -143,6 +154,7 @@ const dateTimeFormatterCache = new Map();
 let availableTimeZones = null;
 let popupInitialization = null;
 let deadlineLoadPromise = null;
+let conferenceParserLoadPromise = null;
 let isPopupReady = false;
 
 const translations = {
@@ -985,62 +997,6 @@ function buildIsoFromTimeZoneInput(dateValue, timeValue, timeZone) {
   );
 }
 
-function normalizeIcsTimeZoneHint(timeZoneHint) {
-  return (timeZoneHint || "").trim().replace(/^"(.*)"$/, "$1");
-}
-
-function parseFixedOffsetTimeZone(timeZoneHint) {
-  const normalized = normalizeIcsTimeZoneHint(timeZoneHint);
-  if (!normalized) return "";
-  if (normalized.toUpperCase() === "UTC" || normalized === "Z") return "Z";
-
-  const utcOffsetMatch = normalized.match(/^UTC([+-])(\d{1,2})(?::?(\d{2}))?$/i);
-  if (utcOffsetMatch) {
-    const [, sign, hourDigits, minuteDigits = "00"] = utcOffsetMatch;
-    return `${sign}${hourDigits.padStart(2, "0")}:${minuteDigits}`;
-  }
-
-  const offsetMatch = normalized.match(/^([+-])(\d{2}):?(\d{2})$/);
-  if (offsetMatch) {
-    const [, sign, hourDigits, minuteDigits] = offsetMatch;
-    return `${sign}${hourDigits}:${minuteDigits}`;
-  }
-
-  return "";
-}
-
-function parseIcsProperty(rawKey) {
-  const [name, ...parameterEntries] = rawKey.split(";");
-  const parameters = {};
-
-  parameterEntries.forEach((entry) => {
-    const [parameterName, ...parameterValueParts] = entry.split("=");
-    if (!parameterName || parameterValueParts.length === 0) return;
-    parameters[parameterName.toUpperCase()] = normalizeIcsTimeZoneHint(
-      parameterValueParts.join("=")
-    );
-  });
-
-  return { name, parameters };
-}
-
-function splitIcsLine(line) {
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-    if (char === ":" && !inQuotes) {
-      return [line.slice(0, index), line.slice(index + 1)];
-    }
-  }
-
-  return [line, ""];
-}
-
 function setSettingsOpen(open) {
   isSettingsOpen = open;
   if (open) syncTimeZoneSelect();
@@ -1166,107 +1122,6 @@ function setTimeZone(nextTimeZone) {
   loadDeadlines();
 }
 
-function parseIcsDate(value, timeZoneHint = "") {
-  if (!value) return null;
-  const sanitized = value.trim();
-  const dateTimeMatch =
-    sanitized.match(
-      /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z|[+-]\d{4})?$/
-    );
-  if (dateTimeMatch) {
-    const [, year, month, day, hour, minute, second, tz] = dateTimeMatch;
-    const embeddedOffset = tz && tz !== "Z" ? `${tz.slice(0, 3)}:${tz.slice(3)}` : "";
-    const fixedOffset = parseFixedOffsetTimeZone(timeZoneHint);
-    const suffix = tz === "Z" ? "Z" : embeddedOffset || fixedOffset;
-    if (suffix) {
-      const iso = `${year}-${month}-${day}T${hour}:${minute}:${second}${suffix}`;
-      const date = new Date(iso);
-      return Number.isNaN(date.getTime()) ? null : date;
-    }
-
-    const normalizedTimeZone = normalizeIcsTimeZoneHint(timeZoneHint);
-    if (normalizedTimeZone) {
-      const iso = buildIsoFromTimeZoneParts(
-        {
-          year: Number(year),
-          month: Number(month),
-          day: Number(day),
-          hour: Number(hour),
-          minute: Number(minute),
-          second: Number(second),
-        },
-        normalizedTimeZone
-      );
-      if (iso) {
-        const date = new Date(iso);
-        return Number.isNaN(date.getTime()) ? null : date;
-      }
-    }
-
-    const localDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}`);
-    return Number.isNaN(localDate.getTime()) ? null : localDate;
-  }
-
-  const dateOnlyMatch = sanitized.match(/^(\d{4})(\d{2})(\d{2})$/);
-  if (dateOnlyMatch) {
-    const [, year, month, day] = dateOnlyMatch;
-    const date = new Date(`${year}-${month}-${day}T23:59:59`);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  const parsed = new Date(sanitized);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function parseIcs(text) {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
-  const unfolded = [];
-  lines.forEach((line) => {
-    if (line.startsWith(" ") || line.startsWith("\t")) {
-      const previous = unfolded.pop() ?? "";
-      unfolded.push(previous + line.trim());
-    } else {
-      unfolded.push(line);
-    }
-  });
-
-  const events = [];
-  let current = null;
-  unfolded.forEach((line) => {
-    if (line === "BEGIN:VEVENT") {
-      current = {};
-      return;
-    }
-    if (line === "END:VEVENT") {
-      if (current) events.push(current);
-      current = null;
-      return;
-    }
-    if (!current) return;
-
-    const [rawKey, value] = splitIcsLine(line);
-    const { name: key, parameters } = parseIcsProperty(rawKey);
-    if (key === "SUMMARY") current.summary = value;
-    if (key === "DTSTART") {
-      current.start = value;
-      current.startTimeZone = parameters.TZID || "";
-    }
-    if (key === "URL") current.url = value;
-  });
-
-  return events
-    .map((event) => {
-      const date = parseIcsDate(event.start, event.startTimeZone);
-      if (!event.summary || !date) return null;
-      return {
-        title: event.summary,
-        datetime: date.toISOString(),
-        url: event.url || "",
-      };
-    })
-    .filter(Boolean);
-}
-
 function normalizeConferenceUrl(value) {
   if (!value) return "";
   const trimmed = value.trim().replace(/^['"]|['"]$/g, "");
@@ -1277,147 +1132,6 @@ function normalizeConferenceUrl(value) {
     return `https://${trimmed}`;
   }
   return "";
-}
-
-function parseTimezoneOffset(timezone) {
-  if (!timezone) return 0;
-  const normalized = timezone.trim();
-  if (normalized.toUpperCase() === "AOE") return -12;
-  const match = normalized.match(/UTC([+-]\d{1,2})/i);
-  if (!match) return 0;
-  return Number.parseInt(match[1], 10);
-}
-
-function parseDeadlineWithTimezone(deadline, timezone) {
-  if (!deadline || deadline.toUpperCase() === "TBD") return null;
-  const [datePart, timePart] = deadline.split(" ");
-  if (!datePart || !timePart) return null;
-  const [year, month, day] = datePart.split("-").map((value) => Number(value));
-  const [hour, minute, second] = timePart.split(":").map((value) => Number(value));
-  if ([year, month, day, hour, minute, second].some((value) => Number.isNaN(value))) {
-    return null;
-  }
-  const offsetHours = parseTimezoneOffset(timezone);
-  const utcMs = Date.UTC(year, month - 1, day, hour, minute, second) - offsetHours * 3600 * 1000;
-  return new Date(utcMs).toISOString();
-}
-
-function parseAllConfYaml(text) {
-  const items = [];
-  let current = null;
-  let currentTimezone = null;
-  let currentYear = null;
-  let currentPlace = null;
-  let pendingDeadline = null;
-  let pendingComment = null;
-
-  const flushPending = () => {
-    if (!pendingDeadline || !current) return;
-    const iso = parseDeadlineWithTimezone(pendingDeadline, currentTimezone);
-    if (!iso) return;
-    const suffix = pendingComment ? ` (${pendingComment})` : "";
-    const title = currentYear ? `${current.title} ${currentYear}${suffix}` : `${current.title}${suffix}`;
-    items.push({
-      title,
-      datetime: iso,
-      url: normalizeConferenceUrl(current.link),
-      description: current.description || "",
-      sub: current.sub || "",
-      rank: current.rank || {},
-      place: currentPlace || "",
-    });
-    pendingDeadline = null;
-    pendingComment = null;
-  };
-
-  text.split(/\r?\n/).forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) return;
-
-    if (trimmed.startsWith("- title:")) {
-      flushPending();
-      const title = trimmed.replace("- title:", "").trim().replace(/^['"]|['"]$/g, "");
-      current = { title };
-      currentTimezone = null;
-      currentYear = null;
-      currentPlace = null;
-      return;
-    }
-
-    if (!current) return;
-
-    if (trimmed.startsWith("description:")) {
-      current.description = trimmed.replace("description:", "").trim().replace(/^['"]|['"]$/g, "");
-      return;
-    }
-
-    if (trimmed.startsWith("sub:")) {
-      current.sub = trimmed.replace("sub:", "").trim().replace(/^['"]|['"]$/g, "").toUpperCase();
-      return;
-    }
-
-    if (trimmed.startsWith("ccf:")) {
-      current.rank = { ...(current.rank || {}), ccf: trimmed.replace("ccf:", "").trim().replace(/^['"]|['"]$/g, "") };
-      return;
-    }
-
-    if (trimmed.startsWith("core:")) {
-      current.rank = { ...(current.rank || {}), core: trimmed.replace("core:", "").trim().replace(/^['"]|['"]$/g, "") };
-      return;
-    }
-
-    if (trimmed.startsWith("thcpl:")) {
-      current.rank = { ...(current.rank || {}), thcpl: trimmed.replace("thcpl:", "").trim().replace(/^['"]|['"]$/g, "") };
-      return;
-    }
-
-    if (trimmed.startsWith("year:")) {
-      currentYear = trimmed.replace("year:", "").trim();
-      currentPlace = null;
-      return;
-    }
-
-    if (trimmed.startsWith("timezone:")) {
-      currentTimezone = trimmed.replace("timezone:", "").trim();
-      return;
-    }
-
-    if (trimmed.startsWith("link:")) {
-      current.link = trimmed.replace("link:", "").trim();
-      return;
-    }
-
-    if (trimmed.startsWith("place:")) {
-      currentPlace = trimmed.replace("place:", "").trim().replace(/^['"]|['"]$/g, "");
-      return;
-    }
-
-    if (trimmed.startsWith("- deadline:") || trimmed.startsWith("deadline:")) {
-      flushPending();
-      pendingDeadline = trimmed.replace("- deadline:", "").replace("deadline:", "").trim();
-      pendingDeadline = pendingDeadline.replace(/^['"]|['"]$/g, "");
-      return;
-    }
-
-    if (trimmed.startsWith("- abstract_deadline:") || trimmed.startsWith("abstract_deadline:")) {
-      flushPending();
-      pendingDeadline = trimmed
-        .replace("- abstract_deadline:", "")
-        .replace("abstract_deadline:", "")
-        .trim();
-      pendingDeadline = pendingDeadline.replace(/^['"]|['"]$/g, "");
-      pendingComment = pendingComment ? pendingComment : "abstract";
-      return;
-    }
-
-    if (trimmed.startsWith("comment:")) {
-      pendingComment = trimmed.replace("comment:", "").trim().replace(/^['"]|['"]$/g, "");
-      return;
-    }
-  });
-
-  flushPending();
-  return items;
 }
 
 function getConferenceSubjectLabel(sub) {
@@ -1671,38 +1385,117 @@ function mergeCcfddlItems(items) {
   });
 }
 
+function loadConferenceParser() {
+  if (conferenceParserLoadPromise) return conferenceParserLoadPromise;
+
+  const script = document.createElement("script");
+  script.src = "conference-parser.js";
+  script.async = true;
+  // Store the promise before appending, so every caller shares the same load.
+  let finish;
+  const loading = new Promise((resolve, reject) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      finish(new Error("Conference parser load timed out"));
+    }, CONFERENCE_PARSER_TIMEOUT_MS);
+    finish = (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      script.onload = null;
+      script.onerror = null;
+      if (error) {
+        script.remove();
+        conferenceParserLoadPromise = null;
+        reject(error);
+      } else {
+        resolve();
+      }
+    };
+    script.onload = () => {
+      const ready = typeof parseAllConfYaml === "function" && typeof parseIcs === "function";
+      finish(ready ? null : new Error("Conference parser did not initialize"));
+    };
+    script.onerror = () => finish(new Error("Conference parser could not be loaded"));
+  });
+  conferenceParserLoadPromise = loading;
+  try {
+    document.head.appendChild(script);
+  } catch (error) {
+    finish(error);
+  }
+  return loading;
+}
+
+async function fetchConferenceItems(url, parse) {
+  const controller = new AbortController();
+  let timeout;
+  const request = async () => {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error(`Conference source returned HTTP ${response.status}`);
+    const items = parse(await response.text());
+    if (items.length === 0) throw new Error("Conference source contained no readable deadlines");
+    return items;
+  };
+
+  try {
+    // Bound both the request and body read so a stalled source reaches fallback.
+    return await Promise.race([
+      request(),
+      new Promise((_, reject) => {
+        timeout = setTimeout(() => {
+          controller.abort();
+          reject(new Error("Conference source request timed out"));
+        }, CONFERENCE_FETCH_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchCcfddlItems() {
+  await loadConferenceParser();
+  try {
+    // The legacy GitHub Pages URL redirects through HTTP, outside our HTTPS permissions.
+    return await fetchConferenceItems("https://ccfddl.com/conference/allconf.yml", parseAllConfYaml);
+  } catch (error) {
+    console.warn("[CCF DDL Tracker] Primary conference source failed; trying calendar feeds:", error);
+  }
+
+  // Each feed can recover independently when the other language is unavailable.
+  const results = await Promise.allSettled([
+    fetchConferenceItems("https://ccfddl.com/conference/deadlines_zh.ics", parseIcs),
+    fetchConferenceItems("https://ccfddl.com/conference/deadlines_en.ics", parseIcs),
+  ]);
+  const items = [];
+  let hasReadableFeed = false;
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      hasReadableFeed = true;
+      items.push(...result.value);
+    } else {
+      console.warn("[CCF DDL Tracker] Calendar feed failed:", result.reason);
+    }
+  }
+  if (!hasReadableFeed) throw new Error("All conference sources failed");
+  return items;
+}
+
 async function loadCcfddlData() {
   if (isCcfddlLoading) return;
   isCcfddlLoading = true;
   ccfddlEmpty.textContent = t("loading", "加载中...");
   ccfddlEmpty.style.display = isCcfddlExpanded && isCcfddlDropdownOpen ? "block" : "none";
   try {
-    const repoResponse = await fetch(
-      "https://ccfddl.github.io/conference/allconf.yml"
-    );
-    if (repoResponse.ok) {
-      const repoText = await repoResponse.text();
-      const now = Date.now();
-      const parsedItems = mergeCcfddlItems(parseAllConfYaml(repoText))
-        .filter((item) => toTimestamp(item.datetime) >= now)
-        .sort((a, b) => toTimestamp(a.datetime) - toTimestamp(b.datetime));
-      await applyLoadedCcfddlItems(parsedItems);
-      return;
-    }
-
-    const [zhResponse, enResponse] = await Promise.all([
-      fetch("https://ccfddl.com/conference/deadlines_zh.ics"),
-      fetch("https://ccfddl.com/conference/deadlines_en.ics"),
-    ]);
-    const responses = [zhResponse, enResponse].filter((res) => res.ok);
-    if (responses.length === 0) throw new Error("加载失败");
-    const texts = await Promise.all(responses.map((res) => res.text()));
+    const items = await fetchCcfddlItems();
     const now = Date.now();
-    const parsedItems = mergeCcfddlItems(texts.flatMap((text) => parseIcs(text)))
+    const parsedItems = mergeCcfddlItems(items)
       .filter((item) => toTimestamp(item.datetime) >= now)
       .sort((a, b) => toTimestamp(a.datetime) - toTimestamp(b.datetime));
     await applyLoadedCcfddlItems(parsedItems);
   } catch (error) {
+    console.error("[CCF DDL Tracker] Could not load conference data:", error);
     if (ccfddlItems.length === 0) {
       ccfddlEmpty.textContent = t("load_failed", "加载失败，请稍后重试");
       ccfddlEmpty.style.display = isCcfddlExpanded && isCcfddlDropdownOpen ? "block" : "none";
@@ -1920,7 +1713,9 @@ function shouldIgnoreStartupInteraction() {
 
 function startAutoRefresh() {
   if (refreshTimer) return;
-  refreshTimer = setInterval(loadDeadlines, REFRESH_INTERVAL_MS);
+  refreshTimer = setInterval(() => {
+    if (!document.hidden) loadDeadlines();
+  }, REFRESH_INTERVAL_MS);
 
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
@@ -1988,6 +1783,7 @@ function initializePopup() {
   const controls = [addActionBtn, importActionBtn, langToggle, settingsToggle];
   controls.forEach((control) => { control.disabled = true; });
   performance.mark("ccf-popup-initialize");
+  performance.mark("ccf-popup-storage-start");
 
   // Preferences and deadlines share one read, so the first list render does
   // not wait for a second storage round trip or for the background worker.
@@ -2003,6 +1799,8 @@ function initializePopup() {
     [ACTIVE_PANEL_STORAGE_KEY]: "import",
     [ADD_FORM_DRAFT_STORAGE_KEY]: null,
   }).then((result) => {
+    performance.mark("ccf-popup-storage-end");
+    performance.measure("ccf-popup-storage-read", "ccf-popup-storage-start", "ccf-popup-storage-end");
     const deadlines = validateStoredDeadlines(result[STORAGE_KEY]);
     currentLang = result[LANG_STORAGE_KEY] || "zh";
     currentTimeFormat = result[TIME_FORMAT_STORAGE_KEY] || "24h";
@@ -2023,6 +1821,11 @@ function initializePopup() {
     startAutoRefresh();
     performance.mark("ccf-popup-ready");
     performance.measure("ccf-popup-initialization", "ccf-popup-initialize", "ccf-popup-ready");
+    // Record the first available frame without making readiness depend on it.
+    window.requestAnimationFrame?.(() => {
+      performance.mark("ccf-popup-frame-after-ready");
+      performance.measure("ccf-popup-ready-to-frame", "ccf-popup-ready", "ccf-popup-frame-after-ready");
+    });
   }).catch((error) => {
     console.error("[CCF DDL Tracker] Popup initialization failed:", error);
     setPopupStatus("error");

@@ -73,9 +73,7 @@
     <main class="site-main">
         <article class="article-shell">
             <h1 data-i18n="guide.title">Guide</h1>
-            <p data-i18n="guide.intro">
-                This page covers the basic workflow for using CCF DDL Tracker after installation.
-            </p>
+            <p data-i18n="guide.intro">This page covers the basic workflow for CCF DDL Tracker v2.5. Check the installed extension version when comparing source features with the Chrome Web Store package.</p>
 
             <h2 data-i18n="guide.openPopup.title">Open the Popup</h2>
             <p data-i18n="guide.openPopup.body">
@@ -91,12 +89,11 @@
                 the toolbar badge countdown.
             </p>
 
+            <h2 data-i18n="guide.badge.title">Read the Toolbar Badge</h2>
+            <p data-i18n="guide.badge.body">The toolbar clock shows the days remaining until the nearest upcoming deadline. v2.5 recalculates after deadline changes and schedules its next update at the next day-count change or expiration. No update is scheduled when there are no future deadlines. A sleeping browser may deliver the scheduled update later.</p>
+
             <h2 data-i18n="guide.import.title">Import Conferences from CCFDDL</h2>
-            <p data-i18n="guide.import.body">
-                The import panel can fetch recommended conferences from the upstream CCFDDL data source.
-                Imported cards keep their official homepage links and source time zone semantics, and
-                you can add selected items into your own deadline list.
-            </p>
+            <p data-i18n="guide.import.body">Click the import search field to load recommended conferences from CCFDDL over HTTPS. If the main source fails, the Chinese and English ICS feeds can recover independently, with a 10 second limit for each source request and response read. Imported cards retain their official homepage links and source time zone semantics.</p>
 
             <h2 data-i18n="guide.calendar.title">Add a Deadline to Calendar</h2>
             <p data-i18n="guide.calendar.body">
@@ -119,7 +116,7 @@
                 <li data-i18n="guide.customize.item2">Choose a display time zone in settings. The default is Asia/Shanghai.</li>
                 <li data-i18n="guide.customize.item3">Choose a 24-hour or 12-hour clock in settings.</li>
                 <li data-i18n="guide.customize.item4">Change date order between year-first and month-first formats.</li>
-                <li data-i18n="guide.customize.item5">Choose System (default), Light, or Dark appearance; your choice is saved locally.</li>
+                <li data-i18n="guide.customize.item5">Choose System (default), Light, or Dark appearance. Your saved choice loads asynchronously when the popup opens, so system colors may appear briefly.</li>
             </ul>
 
             <h2 data-i18n="guide.links.title">Open Official Conference Sites</h2>

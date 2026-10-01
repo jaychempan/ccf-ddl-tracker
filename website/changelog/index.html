@@ -77,6 +77,18 @@
                 This page records major product and interface changes across website and extension releases.
             </p>
 
+            <h2 data-i18n="changelog.v25.title">v2.5</h2>
+            <p data-i18n="changelog.v25.subtitle">Badge scheduling, lighter first-view resources, and more resilient imports.</p>
+            <ul>
+                <li data-i18n="changelog.v25.item1">Replaced minute-by-minute badge polling with one-shot alarms at the next day-count change or expiration, while recalculating immediately after deadline changes.</li>
+                <li data-i18n="changelog.v25.item2">Bound background local-data reads to 3 seconds and scheduled a single retry after 5 minutes on failure; stale reads and errors cannot overwrite newer badge updates.</li>
+                <li data-i18n="changelog.v25.item3">Deferred theme initialization and removed synchronous Web Storage access. Saved themes load asynchronously, so system colors may appear briefly.</li>
+                <li data-i18n="changelog.v25.item4">Preserved the original toolbar clock. Loaded the local YAML/ICS parser only when fetching conferences and added an 84 px popup-header logo asset. First-view files fell from about 203 KB to 109 KB (about 46%); this measures file size, not startup time.</li>
+                <li data-i18n="changelog.v25.item5">Requested the main conference dataset through direct HTTPS, with independent Chinese and English ICS fallbacks and a 10 second timeout covering each request and response read.</li>
+                <li data-i18n="changelog.v25.item6">Skipped minute refresh reads while a fallback tracker tab is hidden and refreshed it when visible again.</li>
+                <li data-i18n="changelog.v25.item7">Added startup timing diagnostics and recovery checks. These improvements do not establish that the long-running browser popup failure is fixed.</li>
+            </ul>
+
             <h2 data-i18n="changelog.v24.title">v2.4</h2>
             <p data-i18n="changelog.v24.subtitle">Appearance settings, lighter startup, and popup recovery.</p>
             <ul>
