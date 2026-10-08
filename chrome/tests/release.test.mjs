@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import { createHash } from "node:crypto";
 
 const root = new URL("../../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
@@ -43,6 +44,7 @@ assert.ok(extensionReadme.includes(`**${displayVersion}**`));
 assert.ok(extensionReadme.includes(`\`${manifest.version}\``));
 
 const websiteScript = await read("website/script.js");
+const websiteScriptVersion = createHash("sha256").update(websiteScript).digest("hex").slice(0, 12);
 new vm.Script(websiteScript, { filename: "website/script.js" });
 const start = websiteScript.indexOf("const translations =");
 const end = websiteScript.indexOf("\nfunction setMenuOpen", start);
@@ -63,6 +65,8 @@ const pages = ["index.html", "get-it/index.html", "guide/index.html", "faq/index
 for (const path of pages) {
   const url = new URL(`website/${path}`, root);
   const html = await readFile(url, "utf8");
+  const scriptUrl = html.match(/<script\s+src="((?:\.\/|\.\.\/)?script\.js[^"<>]*)"/)?.[1];
+  assert.equal(scriptUrl?.split("?")[1], `v=${websiteScriptVersion}`, `${path}: stale translation script URL; run python3 scripts/version-website-script.py`);
   const page = html.match(/\bdata-page="([^"]+)"/)?.[1];
   assert.ok(page, `${path}: page identifier`);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
