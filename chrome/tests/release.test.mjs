@@ -16,6 +16,21 @@ const popup = await read("chrome/popup.html");
 assert.ok(popup.includes(`aria-label="Version ${major}.${minor}">${displayVersion}</span>`));
 assert.equal(manifest.action.default_popup, "popup.html");
 assert.equal(manifest.options_page, "popup.html");
+const runtimeFiles = new Set([
+  manifest.background.service_worker,
+  ...Object.values(manifest.icons),
+  ...manifest.content_scripts.flatMap((entry) => entry.js || []),
+  ...[...popup.matchAll(/\b(?:src|href)="([^"]+)"/g)]
+    .map(([, path]) => path).filter((path) => !/^(?:[a-z]+:|#)/i.test(path)),
+]);
+for (const path of runtimeFiles) await stat(new URL(`chrome/${path}`, root));
+const worker = await read(`chrome/${manifest.background.service_worker}`);
+for (const [, path] of worker.matchAll(/import\s+"\.\/([^"]+)"/g)) {
+  await stat(new URL(`chrome/${path}`, root));
+}
+const notes = await read(`releases/v${manifest.version}.md`);
+assert.ok(notes.includes(`Manifest \`${manifest.version}\``));
+assert.ok(notes.includes(`ccf-ddl-tracker-v${manifest.version}.zip`));
 
 for (const [path, label] of [["README.md", "Version"], ["README.zh-CN.md", "版本"]]) {
   const text = await read(path);
@@ -38,6 +53,10 @@ for (const language of ["en", "zh"]) {
   assert.ok(pages.home["home.release"].includes(displayVersion));
   assert.ok(pages.getIt["getIt.release.body"].includes(displayVersion));
   assert.equal(pages.changelog[changelogKey], displayVersion);
+  assert.ok(pages.guide["guide.intro"].includes(displayVersion));
+}
+for (const page of Object.keys(translations.en.pages)) {
+  assert.deepEqual(Object.keys(translations.en.pages[page]).sort(), Object.keys(translations.zh.pages[page]).sort(), `${page}: matching bilingual message keys`);
 }
 
 const pages = ["index.html", "get-it/index.html", "guide/index.html", "faq/index.html", "privacy/index.html", "changelog/index.html"];

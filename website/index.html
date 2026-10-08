@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
         name="description"
-        content="CCF DDL Tracker is an open source Chrome extension for tracking CCF deadlines with a compact popup, right-click calendar actions, time zone switching, import flow, and local-only storage."
+        content="CCF DDL Tracker v2.6: compact conference cards, optional CCFDDL star sync through GitHub sign-in, and calendar exports."
         data-i18n-content="meta.description"
     >
     <title>CCF DDL Tracker: 一键添加和管理你的截止日期</title>
@@ -83,7 +83,7 @@
             </picture>
             <h1>CCF DDL Tracker</h1>
             <p class="project-subtitle" data-i18n="home.subtitle">An open source Chrome extension for tracking CCF deadlines</p>
-            <p class="project-subtitle" data-i18n="home.release">v2.5 · Less background work, lighter startup, and import recovery</p>
+            <p class="project-subtitle" data-i18n="home.release">v2.6 · Website stars, simpler conference cards</p>
         </section>
 
         <div class="hero-actions">
@@ -101,6 +101,15 @@
 
         <section class="preview-showcase">
             <div class="preview-scroller" data-preview-scroller>
+                <article class="preview-panel" id="preview-v26" data-preview-slide>
+                    <div class="preview-copy">
+                        <span class="eyebrow" data-i18n="home.preview.v26.eyebrow">Version 2.6</span>
+                        <h3 data-i18n="home.preview.v26.title">One conference. Every deadline.</h3>
+                        <p data-i18n="home.preview.v26.body">Connect CCFDDL stars from the small account icon beside My DDLs. A compact card shows the next deadline; expand it for submission rounds, calendar actions, and individual stages. Light and dark previews use example data.</p>
+                    </div>
+                    <img src="./previewv2.6.png" alt="CCF DDL Tracker v2.6 light and dark previews showing the account icon, a compact conference card and expanded submission stages, using example dates" width="1040" height="800" fetchpriority="high" data-i18n-alt="home.preview.v26.imageAlt">
+                </article>
+
                 <article class="preview-panel" id="preview-v25" data-preview-slide>
                     <div class="preview-copy">
                         <span class="eyebrow" data-i18n="home.preview.v25.eyebrow">Version 2.5</span>
@@ -112,7 +121,7 @@
                         alt="Illustration of CCF DDL Tracker v2.5 with the familiar light and dark interface, saved deadlines, theme settings, and local-loading retry"
                         width="1040"
                         height="800"
-                        fetchpriority="high"
+                        loading="lazy"
                         data-i18n-alt="home.preview.v25.imageAlt"
                     >
                 </article>
@@ -215,21 +224,18 @@
             </div>
 
             <div class="preview-dots" role="group" aria-label="Choose a release preview" data-i18n-aria-label="home.preview.tabsLabel">
-                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v25" aria-pressed="true" aria-label="v2.5" title="v2.5"></button>
-                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v24" aria-pressed="false" aria-label="v2.4" title="v2.4"></button>
-                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v23" aria-pressed="false" aria-label="v2.3" title="v2.3"></button>
-                <button class="preview-dot" type="button" data-preview-target="3" aria-controls="preview-v22" aria-pressed="false" aria-label="v2.2" title="v2.2"></button>
-                <button class="preview-dot" type="button" data-preview-target="4" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
-                <button class="preview-dot" type="button" data-preview-target="5" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
+                <button class="preview-dot is-active" type="button" data-preview-target="0" aria-controls="preview-v26" aria-pressed="true" aria-label="v2.6" title="v2.6"></button>
+                <button class="preview-dot" type="button" data-preview-target="1" aria-controls="preview-v25" aria-pressed="false" aria-label="v2.5" title="v2.5"></button>
+                <button class="preview-dot" type="button" data-preview-target="2" aria-controls="preview-v24" aria-pressed="false" aria-label="v2.4" title="v2.4"></button>
+                <button class="preview-dot" type="button" data-preview-target="3" aria-controls="preview-v23" aria-pressed="false" aria-label="v2.3" title="v2.3"></button>
+                <button class="preview-dot" type="button" data-preview-target="4" aria-controls="preview-v22" aria-pressed="false" aria-label="v2.2" title="v2.2"></button>
+                <button class="preview-dot" type="button" data-preview-target="5" aria-controls="preview-v21" aria-pressed="false" aria-label="v2.1" title="v2.1"></button>
+                <button class="preview-dot" type="button" data-preview-target="6" aria-controls="preview-v20" aria-pressed="false" aria-label="v2.0" title="v2.0"></button>
             </div>
         </section>
 
         <article class="article-shell">
-            <p data-i18n="home.intro">
-                CCF DDL Tracker provides a compact popup for keeping deadlines visible in Chrome.
-                You can add custom deadlines, import recommended conferences from CCFDDL, switch the
-                display time zone, and keep everything stored locally in your browser.
-            </p>
+            <p data-i18n="home.intro">Keep conference deadlines together in a compact Chrome popup. Import a conference once, see its next deadline, and expand its card for other stages and calendar actions. Connect your CCFDDL website stars through GitHub sign-in, or use the tracker locally without an account.</p>
 
             <h2 data-i18n="home.features.title">Features</h2>
             <div class="home-features">
@@ -238,15 +244,22 @@
                         <span class="feature-title" data-i18n="home.features.focused.title">Focused tracking</span>
                         <ul>
                             <li data-i18n="home.features.focused.item1">Keep deadlines in a dense popup instead of a separate dashboard.</li>
-                            <li data-i18n="home.features.focused.item2">See remaining days quickly with compact cards and sorted lists.</li>
-                            <li data-i18n="home.features.focused.item3">v2.5 schedules badge updates when needed and loads fewer resources when the popup opens.</li>
+                            <li data-i18n="home.features.focused.item2">One card per conference edition, with the next deadline visible and other stages a click away.</li>
+                            <li data-i18n="home.features.focused.item3">Compact countdowns, expandable submission rounds, and separate calendar actions for each deadline.</li>
                         </ul>
                     </li>
                     <li>
                         <span class="feature-title" data-i18n="home.features.import.title">CCFDDL import flow</span>
                         <ul>
                             <li data-i18n="home.features.import.item1">Import the CCFDDL dataset over HTTPS, with independent Chinese and English ICS fallbacks.</li>
-                            <li data-i18n="home.features.import.item2">Keep homepage links and source time zone data so each card can jump to the official conference site.</li>
+                            <li data-i18n="home.features.import.item2">Add all available deadlines for an edition together; click its title to open the official site.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span class="feature-title" data-i18n="home.features.sync.title">Optional website-star sync</span>
+                        <ul>
+                            <li data-i18n="home.features.sync.item1">Click the account icon beside My DDLs; sign in with GitHub on ccfddl.com if needed.</li>
+                            <li data-i18n="home.features.sync.item2">Keep the website tab open for automatic sync. Disconnect from Settings; manual deadlines stay local.</li>
                         </ul>
                     </li>
                     <li>
@@ -259,7 +272,7 @@
                     <li>
                         <span class="feature-title" data-i18n="home.features.calendar.title">Calendar handoff</span>
                         <ul>
-                            <li data-i18n="home.features.calendar.item1">Right-click any saved or imported card to open the calendar menu.</li>
+                            <li data-i18n="home.features.calendar.item1">Right-click a card for its next deadline, or expand it to export a specific stage.</li>
                             <li data-i18n="home.features.calendar.item2">Send deadlines to Google Calendar or export ICS for Apple / iCloud and other calendar apps.</li>
                         </ul>
                     </li>
@@ -268,10 +281,7 @@
 
             <div class="markdown-alert markdown-alert-note">
                 <p class="markdown-alert-title" data-i18n="home.note.title">Note</p>
-                <p data-i18n-html="home.note.body">
-                    This extension does not require an account and does not upload your saved deadlines.
-                    Your data stays in <code>chrome.storage.local</code> on the current browser.
-                </p>
+                <p data-i18n-html="home.note.body">Deadlines and preferences are stored in <code>chrome.storage.local</code>. Website-star sync is optional and uses GitHub sign-in on ccfddl.com. Manual deadlines stay local; the extension does not read or store GitHub tokens.</p>
             </div>
 
             <div class="markdown-alert markdown-alert-warning">

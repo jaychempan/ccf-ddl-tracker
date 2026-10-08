@@ -148,6 +148,7 @@ let isCcfddlDropdownOpen = false;
 let isCcfddlLoading = false;
 let isSettingsOpen = false;
 let activeContextDeadline = null;
+const expandedConferences = new Set();
 const popupOpenedAt = performance.now();
 const timeZoneSupportCache = new Map();
 const dateTimeFormatterCache = new Map();
@@ -180,6 +181,9 @@ const translations = {
     loading: "加载中...",
     popup_loading: "正在读取已保存的截止日期...",
     popup_load_failed: "读取本地数据失败，请重试。已保存的数据不会被清空。",
+    popup_save_failed: "无法确认保存结果，请刷新列表后再试。",
+    popup_background_unavailable: "扩展后台未连接，请重新加载扩展后再试。已有数据会保留。",
+    reload_extension: "重新加载扩展",
     retry: "重试",
     search_label: "搜索会议",
     search_placeholder: "例如：ICML / SIGMOD",
@@ -190,7 +194,7 @@ const translations = {
     empty_state: "还没有添加任何截止日期",
     refresh_button: "刷新",
     settings_button: "设置",
-    settings_title: "显示设置",
+    settings_title: "设置",
     theme_label: "外观",
     theme_system: "跟随系统",
     theme_light: "浅色",
@@ -219,6 +223,20 @@ const translations = {
     open_site: "打开卡片链接",
     add_item: "添加",
     delete_item: "删除",
+    remove_conference: "移除会议",
+    remove_stage: "移除节点",
+    add_conference: "添加会议",
+    conference_next: "接下来",
+    conference_finished: "本届已无待办节点",
+    stage_finished: "已结束",
+    stage_abstract: "摘要提交",
+    stage_paper: "论文投稿",
+    stage_rebuttal: "Rebuttal 提交",
+    stage_decision: "录用通知",
+    conference_round: (round) => `第 ${round} 轮`,
+    conference_dates: (count) => `${count} 个节点`,
+    conference_expand: (count) => `查看 ${count} 个时间节点`,
+    conference_collapse: (count) => `收起 ${count} 个时间节点`,
     calendar_menu_title: "添加到日历",
     calendar_menu_google: "添加到 Google Calendar",
     calendar_menu_apple: "添加到 Apple / iCloud 日历（.ics）",
@@ -267,6 +285,9 @@ const translations = {
     loading: "Loading...",
     popup_loading: "Loading saved deadlines...",
     popup_load_failed: "Could not load local data. Retry; your saved data has not been cleared.",
+    popup_save_failed: "Could not confirm the save. Refresh the list before trying again.",
+    popup_background_unavailable: "The extension background is unavailable. Reload the extension and try again. Saved data will be kept.",
+    reload_extension: "Reload extension",
     retry: "Retry",
     search_label: "Search",
     search_placeholder: "e.g., ICML / SIGMOD",
@@ -277,7 +298,7 @@ const translations = {
     empty_state: "No deadlines yet",
     refresh_button: "Refresh",
     settings_button: "Settings",
-    settings_title: "Display Settings",
+    settings_title: "Settings",
     theme_label: "Appearance",
     theme_system: "System",
     theme_light: "Light",
@@ -306,6 +327,20 @@ const translations = {
     open_site: "Open card link",
     add_item: "Add",
     delete_item: "Delete",
+    remove_conference: "Remove conference",
+    remove_stage: "Remove date",
+    add_conference: "Add conference",
+    conference_next: "Next",
+    conference_finished: "No upcoming dates",
+    stage_finished: "Past",
+    stage_abstract: "Abstract submission",
+    stage_paper: "Paper submission",
+    stage_rebuttal: "Rebuttal submission",
+    stage_decision: "Final decisions",
+    conference_round: (round) => `Round ${round}`,
+    conference_dates: (count) => `${count} dates`,
+    conference_expand: (count) => `View ${count} dates`,
+    conference_collapse: (count) => `Hide ${count} dates`,
     calendar_menu_title: "Add to Calendar",
     calendar_menu_google: "Add to Google Calendar",
     calendar_menu_apple: "Apple / iCloud Calendar (.ics)",
@@ -535,6 +570,7 @@ function applyTranslations() {
   syncCardInfoFieldInputs();
   syncDateInputMode();
   syncActionButtons();
+  globalThis.renderStarSync?.();
 }
 
 function syncDateInputMode() {
@@ -1199,7 +1235,8 @@ function renderCcfddlList(items) {
   }
 
   ccfddlEmpty.style.display = "none";
-  items.forEach((item) => {
+  getDeadlineCards(items).forEach((card) => {
+    const item = card.item;
     const li = document.createElement("li");
     li.className = "import-item";
 
@@ -1208,18 +1245,20 @@ function renderCcfddlList(items) {
 
     const title = document.createElement("span");
     title.className = "import-title";
-    title.textContent = item.title;
+    title.textContent = card.title;
 
     const addBtn = document.createElement("button");
     addBtn.className = "import-add";
-    addBtn.textContent = t("add_item", "添加");
-    addBtn.addEventListener("click", () => addImportedDeadline(item));
+    addBtn.textContent = card.conferenceId ? t("add_conference") : t("add_item", "添加");
+    addBtn.addEventListener("click", () => card.conferenceId ? addImportedConference(card.items) : addImportedDeadline(item));
 
     header.append(title, addBtn);
 
     const meta = document.createElement("div");
     meta.className = "import-meta";
-    meta.textContent = formatDate(item.datetime);
+    meta.textContent = card.conferenceId
+      ? `${getDeadlineStageLabel(item, card.items)} · ${formatDate(item.datetime)} · ${t("conference_dates")(card.items.length)}`
+      : formatDate(item.datetime);
 
     const badgeList = renderConferenceBadges(item, "import-badges");
     if (badgeList) {
@@ -1279,7 +1318,8 @@ function filterCcfddlList() {
       normalizeText(searchable).includes(normalizedKeyword)
     );
   });
-  renderCcfddlList(filtered);
+  const matchedEditions = new Set(filtered.map((item) => item.conferenceId).filter(Boolean));
+  renderCcfddlList(ccfddlItems.filter((item) => matchedEditions.has(item.conferenceId) || filtered.includes(item)));
 }
 
 async function applyLoadedCcfddlItems(items) {
@@ -1344,7 +1384,8 @@ async function backfillSavedConferenceTags(items) {
       return source ? mergeConferenceTags(item, source) : item;
     });
     if (updated.some((item, index) => item !== existing[index])) {
-      saveDeadlines(updated);
+      if (chrome.runtime.sendMessage) await sendDeadlineMutation("enrich", { items: updated });
+      else saveDeadlines(updated);
     }
   } catch (error) {
     console.error("[CCF DDL Tracker] Could not fill saved conference tags:", error);
@@ -1352,6 +1393,10 @@ async function backfillSavedConferenceTags(items) {
 }
 
 function addImportedDeadline(item) {
+  if (chrome.runtime.sendMessage) {
+    sendDeadlineMutation("add", { item });
+    return;
+  }
   chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
     const existing = result[STORAGE_KEY];
     const matchIndex = existing.findIndex(
@@ -1543,10 +1588,198 @@ async function toggleImportPanel() {
   saveActivePanelPreference();
 }
 
+// Group only explicit edition IDs. Similar titles and manually entered dates
+// must not accidentally become a conference or another year's edition.
+function getDeadlineCards(deadlines, now = Date.now()) {
+  const conferences = new Map();
+  const cards = [];
+  for (const item of getSortedDeadlines(deadlines)) {
+    if (!item.conferenceId) {
+      cards.push({ item, items: [item] });
+      continue;
+    }
+    let card = conferences.get(item.conferenceId);
+    if (!card) {
+      card = { conferenceId: item.conferenceId, items: [] };
+      conferences.set(item.conferenceId, card);
+      cards.push(card);
+    }
+    card.items.push(item);
+  }
+  for (const card of cards) {
+    card.item = card.items.find((item) => (toTimestamp(item.datetime) ?? -Infinity) >= now)
+      || card.items[card.items.length - 1];
+    card.upcoming = (toTimestamp(card.item.datetime) ?? -Infinity) >= now;
+    card.title = card.conferenceId
+      ? card.items.find((item) => item.conferenceTitle)?.conferenceTitle || card.item.title.replace(/\s+\([^)]*\)$/, "")
+      : card.item.title;
+  }
+  const sortTime = (card) => card.conferenceId && !card.upcoming ? Infinity : toTimestamp(card.item.datetime) ?? Infinity;
+  return cards.sort((a, b) => sortTime(a) - sortTime(b));
+}
+
+function getDeadlineStageLabel(item, items = []) {
+  const parts = (item.conferenceDeadlineId || "").split(":");
+  const stage = item.deadlineStage || parts[parts.length - 1];
+  const key = { abstract_deadline: "stage_abstract", deadline: "stage_paper", rebuttal_deadline: "stage_rebuttal", decision_deadline: "stage_decision" }[stage];
+  const label = key ? t(key) : item.title;
+  const round = item.deadlineRound ?? Number(parts[parts.length - 2]);
+  const rounds = new Set(items.map((entry) => entry.deadlineRound ?? entry.conferenceDeadlineId?.split(":").at(-2)));
+  const roundLabel = item.deadlineRoundLabel || (rounds.size > 1 && Number.isInteger(round) ? t("conference_round")(round + 1) : "");
+  return roundLabel ? `${label} · ${roundLabel}` : label;
+}
+
+function getRemainingLabel(item) {
+  const parts = getCountdownParts(item.datetime);
+  if (!parts) return "";
+  if (!isPreciseCountdownEnabled) return currentLang === "zh" ? `${parts.days} 天` : `${parts.days}d`;
+  const values = currentLang === "zh"
+    ? [parts.days ? `${parts.days}天` : "", parts.days || parts.hours ? `${parts.hours}时` : "", `${parts.minutes}分`]
+    : [parts.days ? `${parts.days}d` : "", parts.days || parts.hours ? `${parts.hours}h` : "", `${parts.minutes}m`];
+  return values.filter(Boolean).join(" ");
+}
+
+function createConferenceCard(card) {
+  const { item, items, conferenceId } = card;
+  const li = document.createElement("li");
+  li.className = "item conference-group";
+  const header = document.createElement("div");
+  header.className = "item-header";
+  const title = document.createElement(item.url ? "a" : "span");
+  title.className = "item-title conference-title";
+  title.textContent = card.title;
+  if (item.url) {
+    title.href = normalizeConferenceUrl(item.url);
+    title.target = "_blank";
+    title.rel = "noopener noreferrer";
+    title.setAttribute("title", t("open_site"));
+  }
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "delete-btn";
+  remove.textContent = t("remove_conference");
+  remove.setAttribute("aria-label", `${t("remove_conference")} ${card.title}`);
+  remove.addEventListener("click", () => removeConference(conferenceId));
+  header.appendChild(title);
+  li.appendChild(header);
+  const badges = isCardInfoEnabled ? renderConferenceBadges(item, "item-badges", currentCardInfoFields) : null;
+
+  const next = document.createElement("div");
+  next.className = "conference-next";
+  const stage = document.createElement("span");
+  stage.className = "conference-next-label";
+  stage.textContent = card.upcoming ? getDeadlineStageLabel(item, items) : t("conference_finished");
+  const countdown = document.createElement("span");
+  countdown.className = "conference-countdown";
+  countdown.textContent = card.upcoming ? getRemainingLabel(item) : "";
+  const date = document.createElement("div");
+  date.className = "conference-next-date";
+  date.textContent = formatDate(item.datetime);
+  countdown.setAttribute("title", card.upcoming ? t("remaining_precise")(getCountdownParts(item.datetime)) : "");
+  header.appendChild(countdown);
+  next.append(stage, date);
+  li.appendChild(next);
+
+  const details = document.createElement("details");
+  details.className = "conference-details";
+  details.open = expandedConferences.has(conferenceId);
+  const summary = document.createElement("summary");
+  const updateSummary = () => {
+    const label = t(details.open ? "conference_collapse" : "conference_expand")(items.length);
+    summary.setAttribute("aria-label", `${card.title}：${label}`);
+    summary.setAttribute("title", label);
+  };
+  updateSummary();
+  details.addEventListener("toggle", () => {
+    if (details.open) expandedConferences.add(conferenceId);
+    else expandedConferences.delete(conferenceId);
+    updateSummary();
+  });
+  const stages = document.createElement("ol");
+  stages.className = "conference-stages";
+  for (const entry of items) {
+    const row = document.createElement("li");
+    row.className = "conference-stage";
+    const isNext = card.upcoming && entry === item;
+    if (isNext) row.classList.add("is-next");
+    const heading = document.createElement("div");
+    heading.className = "stage-heading";
+    const label = document.createElement("span");
+    label.className = "stage-label";
+    label.textContent = getDeadlineStageLabel(entry, items);
+    const status = document.createElement("span");
+    status.className = "stage-status";
+    status.textContent = toTimestamp(entry.datetime) < Date.now() ? t("stage_finished") : "";
+    if (isNext) row.setAttribute("aria-label", `${t("conference_next")}：${getDeadlineStageLabel(entry, items)}`);
+    heading.append(label, status);
+    const time = document.createElement("div");
+    time.className = "stage-date";
+    time.textContent = formatDate(entry.datetime);
+    const actions = document.createElement("div");
+    actions.className = "stage-actions";
+    const calendar = document.createElement("button");
+    calendar.type = "button";
+    calendar.className = "stage-calendar";
+    calendar.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="5" width="14" height="12" rx="2"/><path d="M6 3v4m8-4v4M3 9h14m-7 2v4m-2-2h4"/></svg>';
+    calendar.setAttribute("title", t("calendar_menu_title"));
+    calendar.setAttribute("aria-label", `${t("calendar_menu_title")}：${entry.title}`);
+    calendar.addEventListener("click", (event) => {
+      const rect = calendar.getBoundingClientRect();
+      openDeadlineContextMenu(entry, { clientX: event.clientX || rect.left, clientY: event.clientY || rect.bottom });
+    });
+    const hide = document.createElement("button");
+    hide.type = "button";
+    hide.className = "stage-remove";
+    hide.textContent = "×";
+    hide.setAttribute("title", t("remove_stage"));
+    hide.setAttribute("aria-label", `${t("remove_stage")}：${entry.title}`);
+    hide.addEventListener("click", () => removeDeadline(entry.originalIndex, entry));
+    actions.append(calendar, hide);
+    row.append(heading, time, actions);
+    attachDeadlineContextMenu(row, entry);
+    stages.appendChild(row);
+  }
+  const footer = document.createElement("div");
+  footer.className = "conference-info";
+  if (badges) footer.appendChild(badges);
+  footer.appendChild(remove);
+  details.append(summary, stages, footer);
+  li.appendChild(details);
+  attachDeadlineContextMenu(li, item);
+  return li;
+}
+
+function addImportedConference(items) {
+  if (chrome.runtime.sendMessage) {
+    sendDeadlineMutation("addMany", { items });
+    return;
+  }
+  chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
+    const updated = [...result[STORAGE_KEY]];
+    for (const item of items) {
+      if (!updated.some((entry) => entry.conferenceDeadlineId === item.conferenceDeadlineId)) updated.push(item);
+    }
+    saveDeadlines(updated);
+  });
+}
+
+function removeConference(conferenceId) {
+  expandedConferences.delete(conferenceId);
+  if (chrome.runtime.sendMessage) {
+    sendDeadlineMutation("removeConference", { conferenceId });
+    return;
+  }
+  chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
+    saveDeadlines(result[STORAGE_KEY].filter((item) => item.conferenceId !== conferenceId));
+  });
+}
+
 function render(deadlines) {
   closeDeadlineContextMenu();
   listEl.innerHTML = "";
-  const sorted = getSortedDeadlines(deadlines);
+  const sorted = getDeadlineCards(deadlines);
+  const visibleGroups = new Set(sorted.map((card) => card.conferenceId));
+  for (const id of expandedConferences) if (!visibleGroups.has(id)) expandedConferences.delete(id);
 
   if (sorted.length === 0) {
     emptyEl.hidden = false;
@@ -1557,7 +1790,12 @@ function render(deadlines) {
   emptyEl.hidden = true;
   countEl.textContent = currentLang === "zh" ? `(${sorted.length} 项)` : `(${sorted.length})`;
 
-  sorted.forEach((item) => {
+  sorted.forEach((card) => {
+    if (card.conferenceId) {
+      listEl.appendChild(createConferenceCard(card));
+      return;
+    }
+    const item = card.item;
     const li = document.createElement("li");
     li.className = "item";
     const hasLink = Boolean(item.url);
@@ -1587,7 +1825,7 @@ function render(deadlines) {
     del.textContent = t("delete_item", "删除");
     del.addEventListener("click", (event) => {
       event.stopPropagation();
-      removeDeadline(item.originalIndex);
+      removeDeadline(item.originalIndex, item);
     });
 
     header.append(title, del);
@@ -1669,11 +1907,19 @@ function validateStoredDeadlines(deadlines) {
   return deadlines;
 }
 
-function setPopupStatus(state) {
+let backgroundUnavailable = false;
+
+function setPopupStatus(state, messageKey = "popup_load_failed") {
+  // A successful storage read cannot repair a missing background worker.
+  if (state === "ready" && backgroundUnavailable) {
+    state = "error";
+    messageKey = "popup_background_unavailable";
+  }
   popupStatus.hidden = state === "ready";
   popupStatus.dataset.state = state;
-  popupStatusMessage.textContent = t(state === "error" ? "popup_load_failed" : "popup_loading");
-  popupRetryBtn.textContent = t("retry");
+  popupStatus.dataset.recovery = state === "error" && messageKey === "popup_background_unavailable" ? "reload" : "read";
+  popupStatusMessage.textContent = t(state === "error" ? messageKey : "popup_loading");
+  popupRetryBtn.textContent = t(popupStatus.dataset.recovery === "reload" ? "reload_extension" : messageKey === "popup_save_failed" ? "refresh_button" : "retry");
   popupRetryBtn.hidden = state !== "error";
 }
 
@@ -1732,14 +1978,35 @@ function saveDeadlines(deadlines) {
   });
 }
 
-function removeDeadline(index) {
+async function sendDeadlineMutation(action, data) {
+  try {
+    const response = await chrome.runtime.sendMessage({ type: "ccfddl-sync", action, ...data });
+    if (!response) throw new Error("background_unavailable");
+    if (!response?.ok) throw new Error("Could not save deadlines");
+    render(validateStoredDeadlines(response.deadlines));
+    backgroundUnavailable = false;
+    setPopupStatus("ready");
+    return true;
+  } catch (error) {
+    console.error("[CCF DDL Tracker] Could not save deadlines:", error);
+    backgroundUnavailable = /background_unavailable|Receiving end does not exist|Could not establish connection|Extension context invalidated/i.test(error?.message || "");
+    setPopupStatus("error", backgroundUnavailable ? "popup_background_unavailable" : "popup_save_failed");
+    return false;
+  }
+}
+
+function removeDeadline(index, item) {
+  if (chrome.runtime.sendMessage) {
+    sendDeadlineMutation("remove", { item });
+    return;
+  }
   chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
     const updated = result[STORAGE_KEY].filter((_, idx) => idx !== index);
     saveDeadlines(updated);
   });
 }
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const title = titleInput.value.trim();
   const date = normalizeDateInput(dateInput.value);
@@ -1755,6 +2022,16 @@ form.addEventListener("submit", (event) => {
   );
   if (!datetime) return;
 
+  if (chrome.runtime.sendMessage) {
+    if (await sendDeadlineMutation("add", { item: { title, datetime, ...(url ? { url } : {}) } })) {
+      form.reset();
+      timeInput.value = "23:59";
+      clearAddFormDraft();
+      setAddFormExpanded(false);
+      saveActivePanelPreference();
+    }
+    return;
+  }
   chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
     const deadline = { title, datetime };
     if (url) {
@@ -1837,7 +2114,13 @@ function initializePopup() {
   return popupInitialization;
 }
 
-popupRetryBtn.addEventListener("click", loadDeadlines);
+popupRetryBtn.addEventListener("click", () => {
+  if (popupStatus.dataset.recovery === "reload") {
+    chrome.runtime.reload();
+    return;
+  }
+  loadDeadlines();
+});
 
 addActionBtn.addEventListener("click", () => {
   setSettingsOpen(false);

@@ -639,6 +639,124 @@ END:VCALENDAR`;
     assert.equal(h.evaluate("isCcfddlLoading"), false);
   });
 
+  const groupItems = [
+    { title: "CVPR 2099 (abstract)", conferenceTitle: "CVPR 2099", conferenceId: "cvpr99", conferenceDeadlineId: "cvpr99:0:abstract_deadline", datetime: "2099-11-01T12:00:00Z" },
+    { title: "CVPR 2099", conferenceTitle: "CVPR 2099", conferenceId: "cvpr99", conferenceDeadlineId: "cvpr99:0:deadline", datetime: "2099-11-08T12:00:00Z" },
+    { title: "CVPR 2099 (rebuttal)", conferenceTitle: "CVPR 2099", conferenceId: "cvpr99", conferenceDeadlineId: "cvpr99:0:rebuttal_deadline", datetime: "2099-12-01T12:00:00Z" },
+  ];
+  await check("conference cards group edition IDs, keep manual entries separate, and advance to the next date", async () => {
+    const otherYear = { ...groupItems[1], title: "CVPR 2100", conferenceTitle: "CVPR 2100", conferenceId: "cvpr00", conferenceDeadlineId: "cvpr00:0:deadline", datetime: "2100-11-08T12:00:00Z" };
+    const manual = { title: "CVPR 2099", datetime: "2099-11-04T12:00:00Z" };
+    const h = createPopupHarness(source, { deadlines: [...groupItems, otherYear, manual] });
+    await h.runTimers(0);
+    assert.equal(h.getElement("deadline-list").children.length, 3);
+    assert.equal(h.getElement("count").textContent, "(3 项)");
+    const cardsAt = (now) => JSON.parse(JSON.stringify(h.evaluate(`getDeadlineCards(${JSON.stringify([...groupItems, otherYear, manual])}, Date.parse(${JSON.stringify(now)}))`)));
+    const before = cardsAt("2099-10-01").find((card) => card.conferenceId === "cvpr99");
+    const after = cardsAt("2099-11-02").find((card) => card.conferenceId === "cvpr99");
+    assert.equal(before.item.conferenceDeadlineId, "cvpr99:0:abstract_deadline");
+    assert.equal(after.item.conferenceDeadlineId, "cvpr99:0:deadline");
+    assert.equal(after.items.length, 3, "past stages stay available in the expanded card");
+    assert.equal(cardsAt("2101-01-01").find((card) => card.conferenceId === "cvpr99").upcoming, false);
+    assert.equal(h.state.writes.length, 0, "grouping is a view and never migrates local data");
+  });
+  await check("expanded conference stages survive refresh and calendar actions target the selected stage", async () => {
+    const h = createPopupHarness(source, { deadlines: groupItems });
+    await h.runTimers(0);
+    const getDetails = () => h.getElement("deadline-list").children[0].children.find((child) => child.className === "conference-details");
+    let details = getDetails();
+    assert.equal(details.open, false);
+    details.open = true;
+    details.listeners.get("toggle")[0]();
+    h.evaluate(`render(${JSON.stringify(groupItems)})`);
+    details = getDetails();
+    assert.equal(details.open, true);
+    const rows = details.children[1].children;
+    assert.equal(rows.length, 3);
+    assert.equal(rows[0].children[0].children[0].textContent, "摘要提交");
+    const calendar = rows[1].children[2].children[0];
+    calendar.getBoundingClientRect = () => ({ left: 20, bottom: 30 });
+    h.evaluate("openDeadlineContextMenu = (item) => { globalThis.selectedCalendarItem = item; }");
+    calendar.listeners.get("click")[0]({ clientX: 20, clientY: 30 });
+    assert.equal(h.context.selectedCalendarItem.conferenceDeadlineId, "cvpr99:0:deadline");
+    rows[0].children[2].children[1].listeners.get("click")[0]();
+    await h.settle();
+    assert.equal(h.state.data.deadlines.length, 2);
+    assert.equal(h.getElement("deadline-list").children.length, 1, "removing a stage keeps the conference card");
+    assert.equal(getDetails().open, true);
+  });
+  await check("conference imports group matching search stages and add all edition dates at once", async () => {
+    const h = createPopupHarness(source);
+    await h.runTimers(0);
+    h.evaluate(`ccfddlItems = ${JSON.stringify(groupItems)};`);
+    h.getElement("ccfddl-search").value = "abstract";
+    h.evaluate("filterCcfddlList()");
+    const cards = h.getElement("ccfddl-list").children;
+    assert.equal(cards.length, 1);
+    assert.equal(cards[0].children[0].children[0].textContent, "CVPR 2099");
+    cards[0].children[0].children[1].listeners.get("click")[0]();
+    await h.settle();
+    assert.equal(h.state.data.deadlines.length, 3);
+    assert.equal(h.state.writes.length, 1, "a grouped import is one local write");
+    assert.equal(h.getElement("deadline-list").children.length, 1);
+  });
+  await check("multiple rounds remain distinguishable and grouped labels follow the selected language", async () => {
+    const rounds = [...groupItems, { ...groupItems[1], conferenceDeadlineId: "cvpr99:1:deadline", title: "CVPR 2099 (Second round)", deadlineRound: 1, deadlineRoundLabel: "Second round" }];
+    const h = createPopupHarness(source, { deadlines: rounds, language: "en" });
+    await h.runTimers(0);
+    const labels = h.evaluate(`getDeadlineCards(${JSON.stringify(rounds)})[0].items.map((item) => getDeadlineStageLabel(item, ${JSON.stringify(rounds)}))`);
+    assert.ok(labels.includes("Paper submission · Round 1"));
+    assert.ok(labels.includes("Paper submission · Second round"));
+    assert.equal(h.getElement("deadline-list").children.length, 1);
+  });
+
+  await check("a missing background offers extension reload and preserves existing deadlines", async () => {
+    for (const reply of ["reject", "empty"]) {
+      const h = createPopupHarness(source, { deadlines: [sample] });
+      await h.runTimers(0);
+      h.runtime.sendMessage = async () => {
+        if (reply === "reject") throw new Error("Could not establish connection. Receiving end does not exist.");
+      };
+      const saved = JSON.stringify(h.state.data);
+      assert.equal(await h.evaluate(`sendDeadlineMutation("add", { item: ${JSON.stringify(sample)} })`), false);
+      assert.ok(h.getElement("popup-status-message").textContent.includes("扩展后台未连接"));
+      assert.equal(h.getElement("popup-retry").textContent, "重新加载扩展");
+      await h.evaluate("loadDeadlines()");
+      assert.equal(h.getElement("popup-status").hidden, false, "reading data cannot repair the missing worker");
+      let reloads = 0;
+      h.runtime.reload = () => { reloads += 1; };
+      h.getElement("popup-retry").listeners.get("click")[0]();
+      assert.equal(reloads, 1);
+      assert.equal(JSON.stringify(h.state.data), saved);
+      assert.equal(h.state.writes.length, 0);
+      assert.equal(h.getElement("deadline-list").children.length, 1);
+    }
+  });
+  await check("failed saves refresh the saved list without replaying an uncertain mutation", async () => {
+    const h = createPopupHarness(source, { deadlines: [sample], language: "en" });
+    await h.runTimers(0);
+    let calls = 0;
+    h.runtime.sendMessage = async () => { calls += 1; return { ok: false }; };
+    await h.evaluate(`sendDeadlineMutation("remove", { item: ${JSON.stringify(sample)} })`);
+    assert.ok(h.getElement("popup-status-message").textContent.includes("Could not confirm the save"));
+    assert.equal(h.getElement("popup-retry").textContent, "Refresh");
+    h.getElement("popup-retry").listeners.get("click")[0]();
+    await h.settle();
+    assert.equal(calls, 1);
+    assert.equal(h.getElement("deadline-list").children.length, 1);
+    assert.equal(h.getElement("popup-status").hidden, true);
+  });
+  await check("a successful mutation clears the previous connection error", async () => {
+    const h = createPopupHarness(source, { deadlines: [sample] });
+    await h.runTimers(0);
+    h.runtime.sendMessage = async () => undefined;
+    await h.evaluate(`sendDeadlineMutation("add", { item: ${JSON.stringify(sample)} })`);
+    h.runtime.sendMessage = async () => ({ ok: true, deadlines: [sample] });
+    assert.equal(await h.evaluate(`sendDeadlineMutation("add", { item: ${JSON.stringify(sample)} })`), true);
+    assert.equal(h.getElement("popup-status").hidden, true);
+    assert.equal(h.getElement("deadline-list").children.length, 1);
+  });
+
   return { passed: results.length, tests: results };
 }
 

@@ -1,6 +1,6 @@
 # CCF DDL Tracker (Chrome Extension)
 
-当前源码版本为 **v2.5**（manifest：`2.5.0`），新增角标按需更新、首屏减重、异步主题加载和会议搜索恢复；保留原版工具栏小闹钟、夜间模式、加载重试和标签页备用入口。可按下方步骤加载体验；GitHub 更新不会自动更新商店安装包，商店发布需单独提交审核。/ This source checkout is **v2.5** (manifest: `2.5.0`), adding on-demand badge updates, smaller first-view resources, asynchronous theme loading, and conference-search recovery. It retains the original toolbar clock, dark mode, loading retries, and tab fallback. Load it unpacked below; Web Store distribution requires a separate submission and review.
+当前源码版本为 **v2.6**（manifest：`2.6.0`），新增 CCFDDL 收藏同步、简约会议卡片及保存恢复提示。已有已解压安装请在扩展管理页重新加载，保留原安装项即可沿用本地数据。商店安装包需单独提交审核。/ This source checkout is **v2.6** (manifest: `2.6.0`), with CCFDDL star sync, compact conference cards and save recovery. Reload your existing unpacked installation to keep its local data. Web Store distribution requires a separate submission and review.
 
 ## 使用方法 / Usage
 
@@ -13,16 +13,16 @@ Edge 用户可在 `edge://extensions/` 按相同步骤加载。从 v2.4 起，�
 
 ## 功能说明 / Features
 
-- **当前版本**：扩展版本已更新为 `v2.5`，弹窗右上角会显示版本标记。/ The extension is now `v2.5`, and the popup header shows the current version.
+- **当前版本**：扩展版本已更新为 `v2.6`，弹窗右上角会显示版本标记。/ The extension is now `v2.6`, and the popup header shows the current version.
 - **添加 DDL**：填写标题、日期、时间，点击“添加”。/ Add title/date/time and click “Add”.
-- **查看详情**：弹窗中会按时间排序展示多个 DDL，并显示剩余天数。/ Sorted list with remaining days.
-- **会议标签**：“我的截止日期”默认显示已有的 CCF 等级和分类，可在设置 → 会议标签中开关显示或选择 CORE、TH-CPL、地点。此前关闭显示的选择会保留。旧条目缺少标签时，点击导入区搜索框加载推荐会议，会补全标题与截止时间唯一匹配的条目。/ My DDLs shows available CCF rank and category tags by default. Settings → Conference Tags controls visibility and optional CORE, TH-CPL, and place fields; saved opt-outs are preserved. Loading recommendations via the import search field fills missing tags only for unique title-and-deadline matches.
+- **简约会议卡片**：按届次合并日期，默认显示最近节点，展开后查看阶段和轮次；手动条目单独显示。/ One card per edition shows its next deadline; expand stages and rounds. Manual entries remain separate.
+- **会议标签**：展开后的会议卡片默认显示已有的 CCF 等级和分类，可在设置 → 会议标签中开关显示或选择 CORE、TH-CPL、地点。此前关闭显示的选择会保留。旧条目缺少标签时，点击导入区搜索框加载推荐会议，会补全标题与截止时间唯一匹配的条目。/ Expanded conference cards show available CCF rank and category tags by default. Settings → Conference Tags controls visibility and optional CORE, TH-CPL, and place fields; saved opt-outs are preserved. Loading recommendations via the import search field fills missing tags only for unique title-and-deadline matches.
 - **徽标提示**：工具栏图标显示最近一个 DDL 的剩余天数；增删改后立即更新，并在天数变化或到期时安排下一次更新，没有未来 DDL 时不设置定时任务。/ The badge shows the nearest days left, updates immediately when deadlines change, and schedules its next update when the day count changes or the deadline expires. No alarm is scheduled without upcoming deadlines.
-- **删除 DDL**：在条目右侧点击“删除”。/ Delete from the list.
+- **移除条目**：展开会议后可移除单个节点或整届会议。开启同步时，移除整届或最后一个已保存节点会取消网站收藏。/ Expand a conference to remove one stage or the entire edition. With sync enabled, removing the edition or its last saved stage also removes the website star.
 - **右键日历菜单**：在已保存或导入的条目上右键，可添加到 Google Calendar，或导出适用于 Apple / iCloud 的 `.ics` 文件。/ Right-click any saved or imported item to add it to Google Calendar or export an Apple / iCloud compatible `.ics` file.
 - **双入口卡片**：新增截止日期和从 CCFDDL 导入改为一行两个入口卡片，点击后切换下方面板。/ Add DDL and Import from CCFDDL now appear as two side-by-side entry cards that switch the panel below.
 - **导入推荐会议**：导入面板默认常驻显示，会优先显示已缓存会议，并在点击搜索框时获取最新推荐。/ The import panel stays visible by default, shows cached conferences first, and refreshes recommendations when the search field is focused.
-- **官网直达**：从 CCFDDL 导入的会议会保留官网链接，加入“我的截止日期”后可直接点击卡片打开会议官网。/ Imported CCFDDL conferences retain their homepage links, and once added to "My DDLs" the card can be clicked to open the conference website.
+- **官网直达**：从 CCFDDL 导入的会议会保留官网链接，加入“我的截止日期”后点击会议标题打开官网。/ Imported CCFDDL conferences retain their homepage links, and once added to "My DDLs" click its title to open the conference website.
 - **底部工具栏**：中英切换和 CCFDDL 官网入口已移动到底部工具栏，右上角不再放操作项。/ Language switching and the CCFDDL website shortcut now live in the bottom toolbar instead of the top-right corner.
 - **协作入口**：底部工具栏新增 GitHub 仓库链接，可直接打开项目主页参与开发。/ The bottom toolbar now includes a GitHub repository link so you can open the project page and contribute directly.
 - **显示设置**：底部新增设置入口，可切换时间显示为 24 小时制或上午/下午 12 小时制。/ A new settings entry in the bottom bar lets you switch time display between 24-hour and 12-hour formats.
@@ -56,7 +56,11 @@ Note: Imports read the CCFDDL YAML dataset over HTTPS, then fall back to the Chi
 
 ## 数据存储 / Data
 
-所有数据保存在 `chrome.storage.local` 中，仅在本机可见。/ Stored locally in `chrome.storage.local`.
+截止日期和偏好保存在 `chrome.storage.local`。可选同步会与 ccfddl.com 共享会议届次收藏，手动 DDL 不上传。同步账号、待处理操作与隐藏阶段保存在本地；断开同步保留本地数据和网站收藏。/ Deadlines and preferences use `chrome.storage.local`. Optional sync shares conference edition stars with ccfddl.com; manual deadlines are not uploaded. Sync account, pending operations and hidden stages are stored locally. Disconnecting retains local deadlines and website stars.
+
+## 升级和保存恢复 / Upgrade and save recovery
+
+更新源码后，在 `chrome://extensions/` 或 `edge://extensions/` 重新加载原安装项，再刷新 ccfddl.com 标签页。若添加或删除时提示“扩展后台未连接”，点击“重新加载扩展”后重新打开弹窗；不要卸载扩展。若无法确认保存结果，先刷新列表再重试，以免重复操作。/ After updating source files, reload the existing extension and refresh ccfddl.com tabs. If adding or deleting reports an unavailable background, click Reload extension and reopen the popup. Keep the existing installation. If a save cannot be confirmed, refresh the list before repeating it.
 
 ## 弹窗卡顿 / Popup troubleshooting
 
@@ -76,9 +80,9 @@ Badge updates now use a one-shot alarm at the next display change instead of one
 
 Background local reads time out after 3 seconds. A failed current update schedules a one-shot retry after 5 minutes; stale results and errors cannot overwrite a newer badge or schedule.
 
-首屏 logo 从 91,632 字节缩小为 5,745 字节；YAML/ICS 解析器移至本地 `conference-parser.js`，仅在首次请求会议数据时加载。此轮修改将首屏 HTML、CSS、页面脚本和 logo 的合计大小从约 203 KB 降为 109 KB（减少约 46%）。这是文件体积统计，不代表实际启动耗时缩短了相同比例。
+首屏 logo 从 91,632 字节缩小为 5,745 字节；YAML/ICS 解析器移至本地 `conference-parser.js`，在弹窗首次请求会议数据时按需加载，同步后台也使用此解析器。v2.5 当时的资源修改将首屏 HTML、CSS、页面脚本和 logo 的合计大小从约 203 KB 降为 109 KB（减少约 46%）。这是文件体积统计，不代表实际启动耗时缩短了相同比例。
 
-The first-view logo shrank from 91,632 to 5,745 bytes. YAML/ICS parsing moved to local `conference-parser.js`, loaded only on the first conference-data request. Together, these changes reduce the HTML, CSS, page scripts, and logo loaded on startup from about 203 KB to 109 KB (about 46%). File-size savings do not imply the same reduction in startup time.
+The first-view logo shrank from 91,632 to 5,745 bytes. YAML/ICS parsing moved to local `conference-parser.js`, loaded on demand by the popup and also used by the sync worker. In v2.5, these changes reduced the HTML, CSS, page scripts, and logo loaded on startup from about 203 KB to 109 KB (about 46%). File-size savings do not imply the same reduction in startup time.
 
 页面内的分钟倒计时仍在可见时刷新；隐藏的备用标签页跳过定时读取，重新显示时立即刷新。/ Minute-level countdowns still refresh while the page is visible. A hidden fallback tab skips scheduled reads and refreshes immediately when shown again.
 
@@ -88,6 +92,7 @@ The first-view logo shrank from 91,632 to 5,745 bytes. YAML/ICS parsing moved to
 node chrome/tests/popup.test.mjs
 node chrome/tests/theme.test.mjs
 node chrome/tests/background.test.mjs
+node chrome/tests/star-sync.test.mjs
 node chrome/tests/release.test.mjs
 ```
 
@@ -106,3 +111,25 @@ performance.getEntriesByType("measure")
 Edge 或 Chrome 点击图标无反应时，请查看[排查指南](POPUP-TROUBLESHOOTING.md#中文)。macOS 上的 Chrome 已有浏览器官方修复，优先在 `chrome://settings/help` 更新并重新启动，再测试闲置后的首次点击。指南同时提供标签页备用入口和错误收集步骤。
 
 If the popup stops opening in Edge or Chrome, see the [troubleshooting guide](POPUP-TROUBLESHOOTING.md#english). For Chrome on macOS, first apply the official browser fix by updating at `chrome://settings/help` and relaunching, then test the first click after an idle period. The guide also covers the tab fallback and error collection.
+
+## CCFDDL 收藏同步 / CCFDDL star sync
+
+v2.6 增加可选同步：点击“我的截止日期”右侧的小账号图标，已有已登录的网站标签页时直接连接，否则在打开的 ccfddl.com 页面登录 GitHub，并保留该标签页。首次合并收藏，此后自动同步；现有刷新按钮同时刷新截止日期和收藏。再次点击图标直接刷新，悬停可查看状态，没有弹出菜单。取消设置中的“同步网站收藏”即可断开。网站星标可能需要刷新页面才显示。手动 DDL 不上传，断开不删除本地数据或网站收藏，但会取消待同步操作。每届会议可对应多个阶段，删除最后一条关联 DDL 才取消星标。旧版导入或 ICS 条目缺少会议 ID 时，请从最新会议列表重新添加以关联。账号切换会暂停同步，需要断开后重新连接。
+
+v2.6 adds optional sync through the small account icon beside My DDLs. A signed-in CCFDDL tab connects immediately; otherwise sign in with GitHub on the website that opens and keep the tab open. First sync merges stars, then runs automatically. The existing refresh button also refreshes stars; click the account icon to refresh directly, or hover for status. There is no account menu. Uncheck Sync website stars in Settings to disconnect. Reload the website to see extension changes. Manual deadlines stay local. Disconnect preserves local entries and website stars but discards pending changes. Removing the last deadline for an edition unstars it. Re-add old imports or ICS entries from the current catalog to associate edition IDs. Account changes pause sync until you explicitly reconnect.
+
+`site-sync.js` uses only the site's existing `/api/bootstrap`, `/api/stars/:id` and conference catalog endpoints. The service worker serializes local writes and sync, persists retries, and checks the signed-in account before writes. It never reads cookies or stores GitHub tokens. Local sync metadata includes the GitHub login, pending edition IDs, excluded stages and last sync status. No new permission is requested; the content script matches only `https://ccfddl.com/*`.
+
+Run `node chrome/tests/star-sync.test.mjs` for sync and catalog regression coverage.
+
+### 合并会议卡片 / Grouped conference cards
+
+同一届会议的节点在导入列表和“我的 DDL”中合并为一张卡片。默认以两行显示会议名、倒计时、最近节点和日期；点击右上角箭头展开各阶段和不同投稿轮次。悬停节点或通过键盘聚焦可显示日历及移除图标，触摸设备直接显示这些操作。会议标签和整届移除放在展开区底部。节点到期后自动切换到下一项；展开状态在本次弹窗的刷新中保留。“添加会议”一次添加该届所有可导入节点；“移除会议”移除整届并在开启同步时取消网站星标。仅按明确的会议届次 ID 分组，不会按相似标题合并手动 DDL 或不同年份。
+
+Both import results and My DDLs show one card per explicit conference edition ID. The two-line card shows the conference name, countdown and next date. Use the top-right arrow to expand individual stages and rounds. Calendar and remove icons appear on hover or keyboard focus (always visible on touch devices); conference tags and the whole-edition removal action sit at the bottom of the expanded view. The next date advances automatically, and expansion survives refreshes within the open popup. Add conference imports the edition's available dates together; Remove conference removes the edition and unstars it when sync is enabled. Manual entries and different years remain separate.
+
+## 发布包 / Release package
+
+在仓库根目录执行 `python3 scripts/package-extension.py`，生成 `dist/ccf-ddl-tracker-v2.6.0.zip`。安装包根目录包含 manifest 与运行所需资源，不包含测试、文档或网站。/ Run `python3 scripts/package-extension.py` from the repository root to build `dist/ccf-ddl-tracker-v2.6.0.zip`. It contains the manifest and runtime resources, excluding tests, docs and the website.
+
+完整更新说明 / Full release notes: [v2.6.0](../releases/v2.6.0.md).

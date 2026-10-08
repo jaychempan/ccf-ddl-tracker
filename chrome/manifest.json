@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CCF DDL Tracker",
   "description": "Track your upcoming CCF deadlines and see days remaining on the badge.",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "permissions": ["storage", "alarms"],
   "host_permissions": ["https://ccfddl.com/*", "https://ccfddl.github.io/*"],
   "options_page": "popup.html",
@@ -14,10 +14,17 @@
     }
   },
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "service-worker.js",
     "type": "module"
   },
   "icons": {
     "128": "icons/icon128.png"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://ccfddl.com/*"],
+      "js": ["site-sync.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }

@@ -73,14 +73,10 @@
     <main class="site-main">
         <article class="article-shell">
             <h1 data-i18n="guide.title">Guide</h1>
-            <p data-i18n="guide.intro">This page covers the basic workflow for CCF DDL Tracker v2.5. Check the installed extension version when comparing source features with the Chrome Web Store package.</p>
+            <p data-i18n="guide.intro">A guide to CCF DDL Tracker v2.6: add conferences, connect website stars, and manage individual deadlines. Check your installed version when comparing features with the Chrome Web Store package.</p>
 
             <h2 data-i18n="guide.openPopup.title">Open the Popup</h2>
-            <p data-i18n="guide.openPopup.body">
-                Pin the extension to the Chrome toolbar and click the icon. The extension opens as a
-                native popup, so you can check deadlines without leaving the current tab. In v2.4,
-                right-click the icon and choose Options to open the same tracker and saved data in a regular tab.
-            </p>
+            <p data-i18n="guide.openPopup.body">Pin the extension to the toolbar and click its icon. You can also right-click the icon and choose Options to open the same tracker and saved data in a regular tab.</p>
 
             <h2 data-i18n="guide.manual.title">Add a Deadline Manually</h2>
             <p data-i18n="guide.manual.body">
@@ -90,17 +86,25 @@
             </p>
 
             <h2 data-i18n="guide.badge.title">Read the Toolbar Badge</h2>
-            <p data-i18n="guide.badge.body">The toolbar clock shows the days remaining until the nearest upcoming deadline. v2.5 recalculates after deadline changes and schedules its next update at the next day-count change or expiration. No update is scheduled when there are no future deadlines. A sleeping browser may deliver the scheduled update later.</p>
+            <p data-i18n="guide.badge.body">The toolbar clock shows days remaining until the nearest upcoming deadline across all stages. It updates after deadline edits and at the next day-count change or expiration. No badge update is scheduled without upcoming deadlines. A sleeping browser may deliver an update later.</p>
 
             <h2 data-i18n="guide.import.title">Import Conferences from CCFDDL</h2>
-            <p data-i18n="guide.import.body">Click the import search field to load recommended conferences from CCFDDL over HTTPS. If the main source fails, the Chinese and English ICS feeds can recover independently, with a 10 second limit for each source request and response read. Imported cards retain their official homepage links and source time zone semantics.</p>
+            <p data-i18n="guide.import.body">Click the import search field to load CCFDDL conferences. Add conference saves the available dates for that edition together. Source time zones and official links are preserved. If the main dataset fails, either Chinese or English ICS feed can recover the import; each request has a 10-second timeout. ICS entries without an edition ID remain separate local entries.</p>
+
+            <h2 data-i18n="guide.cards.title">One Card per Conference Edition</h2>
+            <p data-i18n="guide.cards.body">A conference card shows the next upcoming deadline and a compact countdown. Use the chevron to see all saved stages and submission rounds. Removing one stage hides it locally; Remove conference deletes all saved stages for the edition. Manual deadlines remain separate cards.</p>
+
+            <h2 data-i18n="guide.sync.title">Connect Your CCFDDL Stars</h2>
+            <ol>
+                <li data-i18n="guide.sync.step1">Click the small account icon beside My DDLs. An open, signed-in ccfddl.com tab connects directly; otherwise sign in with GitHub on the website that opens.</li>
+                <li data-i18n="guide.sync.step2">Keep that website tab open. The first connection merges both sets of conference stars and imports upcoming stages. Sync runs automatically; the existing refresh button also refreshes stars.</li>
+                <li data-i18n="guide.sync.step3">Once connected, click the account icon to refresh stars directly or hover to see status. Uncheck Sync website stars in Settings to disconnect. Refresh the website to see extension changes.</li>
+            </ol>
+            <p data-i18n="guide.sync.removal">With sync enabled, removing a conference or its last saved stage removes its website star. Website unstars remove linked local stages. Manual deadlines and older imports without an edition ID stay local; re-add a conference from the current import list to link it.</p>
+            <p data-i18n="guide.sync.recovery">Offline changes are retained for retry. If the website account changes, sync pauses until you disconnect and reconnect. Stars with unknown or TBD dates remain on the website until dates are available.</p>
 
             <h2 data-i18n="guide.calendar.title">Add a Deadline to Calendar</h2>
-            <p data-i18n="guide.calendar.body">
-                Right-click any saved or imported deadline card to open the calendar menu. From there,
-                you can send the item to Google Calendar or export an ICS file for Apple / iCloud and
-                other calendar apps.
-            </p>
+            <p data-i18n="guide.calendar.body">Right-click a conference card to export its next deadline. To choose another stage, expand the card and use that stage’s calendar icon or right-click menu. Google Calendar and Apple / iCloud-compatible ICS exports use the selected stage’s date.</p>
 
             <div class="markdown-alert markdown-alert-note">
                 <p class="markdown-alert-title" data-i18n="guide.tip.title">Tip</p>
@@ -120,16 +124,10 @@
             </ul>
 
             <h2 data-i18n="guide.links.title">Open Official Conference Sites</h2>
-            <p data-i18n="guide.links.body">
-                Imported conferences retain their homepage links, so once a card is added to your list,
-                you can jump from the popup to the official website for calls for papers or updates.
-            </p>
+            <p data-i18n="guide.links.body">Click the conference title to open its official website. The chevron expands the card’s deadlines without opening another page.</p>
 
             <h2 data-i18n="guide.storage.title">Storage Model</h2>
-            <p data-i18n-html="guide.storage.body">
-                All deadlines and preferences are stored in <code>chrome.storage.local</code>. The
-                extension does not require sign-in or cloud sync to function.
-            </p>
+            <p data-i18n-html="guide.storage.body">Deadlines and preferences are saved in <code>chrome.storage.local</code>. Optional sync shares conference edition stars with ccfddl.com; manual deadlines stay local. Disconnecting keeps local deadlines and website stars, while cancelling pending sync operations.</p>
         </article>
     </main>
 

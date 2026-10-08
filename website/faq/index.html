@@ -75,10 +75,7 @@
             <h1 data-i18n="faq.title">FAQ</h1>
 
             <h3 data-i18n="faq.q1">Where are my deadlines stored?</h3>
-            <p data-i18n-html="faq.a1">
-                They are stored in <code>chrome.storage.local</code> inside the browser. There is no
-                account system and no project-hosted cloud sync.
-            </p>
+            <p data-i18n-html="faq.a1">Deadlines and preferences are stored in <code>chrome.storage.local</code>. In v2.6, you can optionally sync conference stars through a signed-in ccfddl.com tab. Manual deadlines remain local.</p>
 
             <h3 data-i18n="faq.q2">Where do imported conferences come from?</h3>
             <p data-i18n-html="faq.a2">Imports use the CCFDDL dataset served over direct HTTPS. The data comes from the upstream <a href="https://github.com/ccfddl/ccf-deadlines" target="_blank" rel="noopener noreferrer">ccfddl/ccf-deadlines</a> project. If that source fails, the Chinese and English ICS feeds can recover independently; each request and response read is limited to 10 seconds.</p>
@@ -96,10 +93,7 @@
             </p>
 
             <h3 data-i18n="faq.q5">Can I open the official conference homepage from a card?</h3>
-            <p data-i18n="faq.a5">
-                Yes. Imported conferences keep their homepage links, and added cards can open the
-                conference website directly from the popup.
-            </p>
+            <p data-i18n="faq.a5">Yes. Click the title of an imported conference to open its official site. The chevron expands its deadlines.</p>
 
             <h3 data-i18n="faq.q6">Can I use my own custom deadlines?</h3>
             <p data-i18n="faq.a6">
@@ -107,15 +101,22 @@
             </p>
 
             <h3 data-i18n="faq.q7">How do I add a deadline to my calendar?</h3>
-            <p data-i18n="faq.a7">
-                Right-click any saved or imported deadline card in the popup. You can open a prefilled
-                Google Calendar event or export an ICS file for Apple / iCloud and other calendar apps.
-            </p>
+            <p data-i18n="faq.a7">Right-click a card for its next deadline, or expand the conference and use a specific stage’s calendar icon. Export to Google Calendar or download ICS for Apple / iCloud and other calendar apps.</p>
+            <h3 data-i18n="faq.q10">How do I connect my GitHub login and website stars?</h3>
+            <p data-i18n="faq.a10">Click the account icon beside My DDLs, then sign in with GitHub on ccfddl.com if needed. Keep the website tab open for automatic sync. This syncs conference stars on CCFDDL, not GitHub repository stars. No token entry is needed. Disconnect in Settings.</p>
+
+            <h3 data-i18n="faq.q11">Why are several deadlines combined into one card?</h3>
+            <p data-i18n="faq.a11">Dates with the same conference edition ID share one card. Its next deadline is visible by default; expand it for the other stages and rounds. Each stage has its own calendar action. A website star represents the whole edition.</p>
+
+            <h3 data-i18n="faq.q12">What if adding or deleting a conference fails after upgrading?</h3>
+            <p data-i18n="faq.a12">An unpacked extension can show updated popup files while still running its old background worker. Reload the extension from its recovery button or the browser’s extension manager, then reopen the popup. v2.6 distinguishes a missing background from a failed save or read. For an uncertain save, refresh the list before repeating the action. Existing saved data is not automatically cleared.</p>
+
+
             <h3 data-i18n="faq.q9">How often does the toolbar badge update?</h3>
-            <p data-i18n="faq.a9">v2.5 recalculates the badge after saved deadlines change and schedules a single update at the next day-count change or expiration. It no longer polls every minute. Background local reads time out after 3 seconds; failures schedule a retry after 5 minutes.</p>
+            <p data-i18n="faq.a9">The badge recalculates after saved deadlines change and schedules its next update when the day count changes or a deadline expires. Optional website-star sync runs separately, about once a minute while the browser can run it, and after local edits.</p>
 
             <h3 data-i18n="faq.q8">What if the popup gets stuck or does not open?</h3>
-            <p data-i18n="faq.a8">The v2.5 source reduces startup work and adds timing diagnostics. Failed local data reads or reads taking over 3 seconds offer Retry once the popup script is running. If no popup appears, right-click the extension icon and choose Options to try the same tracker in a regular tab. If the problem returns, record the browser and extension versions and any console errors. These changes do not establish that the long-running browser popup failure is fixed.</p>
+            <p data-i18n="faq.a8">If a local read fails or takes more than 3 seconds, click Retry. If the popup does not appear at all, right-click the extension icon and choose Options to use the tracker in a tab. Record browser and extension versions and console errors if it recurs. This is separate from the v2.6 save-error recovery.</p>
         </article>
     </main>
 

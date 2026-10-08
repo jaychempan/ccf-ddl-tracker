@@ -77,6 +77,18 @@
                 This page records major product and interface changes across website and extension releases.
             </p>
 
+            <h2 data-i18n="changelog.v26.title">v2.6</h2>
+            <p data-i18n="changelog.v26.subtitle">Website-star sync, compact conference cards, and reliable save recovery · October 8, 2026</p>
+            <ul>
+                <li data-i18n="changelog.v26.item1">Added opt-in CCFDDL conference-star sync through the website’s GitHub login. Connect from the small account icon beside My DDLs; subsequent sync is automatic and the existing refresh button also refreshes stars.</li>
+                <li data-i18n="changelog.v26.item2">Merged deadlines by conference edition into compact cards. Show the next deadline first, expand stages and rounds, and add all available dates from one import result.</li>
+                <li data-i18n="changelog.v26.item3">Added calendar and removal actions per stage, plus whole-conference removal. With sync enabled, removing the final saved stage or the whole conference also removes its website star.</li>
+                <li data-i18n="changelog.v26.item4">Preserved source time zones and stage metadata when parsing conference editions, including fields declared after the timeline.</li>
+                <li data-i18n="changelog.v26.item5">Serialized local writes and sync commits, retained offline changes, guarded account switches and stale responses, and kept manual deadlines local. No GitHub token entry or additional extension permissions are required.</li>
+                <li data-i18n="changelog.v26.item6">Fixed save and background-connection errors being reported as local-read failures. Added extension reload for an unavailable background and list refresh before retrying an uncertain save.</li>
+                <li data-i18n="changelog.v26.item7">Updated the bilingual website, guides, privacy policy and release preview. Expanded popup and sync regression coverage, including browser checks for upgrade recovery and retained data.</li>
+            </ul>
+
             <h2 data-i18n="changelog.v25.title">v2.5</h2>
             <p data-i18n="changelog.v25.subtitle">Badge scheduling, lighter first-view resources, and more resilient imports.</p>
             <ul>

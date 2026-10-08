@@ -17,7 +17,7 @@
         <p class="subtitle" data-i18n="subtitle_en">Add and manage your deadlines in one click, and show the nearest days left</p>
         </div>
       </div>
-      <span class="version-tag" aria-label="Version 2.5">v2.5</span>
+      <span class="version-tag" aria-label="Version 2.6">v2.6</span>
     </header>
 
     <section class="action-grid">
@@ -86,6 +86,12 @@
           <span id="count"></span>
         </h2>
         <div class="list-actions">
+          <button id="account-toggle" type="button" class="icon-ghost-btn account-toggle" aria-label="通过 GitHub 登录并合并 CCFDDL 收藏" disabled>
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <circle cx="10" cy="6.2" r="3" />
+              <path d="M4.5 17v-1.2a5.5 5.5 0 0 1 11 0V17" />
+            </svg>
+          </button>
           <button id="refresh-deadlines" type="button" class="icon-ghost-btn" data-i18n-title="refresh_button" aria-label="刷新">
             <svg class="refresh-icon" viewBox="0 0 20 20" focusable="false" aria-hidden="true">
               <path
@@ -229,7 +235,14 @@
     </footer>
 
     <section id="settings-panel" class="settings-panel" hidden>
-      <p class="settings-title" data-i18n="settings_title">显示设置</p>
+      <p class="settings-title" data-i18n="settings_title">设置</p>
+      <fieldset class="settings-group">
+        <label class="settings-option">
+          <input id="sync-enabled" type="checkbox" aria-describedby="sync-status" disabled />
+          <span id="sync-label">同步网站收藏</span>
+        </label>
+        <p id="sync-status" class="sync-setting-status" role="status" aria-live="polite"></p>
+      </fieldset>
       <fieldset class="settings-group">
         <legend class="settings-legend" data-i18n="theme_label">外观</legend>
         <div class="theme-options">
@@ -360,5 +373,6 @@
     </section>
 
     <script src="popup.js"></script>
+    <script src="popup-sync.js"></script>
   </body>
 </html>

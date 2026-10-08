@@ -73,27 +73,26 @@
     <main class="site-main">
         <article class="article-shell">
             <h1 data-i18n="privacy.title">Privacy Policy</h1>
-            <p data-i18n="privacy.effectiveDate">Effective date: April 15, 2026</p>
+            <p data-i18n="privacy.effectiveDate">Effective date: October 8, 2026</p>
 
             <p data-i18n-html="privacy.summary">
-                <strong>CCF DDL Tracker does not require an account and does not intentionally collect
-                your personal data.</strong>
+                <strong>Deadline tracking works locally without an account. Optional conference-star sync uses GitHub sign-in on ccfddl.com.</strong>
             </p>
 
             <h2 data-i18n="privacy.local.title">Local Storage</h2>
             <p data-i18n-html="privacy.local.body">
                 Deadlines, imported conference entries that you save, and interface preferences are stored
-                in <code>chrome.storage.local</code> within the browser profile where the extension runs.
+                in <code>chrome.storage.local</code> within the browser profile where the extension runs. Optional sync also stores the GitHub login, pending conference IDs, excluded stages and sync status locally.
             </p>
 
             <h2 data-i18n="privacy.sources.title">External Data Sources</h2>
-            <p data-i18n="privacy.sources.body">The extension requests the CCFDDL dataset and fallback ICS feeds over HTTPS when you use conference import. These requests populate the import list; opening the popup reads your saved local data.</p>
+            <p data-i18n="privacy.sources.body">The extension requests the CCFDDL dataset and fallback ICS feeds over HTTPS when you use conference import. These requests populate the import list. If you enable star sync, the extension uses a signed-in ccfddl.com tab to read your account login and conference stars, send conference-star changes, and fetch conference dates. It never reads or stores GitHub tokens; manual deadlines are not uploaded.</p>
+
+            <h2 data-i18n="privacy.sync.title">Your Sync Choices</h2>
+            <p data-i18n="privacy.sync.body">Sync is off until you connect it. You can disconnect in Settings at any time. Disconnecting retains local deadlines and existing website stars, clears the extension’s sync account/state and cancels pending sync operations. It does not delete your CCFDDL account or sign you out of the website. Website stars and GitHub sign-in are handled by those services under their own policies.</p>
 
             <h2 data-i18n="privacy.analytics.title">Analytics</h2>
-            <p data-i18n="privacy.analytics.body">
-                The extension workflow is designed to operate without project-hosted telemetry, user
-                accounts, or cloud sync managed by this project.
-            </p>
+            <p data-i18n="privacy.analytics.body">The extension has no project-hosted analytics or telemetry. Core deadline tracking works without an account. Optional star sync communicates with ccfddl.com using your website session.</p>
 
             <h2 data-i18n="privacy.links.title">Third-Party Links</h2>
             <p data-i18n="privacy.links.body">

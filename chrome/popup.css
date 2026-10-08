@@ -966,3 +966,83 @@ select:focus-visible,
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+.account-toggle { color: var(--muted); border-radius: 5px; }
+.account-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+.account-toggle[data-state="connected"] { color: var(--primary); }
+.account-toggle[data-state="attention"] { color: var(--danger); }
+.account-toggle:hover { background: var(--menu-hover); }
+
+.sync-setting-status { margin: 3px 0 0 20px; color: var(--muted); font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
+
+.icon-ghost-btn.is-syncing .refresh-icon { animation: refresh-spin 1000ms linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .icon-ghost-btn.is-syncing .refresh-icon { animation: none; }
+}
+
+/* A quiet two-line overview; date-level actions appear on interaction. */
+.conference-group {
+  position: relative;
+  flex-shrink: 0;
+  padding: 11px 10px;
+  gap: 5px;
+  background: var(--card);
+}
+.conference-group > .item-header { padding-right: 25px; align-items: baseline; }
+.conference-title { min-width: 0; color: var(--text); text-decoration: none; overflow-wrap: anywhere; font-size: 13px; }
+a.conference-title:hover { color: var(--primary); }
+.conference-countdown { flex-shrink: 0; color: var(--text); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.conference-next { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; color: var(--muted); font-size: 11px; }
+.conference-next-label { min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
+.conference-next-date { font-variant-numeric: tabular-nums; }
+.conference-details > summary {
+  position: absolute;
+  top: 7px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  list-style: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.conference-details > summary::-webkit-details-marker { display: none; }
+.conference-details > summary::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+.conference-details[open] > summary::after { transform: translateY(2px) rotate(225deg); }
+.conference-details > summary:hover { background: var(--menu-hover); color: var(--text); }
+.conference-stages { list-style: none; margin: 6px 0 0; padding: 4px 0 0; border-top: 1px solid var(--border); }
+.conference-stage { position: relative; padding: 6px 6px 6px 13px; margin: 0; border: 0; }
+.conference-stage::before { content: ""; position: absolute; top: 12px; left: 1px; width: 4px; height: 4px; background: var(--border); border-radius: 50%; }
+.conference-stage.is-next::before { background: var(--primary); }
+.stage-heading { display: flex; gap: 8px; align-items: baseline; }
+.stage-label { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.conference-stage.is-next .stage-label { color: var(--text); font-weight: 600; }
+.stage-status { font-size: 10px; color: var(--muted); }
+.stage-date { font-size: 10px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stage-actions { position: absolute; top: 4px; right: 0; display: flex; gap: 2px; opacity: 0; pointer-events: none; background: var(--card); }
+.conference-stage:hover .stage-actions,
+.conference-stage:focus-within .stage-actions { opacity: 1; pointer-events: auto; }
+.conference-stage:hover .stage-heading,
+.conference-stage:focus-within .stage-heading { padding-right: 50px; }
+.stage-calendar, .stage-remove { display: inline-flex; align-items: center; justify-content: center; width: 23px; height: 23px; padding: 3px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
+.stage-calendar svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.stage-remove { font-size: 18px; font-weight: 400; }
+.stage-calendar:hover { color: var(--primary); background: var(--menu-hover); }
+.stage-remove:hover { color: var(--danger); background: var(--menu-hover); }
+.conference-info { display: flex; align-items: center; gap: 8px; padding-top: 7px; margin-top: 4px; border-top: 1px solid var(--border); }
+.conference-info > .item-badges { flex: 1; margin: 0; }
+.conference-info .conference-badge { border: 0; padding: 0; background: transparent; color: var(--muted); font-size: 10px; }
+.conference-info .conference-badge + .conference-badge::before { content: "/"; padding-right: 4px; color: var(--border); }
+.conference-info > .delete-btn { margin-left: auto; flex-shrink: 0; padding: 2px 0; color: var(--muted); font-size: 10px; font-weight: 400; }
+.conference-info > .delete-btn:hover { color: var(--danger); }
+.conference-details > summary:focus-visible,
+.conference-title:focus-visible,
+.stage-calendar:focus-visible,
+.stage-remove:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+@media (hover: none) {
+  .stage-actions { opacity: 1; pointer-events: auto; }
+  .stage-heading { padding-right: 50px; }
+}

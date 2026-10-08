@@ -4,6 +4,12 @@
 
 ## English
 
+### v2.6: adding or deleting fails after an unpacked upgrade
+
+A new popup can be running alongside an old background worker until the extension is reloaded. v2.6 reports an unavailable background separately from storage-read failures and offers **Reload extension**. Reload the existing installation at `chrome://extensions/` (or `edge://extensions/`), reopen the popup, and retry the operation. Refresh existing ccfddl.com tabs before connecting stars. Keep the original installation to retain local data.
+
+If the save result is uncertain, use **Refresh** to inspect the saved list before repeating the operation. The extension does not replay the uncertain write automatically. An actual local-read failure still offers **Retry**. This recovery is separate from a browser that does not display the popup at all.
+
 ### Chrome on macOS: apply the official browser fix first
 
 As of 2026-09-30, [Chromium issue 549552319](https://issues.chromium.org/issues/549552319) is marked **Fixed**. The fix re-enables `UseMachVouchers`; it was also merged into the M154 and M155 branches. This replaces the older launch-flag workaround as the first recovery step:
@@ -46,7 +52,7 @@ We compared the actual store packages, CCF DDL Tracker **2.4.0** and Citation Tr
 
 The head-level synchronous theme access is a concrete additional blocking point in CCF 2.4.0. If it stalls, the body and startup timeout cannot run yet; Citation has no corresponding head storage step. However, CCF **2.3.0** already failed before that theme script existed. Resource-size differences can add loading work but do not establish the cause of a long hang. Alarm definitions also do not establish which worker or renderer was active during the failure. These comparisons identify candidates for measurement, not a confirmed root cause.
 
-The table describes the installed store packages. The local v2.5 source (manifest: `2.5.0`) separately removes synchronous theme caching, replaces minute-level badge polling with one-shot scheduling, shrinks the header logo to 5.7 KB, and loads conference parsers on demand. The toolbar clock retains its original assets and drawing method. Its first-view files total about 109 KB, down from 203 KB before this resource change. Reload the unpacked copy to test these changes; the installed store package is unchanged, and the long-running failure still needs validation.
+The table describes the installed store packages. The v2.5 source snapshot (manifest: `2.5.0`) separately removes synchronous theme caching, replaces minute-level badge polling with one-shot scheduling, shrinks the header logo to 5.7 KB, and loads conference parsers on demand. The toolbar clock retains its original assets and drawing method. Its first-view files total about 109 KB, down from 203 KB before this resource change. Reload the unpacked copy to test these changes; the installed store package is unchanged, and the long-running failure still needs validation.
 
 ### Start here: Microsoft Edge
 
@@ -152,6 +158,12 @@ Because a normal restart also restored the popup, this test does **not** establi
 
 ## 中文
 
+### v2.6：升级已解压版本后添加或删除失败
+
+更新文件后，新弹窗可能仍连接旧后台，直到重新加载扩展。v2.6 将后台未连接与本地读取失败区分，并提供**重新加载扩展**入口。也可在 `chrome://extensions/`（或 `edge://extensions/`）重新加载原安装项，再打开弹窗重试。连接收藏前刷新已有 ccfddl.com 标签页；保留原安装项即可沿用本地数据。
+
+保存结果不确定时，先点击**刷新**查看已保存列表，再决定是否重试。扩展不会自动重复不确定的写入操作。真正的本地读取失败仍提供**重试**。这与浏览器完全无法显示弹窗的问题分别处理。
+
 ### macOS 上的 Chrome：优先应用浏览器官方修复
 
 截至 2026-09-30，[Chromium issue 549552319](https://issues.chromium.org/issues/549552319) 已标记为 **Fixed**。修复重新启用了 `UseMachVouchers`，并已合入 M154、M155 分支。优先按以下步骤恢复：
@@ -194,7 +206,7 @@ Because a normal restart also restored the popup, this test does **not** establi
 
 head 中的同步主题访问是 CCF 2.4.0 确实多出的一个阻塞点：如果它卡住，body 和启动超时都还不能执行；Citation 没有对应步骤。但 **CCF 2.3.0 没有该主题脚本时就发生过故障**。资源量差异可能增加加载工作，不能证明长时间卡住的原因；定时器定义也不能证明故障时哪个 worker 或渲染进程活跃。这些对比用于确定测量对象，尚不能确定具体根因。
 
-上表描述的是已安装商店包。本地 v2.5 源码（manifest：`2.5.0`）另外移除了同步主题缓存，将每分钟角标轮询改为单次调度、顶部 logo 缩至 5.7 KB，并按需加载会议解析器；工具栏小闹钟保留原版资源和绘制方式。这轮资源修改将首屏文件合计从约 203 KB 降至 109 KB。重新加载已解压版本后可测试这些改动；已安装商店包没有变化，长期故障仍需验证。
+上表描述的是已安装商店包。v2.5 源码快照（manifest：`2.5.0`）当时另外移除了同步主题缓存，将每分钟角标轮询改为单次调度、顶部 logo 缩至 5.7 KB，并按需加载会议解析器；工具栏小闹钟保留原版资源和绘制方式。这轮资源修改将首屏文件合计从约 203 KB 降至 109 KB。重新加载已解压版本后可测试这些改动；已安装商店包没有变化，长期故障仍需验证。
 
 ### 先从这里开始：Microsoft Edge
 

@@ -158,144 +158,72 @@ function parseIcs(text) {
     .filter(Boolean);
 }
 
-function parseTimezoneOffset(timezone) {
-  if (!timezone) return 0;
-  const normalized = timezone.trim();
-  if (normalized.toUpperCase() === "AOE") return -12;
-  const match = normalized.match(/UTC([+-]\d{1,2})/i);
-  if (!match) return 0;
-  return Number.parseInt(match[1], 10);
-}
-
 function parseDeadlineWithTimezone(deadline, timezone) {
-  if (!deadline || deadline.toUpperCase() === "TBD") return null;
-  const [datePart, timePart] = deadline.split(" ");
-  if (!datePart || !timePart) return null;
-  const [year, month, day] = datePart.split("-").map((value) => Number(value));
-  const [hour, minute, second] = timePart.split(":").map((value) => Number(value));
-  if ([year, month, day, hour, minute, second].some((value) => Number.isNaN(value))) {
-    return null;
-  }
-  const offsetHours = parseTimezoneOffset(timezone);
-  const utcMs = Date.UTC(year, month - 1, day, hour, minute, second) - offsetHours * 3600 * 1000;
-  return new Date(utcMs).toISOString();
+  const match = deadline?.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+  const [, year, month, day, hour, minute, second = "00"] = match;
+  const zone = timezone?.trim().toUpperCase() === "AOE" ? "UTC-12" : timezone || "UTC";
+  const offset = parseFixedOffsetTimeZone(zone);
+  if (!offset) return null;
+  const value = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}${offset}`);
+  return Number.isFinite(value.getTime()) ? value.toISOString() : null;
 }
 
+// Parse the generated allconf.yml subset by collecting an entire edition first.
+// Its timezone/place usually follow timeline entries; emitting on each line would
+// apply the previous edition's timezone. Star keys are edition IDs, not series keys.
 function parseAllConfYaml(text) {
+  const conferences = [];
+  let conference, edition, round;
+  const scalar = (value) => value.trim().replace(/^['"]|['"]$/g, "");
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.trim().match(/^(?:-\s+)?([a-z_]+):\s*(.*)$/);
+    if (!match) continue;
+    const [, key, raw] = match;
+    const value = scalar(raw);
+    if (key === "title") {
+      conference = { title: value, rank: {}, editions: [] };
+      conferences.push(conference);
+      edition = round = null;
+    } else if (!conference) continue;
+    else if (key === "year") {
+      edition = { year: value, rounds: [] };
+      conference.editions.push(edition);
+      round = null;
+    } else if (["description", "sub"].includes(key)) conference[key] = value;
+    else if (["ccf", "core", "thcpl"].includes(key)) conference.rank[key] = value;
+    else if (edition && ["id", "link", "timezone", "place"].includes(key)) edition[key] = value;
+    else if (edition && /^(abstract_deadline|deadline|rebuttal_deadline|decision_deadline)$/.test(key)) {
+      if (line.trim().startsWith("- ") || !round) {
+        round = {};
+        edition.rounds.push(round);
+      }
+      round[key] = value;
+    } else if (round && key === "comment") round.comment = value;
+  }
   const items = [];
-  let current = null;
-  let currentTimezone = null;
-  let currentYear = null;
-  let currentPlace = null;
-  let pendingDeadline = null;
-  let pendingComment = null;
-
-  const flushPending = () => {
-    if (!pendingDeadline || !current) return;
-    const iso = parseDeadlineWithTimezone(pendingDeadline, currentTimezone);
-    if (!iso) return;
-    const suffix = pendingComment ? ` (${pendingComment})` : "";
-    const title = currentYear ? `${current.title} ${currentYear}${suffix}` : `${current.title}${suffix}`;
-    items.push({
-      title,
-      datetime: iso,
-      url: normalizeConferenceUrl(current.link),
-      description: current.description || "",
-      sub: current.sub || "",
-      rank: current.rank || {},
-      place: currentPlace || "",
-    });
-    pendingDeadline = null;
-    pendingComment = null;
-  };
-
-  text.split(/\r?\n/).forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) return;
-
-    if (trimmed.startsWith("- title:")) {
-      flushPending();
-      const title = trimmed.replace("- title:", "").trim().replace(/^['"]|['"]$/g, "");
-      current = { title };
-      currentTimezone = null;
-      currentYear = null;
-      currentPlace = null;
-      return;
+  for (const conf of conferences) for (const ed of conf.editions) {
+    for (const [roundIndex, entry] of ed.rounds.entries()) {
+      for (const stage of ["abstract_deadline", "deadline", "rebuttal_deadline", "decision_deadline"]) {
+        const datetime = parseDeadlineWithTimezone(entry[stage], ed.timezone);
+        if (!datetime) continue;
+        const suffix = [entry.comment, stage === "deadline" ? "" : stage.replace("_deadline", "")].filter(Boolean).join(" · ");
+        let url = "";
+        try { const parsed = new URL(ed.link); if (["http:", "https:"].includes(parsed.protocol)) url = parsed.href; } catch {}
+        items.push({
+          title: `${conf.title} ${ed.year}${suffix ? ` (${suffix})` : ""}`,
+          datetime, url, description: conf.description || "", sub: conf.sub || "",
+          rank: conf.rank, place: ed.place || "",
+          ...(ed.id ? {
+            conferenceId: ed.id, conferenceDeadlineId: `${ed.id}:${roundIndex}:${stage}`,
+            conferenceTitle: `${conf.title} ${ed.year}`, deadlineStage: stage,
+            deadlineRound: roundIndex, deadlineRoundLabel: entry.comment || "",
+          } : {}),
+        });
+      }
     }
-
-    if (!current) return;
-
-    if (trimmed.startsWith("description:")) {
-      current.description = trimmed.replace("description:", "").trim().replace(/^['"]|['"]$/g, "");
-      return;
-    }
-
-    if (trimmed.startsWith("sub:")) {
-      current.sub = trimmed.replace("sub:", "").trim().replace(/^['"]|['"]$/g, "").toUpperCase();
-      return;
-    }
-
-    if (trimmed.startsWith("ccf:")) {
-      current.rank = { ...(current.rank || {}), ccf: trimmed.replace("ccf:", "").trim().replace(/^['"]|['"]$/g, "") };
-      return;
-    }
-
-    if (trimmed.startsWith("core:")) {
-      current.rank = { ...(current.rank || {}), core: trimmed.replace("core:", "").trim().replace(/^['"]|['"]$/g, "") };
-      return;
-    }
-
-    if (trimmed.startsWith("thcpl:")) {
-      current.rank = { ...(current.rank || {}), thcpl: trimmed.replace("thcpl:", "").trim().replace(/^['"]|['"]$/g, "") };
-      return;
-    }
-
-    if (trimmed.startsWith("year:")) {
-      currentYear = trimmed.replace("year:", "").trim();
-      currentPlace = null;
-      return;
-    }
-
-    if (trimmed.startsWith("timezone:")) {
-      currentTimezone = trimmed.replace("timezone:", "").trim();
-      return;
-    }
-
-    if (trimmed.startsWith("link:")) {
-      current.link = trimmed.replace("link:", "").trim();
-      return;
-    }
-
-    if (trimmed.startsWith("place:")) {
-      currentPlace = trimmed.replace("place:", "").trim().replace(/^['"]|['"]$/g, "");
-      return;
-    }
-
-    if (trimmed.startsWith("- deadline:") || trimmed.startsWith("deadline:")) {
-      flushPending();
-      pendingDeadline = trimmed.replace("- deadline:", "").replace("deadline:", "").trim();
-      pendingDeadline = pendingDeadline.replace(/^['"]|['"]$/g, "");
-      return;
-    }
-
-    if (trimmed.startsWith("- abstract_deadline:") || trimmed.startsWith("abstract_deadline:")) {
-      flushPending();
-      pendingDeadline = trimmed
-        .replace("- abstract_deadline:", "")
-        .replace("abstract_deadline:", "")
-        .trim();
-      pendingDeadline = pendingDeadline.replace(/^['"]|['"]$/g, "");
-      pendingComment = pendingComment ? pendingComment : "abstract";
-      return;
-    }
-
-    if (trimmed.startsWith("comment:")) {
-      pendingComment = trimmed.replace("comment:", "").trim().replace(/^['"]|['"]$/g, "");
-      return;
-    }
-  });
-
-  flushPending();
+  }
   return items;
 }
 
+globalThis.CcfddlConferenceParser = { parseAllConfYaml };
