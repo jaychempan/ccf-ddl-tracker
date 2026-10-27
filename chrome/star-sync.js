@@ -3,12 +3,14 @@
 (() => {
   const KEY = "starSync";
   const ALARM = "ccfddl-star-sync";
+  const DEADLINE_ALARM = "ccfddl-deadline-sync";
   const validId = (id) => typeof id === "string" && /^[A-Za-z0-9][A-Za-z0-9._&+'-]{0,99}$/.test(id);
   const identity = (item) => item.conferenceDeadlineId || JSON.stringify([item.title, item.datetime]);
   const ids = (items) => new Set(items.map((item) => item.conferenceId).filter(validId));
   let queue = Promise.resolve();
   let syncing = null;
   let resync = false;
+  let refreshingDeadlines = null;
   const serialize = (work) => {
     const result = queue.then(work);
     queue = result.catch(() => {});
@@ -20,6 +22,48 @@
       throw new Error("invalid_storage");
     }
     return { deadlines: data.deadlines, state: data[KEY] };
+  }
+  function refreshDeadlines() {
+    if (refreshingDeadlines) return refreshingDeadlines;
+    refreshingDeadlines = (async () => {
+      const initial = await serialize(read);
+      if (!initial.deadlines.length) return { deadlines: [], updated: 0, unmatched: 0 };
+      const controller = new AbortController();
+      let timer;
+      try {
+        const catalog = await Promise.race([
+          (async () => {
+            const response = await fetch("https://ccfddl.com/conference/allconf.yml", {
+              cache: "no-store", credentials: "omit", signal: controller.signal,
+            });
+            if (!response.ok) throw new Error("catalog_unavailable");
+            const items = globalThis.CcfddlConferenceParser.parseAllConfYaml(await response.text());
+            if (!items.some((item) => validId(item.conferenceId))) throw new Error("invalid_catalog");
+            return items;
+          })(),
+          new Promise((_, reject) => {
+            timer = setTimeout(() => { controller.abort(); reject(new Error("timeout")); }, 15000);
+          }),
+        ]);
+        // Re-read inside the same queue as add/remove and star-sync commits.
+        // A response must never resurrect a card removed while fetching.
+        return await serialize(async () => {
+          const { deadlines, state } = await read();
+          const result = globalThis.CcfddlConferenceParser.reconcileConferenceDeadlines(deadlines, catalog);
+          if (result.updated) {
+            if (state.enabled) {
+              const before = ids(deadlines);
+              state.pending ||= {};
+              for (const id of ids(result.deadlines)) if (!before.has(id)) state.pending[id] = true;
+            }
+            state.revision = (state.revision || 0) + 1;
+            await chrome.storage.local.set({ deadlines: result.deadlines, [KEY]: state });
+          }
+          return result;
+        });
+      } finally { clearTimeout(timer); }
+    })().finally(() => { refreshingDeadlines = null; });
+    return refreshingDeadlines;
   }
   async function bridge(tabId, request) {
     let timer;
@@ -85,9 +129,9 @@
       for (const [id, value] of Object.entries(state.pending)) {
         if (value) selected.add(id); else selected.delete(id);
       }
-      const byIdentity = new Map(catalog.map((item) => [identity(item), item]));
       const updated = deadlines.filter((item) => !validId(item.conferenceId) || selected.has(item.conferenceId))
-        .map((item) => item.conferenceDeadlineId && byIdentity.has(identity(item)) ? { ...item, ...byIdentity.get(identity(item)) } : item);
+        .map((item) => item.conferenceId
+          ? globalThis.CcfddlConferenceParser.reconcileConferenceDeadlines([item], catalog).deadlines[0] : item);
       const excluded = new Set((state.excluded || []).filter((key) => selected.has(key.split(":")[0])));
       state.excluded = [...excluded];
       const existing = new Set(updated.map(identity));
@@ -141,8 +185,11 @@
             if (!merged.rank[field] && item.rank?.[field]) merged.rank[field] = item.rank[field];
           }
           if (item.conferenceId) {
+            merged.source = "ccfddl";
             merged.conferenceId = item.conferenceId;
             merged.conferenceDeadlineId = item.conferenceDeadlineId;
+            // Re-adding an edition must update its dates as well as its tags.
+            if (saved.conferenceDeadlineId === item.conferenceDeadlineId) Object.assign(merged, item);
           }
           updated[found] = merged;
         }
@@ -185,6 +232,7 @@
     else await chrome.tabs.create({ url: "https://ccfddl.com/" });
   }
   async function handle(message) {
+    if (message.action === "refreshDeadlines") return refreshDeadlines();
     if (message.action === "connect") {
       await serialize(async () => {
         const { state } = await read();
@@ -232,10 +280,12 @@
   });
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === ALARM) requestSync().catch(console.error);
+    if (alarm.name === DEADLINE_ALARM) refreshDeadlines().catch(console.error);
   });
   async function recover() {
     const { state } = await read();
     if (state.enabled && !await chrome.alarms.get(ALARM)) await chrome.alarms.create(ALARM, { periodInMinutes: 1 });
+    if (!await chrome.alarms.get(DEADLINE_ALARM)) await chrome.alarms.create(DEADLINE_ALARM, { periodInMinutes: 360 });
   }
   recover().catch(console.error);
   globalThis.CcfddlStarSync = { handle, requestSync };

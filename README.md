@@ -5,7 +5,7 @@
 
   Chrome extension for tracking CCF deadlines with a compact popup, import flow, local storage, and optional CCFDDL star sync.
 
-  **Version:** `v2.6`
+  **Version:** `v2.7`
 
   [中文版本](README.zh-CN.md) ·
   [GitHub Pages](https://jaychempan.github.io/ccf-ddl-tracker/) ·
@@ -23,9 +23,9 @@
   <img src="website/previewv2.6.png" alt="CCF DDL Tracker v2.6 light and dark previews showing the account icon, a compact conference card and expanded submission stages, using example dates" width="720" />
 </div>
 
-v2.6 connects your CCFDDL conference stars through the website’s GitHub login. Each conference edition gets one compact card showing its next deadline, with stages, submission rounds and calendar actions inside. The account icon stays beside My DDLs; sync runs automatically after connecting. Save failures and an unavailable background now have separate recovery prompts. The preview uses example dates, not live conference information.
+v2.7 keeps saved conference cards in sync with the latest official deadlines, including rescheduled dates and time-zone changes. Open the popup or click Refresh to check immediately; a background check also runs every six hours. No login is required. The image above shows the v2.6 card layout with example dates; it is retained as an interface reference.
 
-This repository is versioned as v2.6 (manifest: `2.6.0`). Load it unpacked to try the changes; pushing source updates to GitHub does not update the Chrome Web Store package. Store distribution requires a separate submission and review.
+This repository is versioned as v2.7 (manifest: `2.7.0`). Load it unpacked to try the changes; pushing source updates to GitHub does not update the Chrome Web Store package. Store distribution requires a separate submission and review.
 
 ---
 
@@ -49,7 +49,7 @@ Install directly from the Chrome Web Store:
 4. Select the [`chrome/`](chrome/) directory in this repository.
 5. Pin `CCF DDL Tracker` to the toolbar and click the icon to use it.
 
-For an existing unpacked installation, update the same `chrome/` directory and click **Reload** at `chrome://extensions/` (or `edge://extensions/`). Reopen the popup and check for **v2.6**. Refresh any open ccfddl.com tabs before connecting stars. Keep the existing installed extension to retain local data.
+For an existing unpacked installation, update the same `chrome/` directory and click **Reload** at `chrome://extensions/` (or `edge://extensions/`). Reopen the popup and check for **v2.7**. Refresh any open ccfddl.com tabs before connecting stars. Keep the existing installed extension to retain local data.
 
 <details>
   <summary>Need more extension-specific details?</summary>
@@ -87,7 +87,7 @@ The first connection merges both sets of conference stars. Stars represent an en
 
 Offline changes are retained for retry. Switching the website account pauses sync; disconnect and reconnect explicitly to merge the retained local conferences into another account. Disconnecting keeps local deadlines and website stars, but discards pending sync operations. Sync uses the website's existing HttpOnly session through an isolated content script; the extension stores the account login, pending conference IDs and sync state locally, never a GitHub token. No website/backend changes or additional extension permissions are required.
 
-This connects CCFDDL conference stars, not GitHub repository stars. See the [v2.6.0 release notes](releases/v2.6.0.md) for upgrade details.
+This connects CCFDDL conference stars, not GitHub repository stars. See the [v2.7.0 release notes](releases/v2.7.0.md) for upgrade details.
 
 ---
 
@@ -138,6 +138,15 @@ If the toolbar popup stops opening in Edge or Chrome, see the [popup troubleshoo
 ## Changelog
 
 <details open>
+  <summary><strong>v2.7</strong> - Official deadline refresh for saved cards</summary>
+
+  - Saved cards now refresh deadline dates and time zones from the official CCFDDL catalog when the popup opens, on Refresh, and every six hours in the background. No login or website tab is required.
+  - Legacy imports and ICS entries acquire edition/stage IDs when they uniquely match the catalog. Ambiguous or unavailable dates retain their saved values.
+  - Offline requests keep saved data. Concurrent additions and removals survive refresh; deleted stages are not restored. Re-adding a linked conference updates its saved dates.
+  - Kept deadline sync silent, refreshed recommendation caching, and regression coverage for rescheduling, time zones, legacy migration, offline recovery and real Chrome behavior.
+</details>
+
+<details>
   <summary><strong>v2.6</strong> - Website-star sync, compact conference cards, and save recovery</summary>
 
   - Added opt-in CCFDDL conference-star sync through the website’s GitHub login. Connect from the small account icon beside My DDLs; subsequent sync is automatic and the existing refresh button also refreshes stars.

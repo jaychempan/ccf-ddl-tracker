@@ -1,6 +1,6 @@
 # CCF DDL Tracker (Chrome Extension)
 
-当前源码版本为 **v2.6**（manifest：`2.6.0`），新增 CCFDDL 收藏同步、简约会议卡片及保存恢复提示。已有已解压安装请在扩展管理页重新加载，保留原安装项即可沿用本地数据。商店安装包需单独提交审核。/ This source checkout is **v2.6** (manifest: `2.6.0`), with CCFDDL star sync, compact conference cards and save recovery. Reload your existing unpacked installation to keep its local data. Web Store distribution requires a separate submission and review.
+当前源码版本为 **v2.7**（manifest：`2.7.0`），新增已保存卡片同步官网最新截止时间，无需登录。已有已解压安装请重新加载原安装项以保留本地数据。商店安装包需单独提交审核。/ This source checkout is **v2.7** (manifest: `2.7.0`), with official deadline refresh for saved cards and no login requirement. Reload the existing unpacked installation to retain local data. Web Store distribution requires a separate submission and review.
 
 ## 使用方法 / Usage
 
@@ -13,7 +13,7 @@ Edge 用户可在 `edge://extensions/` 按相同步骤加载。从 v2.4 起，�
 
 ## 功能说明 / Features
 
-- **当前版本**：扩展版本已更新为 `v2.6`，弹窗右上角会显示版本标记。/ The extension is now `v2.6`, and the popup header shows the current version.
+- **当前版本**：扩展版本已更新为 `v2.7`，弹窗右上角会显示版本标记。/ The extension is now `v2.7`, and the popup header shows the current version.
 - **添加 DDL**：填写标题、日期、时间，点击“添加”。/ Add title/date/time and click “Add”.
 - **简约会议卡片**：按届次合并日期，默认显示最近节点，展开后查看阶段和轮次；手动条目单独显示。/ One card per edition shows its next deadline; expand stages and rounds. Manual entries remain separate.
 - **会议标签**：展开后的会议卡片默认显示已有的 CCF 等级和分类，可在设置 → 会议标签中开关显示或选择 CORE、TH-CPL、地点。此前关闭显示的选择会保留。旧条目缺少标签时，点击导入区搜索框加载推荐会议，会补全标题与截止时间唯一匹配的条目。/ Expanded conference cards show available CCF rank and category tags by default. Settings → Conference Tags controls visibility and optional CORE, TH-CPL, and place fields; saved opt-outs are preserved. Loading recommendations via the import search field fills missing tags only for unique title-and-deadline matches.
@@ -114,13 +114,25 @@ If the popup stops opening in Edge or Chrome, see the [troubleshooting guide](PO
 
 ## CCFDDL 收藏同步 / CCFDDL star sync
 
-v2.6 增加可选同步：点击“我的截止日期”右侧的小账号图标，已有已登录的网站标签页时直接连接，否则在打开的 ccfddl.com 页面登录 GitHub，并保留该标签页。首次合并收藏，此后自动同步；现有刷新按钮同时刷新截止日期和收藏。再次点击图标直接刷新，悬停可查看状态，没有弹出菜单。取消设置中的“同步网站收藏”即可断开。网站星标可能需要刷新页面才显示。手动 DDL 不上传，断开不删除本地数据或网站收藏，但会取消待同步操作。每届会议可对应多个阶段，删除最后一条关联 DDL 才取消星标。旧版导入或 ICS 条目缺少会议 ID 时，请从最新会议列表重新添加以关联。账号切换会暂停同步，需要断开后重新连接。
+### 官网截止时间更新 / Official deadline updates
 
-v2.6 adds optional sync through the small account icon beside My DDLs. A signed-in CCFDDL tab connects immediately; otherwise sign in with GitHub on the website that opens and keep the tab open. First sync merges stars, then runs automatically. The existing refresh button also refreshes stars; click the account icon to refresh directly, or hover for status. There is no account menu. Uncheck Sync website stars in Settings to disconnect. Reload the website to see extension changes. Manual deadlines stay local. Disconnect preserves local entries and website stars but discards pending changes. Removing the last deadline for an edition unstars it. Re-add old imports or ICS entries from the current catalog to associate edition IDs. Account changes pause sync until you explicitly reconnect.
+打开插件、点击“我的截止日期”旁的刷新按钮，或后台每 6 小时检查时，会直接读取官网公开会议数据，更新已保存卡片的截止时间（含时区变动）。无需登录、开启收藏同步或保留网站标签页。同步静默进行，更新后倒计时及工具栏徽标会跟随本地数据重新计算。
+
+旧版导入条目会按会议标题、届次、阶段和会议链接唯一匹配并补上关联 ID；缺少年份的 ICS 条目只有在标题和链接唯一匹配时才关联。无法唯一匹配、官网不再提供日期或请求失败时保留原值。手动新增条目不自动更新时间。时间同步只更新已有节点，不恢复已删除的节点。
+
+Opening the popup, clicking Refresh beside My DDLs, or the six-hour background check fetches the public official catalog and updates saved deadlines, including timezone changes. No login, star sync, or open website tab is needed. Deadline sync runs silently; countdowns and the toolbar badge recalculate from the updated local data.
+
+Legacy imports acquire edition/stage IDs only when their title and conference URL uniquely match the catalog. Yearless ICS entries also require a unique match. Ambiguous or unavailable dates and failed requests retain saved values. Newly created manual entries are not changed. Deadline refresh updates saved stages without restoring deleted ones.
+
+v2.6 增加可选同步：点击“我的截止日期”右侧的小账号图标，已有已登录的网站标签页时直接连接，否则在打开的 ccfddl.com 页面登录 GitHub，并保留该标签页。首次合并收藏，此后自动同步；现有刷新按钮同时刷新截止日期和收藏。再次点击图标直接刷新，悬停可查看状态，没有弹出菜单。取消设置中的“同步网站收藏”即可断开。网站星标可能需要刷新页面才显示。手动 DDL 不上传，断开不删除本地数据或网站收藏，但会取消待同步操作。每届会议可对应多个阶段，删除最后一条关联 DDL 才取消星标。旧版条目经时间刷新仍无法关联时，请从最新会议列表重新添加以关联。账号切换会暂停同步，需要断开后重新连接。
+
+v2.6 adds optional sync through the small account icon beside My DDLs. A signed-in CCFDDL tab connects immediately; otherwise sign in with GitHub on the website that opens and keep the tab open. First sync merges stars, then runs automatically. The existing refresh button also refreshes stars; click the account icon to refresh directly, or hover for status. There is no account menu. Uncheck Sync website stars in Settings to disconnect. Reload the website to see extension changes. Manual deadlines stay local. Disconnect preserves local entries and website stars but discards pending changes. Removing the last deadline for an edition unstars it. Re-add legacy entries from the current catalog if deadline refresh cannot uniquely associate their edition IDs. Account changes pause sync until you explicitly reconnect.
 
 `site-sync.js` uses only the site's existing `/api/bootstrap`, `/api/stars/:id` and conference catalog endpoints. The service worker serializes local writes and sync, persists retries, and checks the signed-in account before writes. It never reads cookies or stores GitHub tokens. Local sync metadata includes the GitHub login, pending edition IDs, excluded stages and last sync status. No new permission is requested; the content script matches only `https://ccfddl.com/*`.
 
 Run `node chrome/tests/star-sync.test.mjs` for sync and catalog regression coverage.
+
+Run `PLAYWRIGHT_MODULE=/path/to/playwright-core node chrome/tests/deadline-sync-browser.cjs` for a real Chrome extension check in a disposable profile (Chrome 155 or another build supporting `Extensions.loadUnpacked`; set `CHROME_PATH` on non-macOS systems). It checks legacy deadline updates, cards, badge updates, offline retention and the background alarm without accessing personal browser data.
 
 ### 合并会议卡片 / Grouped conference cards
 
@@ -130,6 +142,6 @@ Both import results and My DDLs show one card per explicit conference edition ID
 
 ## 发布包 / Release package
 
-在仓库根目录执行 `python3 scripts/package-extension.py`，生成 `dist/ccf-ddl-tracker-v2.6.0.zip`。安装包根目录包含 manifest 与运行所需资源，不包含测试、文档或网站。/ Run `python3 scripts/package-extension.py` from the repository root to build `dist/ccf-ddl-tracker-v2.6.0.zip`. It contains the manifest and runtime resources, excluding tests, docs and the website.
+在仓库根目录执行 `python3 scripts/package-extension.py`，生成 `dist/ccf-ddl-tracker-v2.7.0.zip`。安装包根目录包含 manifest 与运行所需资源，不包含测试、文档或网站。/ Run `python3 scripts/package-extension.py` from the repository root to build `dist/ccf-ddl-tracker-v2.7.0.zip`. It contains the manifest and runtime resources, excluding tests, docs and the website.
 
-完整更新说明 / Full release notes: [v2.6.0](../releases/v2.6.0.md).
+完整更新说明 / Full release notes: [v2.7.0](../releases/v2.7.0.md).

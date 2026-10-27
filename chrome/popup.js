@@ -193,6 +193,7 @@ const translations = {
     context_hint: "右键条目可添加到日历",
     empty_state: "还没有添加任何截止日期",
     refresh_button: "刷新",
+    refresh_official: "同步官网最新截止时间",
     settings_button: "设置",
     settings_title: "设置",
     theme_label: "外观",
@@ -297,6 +298,7 @@ const translations = {
     context_hint: "Right-click a card to add it to calendar",
     empty_state: "No deadlines yet",
     refresh_button: "Refresh",
+    refresh_official: "Sync latest official deadlines",
     settings_button: "Settings",
     settings_title: "Settings",
     theme_label: "Appearance",
@@ -1476,7 +1478,7 @@ async function fetchConferenceItems(url, parse) {
   const controller = new AbortController();
   let timeout;
   const request = async () => {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
     if (!response.ok) throw new Error(`Conference source returned HTTP ${response.status}`);
     const items = parse(await response.text());
     if (items.length === 0) throw new Error("Conference source contained no readable deadlines");
@@ -1953,6 +1955,31 @@ function animateRefreshButton() {
   }, 700);
 }
 
+let deadlineSyncPromise = null;
+async function refreshSavedDeadlineDates() {
+  if (!chrome.runtime.sendMessage) return;
+  if (deadlineSyncPromise) return deadlineSyncPromise;
+  deadlineSyncPromise = (async () => {
+    try {
+      const response = await chrome.runtime.sendMessage({ type: "ccfddl-sync", action: "refreshDeadlines" });
+      if (!response?.ok) throw new Error("deadline_sync_failed");
+      // Read the current store, rather than rendering a potentially stale
+      // response after a concurrent add/remove in another popup.
+      if (deadlineLoadPromise) await deadlineLoadPromise;
+      await loadDeadlines();
+      // Invalidate recommendations too, so re-adding from an old search result
+      // cannot restore the pre-refresh deadline.
+      ccfddlItems = [];
+      renderCcfddlList([]);
+      if (isCcfddlDropdownOpen) loadCcfddlData();
+    } catch (error) {
+      // Keep saved cards and retry on the next refresh without adding UI text.
+      console.warn("[CCF DDL Tracker] Could not refresh official deadlines:", error);
+    }
+  })().finally(() => { deadlineSyncPromise = null; });
+  return deadlineSyncPromise;
+}
+
 function shouldIgnoreStartupInteraction() {
   return performance.now() - popupOpenedAt < STARTUP_CLICK_GUARD_MS;
 }
@@ -2023,7 +2050,7 @@ form.addEventListener("submit", async (event) => {
   if (!datetime) return;
 
   if (chrome.runtime.sendMessage) {
-    if (await sendDeadlineMutation("add", { item: { title, datetime, ...(url ? { url } : {}) } })) {
+    if (await sendDeadlineMutation("add", { item: { title, datetime, source: "manual", ...(url ? { url } : {}) } })) {
       form.reset();
       timeInput.value = "23:59";
       clearAddFormDraft();
@@ -2033,7 +2060,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   chrome.storage.local.get({ [STORAGE_KEY]: [] }, (result) => {
-    const deadline = { title, datetime };
+    const deadline = { title, datetime, source: "manual" };
     if (url) {
       deadline.url = url;
     }
@@ -2096,6 +2123,8 @@ function initializePopup() {
     isPopupReady = true;
     setPopupStatus("ready");
     startAutoRefresh();
+    // Paint local cards first; public catalog sync never blocks startup.
+    refreshSavedDeadlineDates();
     performance.mark("ccf-popup-ready");
     performance.measure("ccf-popup-initialization", "ccf-popup-initialize", "ccf-popup-ready");
     // Record the first available frame without making readiness depend on it.
@@ -2184,6 +2213,7 @@ ccfddlSearchInput.addEventListener("input", filterCcfddlList);
 refreshDeadlinesBtn.addEventListener("click", () => {
   animateRefreshButton();
   loadDeadlines();
+  refreshSavedDeadlineDates();
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {

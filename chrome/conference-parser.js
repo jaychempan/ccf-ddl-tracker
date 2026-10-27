@@ -150,6 +150,7 @@ function parseIcs(text) {
       const date = parseIcsDate(event.start, event.startTimeZone);
       if (!event.summary || !date) return null;
       return {
+        source: "ccfddl",
         title: event.summary,
         datetime: date.toISOString(),
         url: event.url || "",
@@ -211,6 +212,7 @@ function parseAllConfYaml(text) {
         let url = "";
         try { const parsed = new URL(ed.link); if (["http:", "https:"].includes(parsed.protocol)) url = parsed.href; } catch {}
         items.push({
+          source: "ccfddl",
           title: `${conf.title} ${ed.year}${suffix ? ` (${suffix})` : ""}`,
           datetime, url, description: conf.description || "", sub: conf.sub || "",
           rank: conf.rank, place: ed.place || "",
@@ -226,4 +228,51 @@ function parseAllConfYaml(text) {
   return items;
 }
 
-globalThis.CcfddlConferenceParser = { parseAllConfYaml };
+// Dates are values, never matching keys: an extension of a deadline must still
+// resolve to the same edition/stage. Legacy imports need a unique title AND URL.
+function reconcileConferenceDeadlines(saved, catalog) {
+  const normalize = (value) => typeof value === "string" ? value.replace(/\s+/g, " ").trim().toLowerCase() : "";
+  const withoutYear = (value) => normalize(normalize(value).replace(/\b(?:19|20|21)\d{2}\b/g, ""));
+  const urlKey = (value) => {
+    try { const url = new URL(value); return `${url.hostname}${url.pathname.replace(/\/$/, "")}${url.search}`; }
+    catch { return ""; }
+  };
+  let updated = 0, unmatched = 0;
+  const deadlines = saved.map((item) => {
+    if (item.source === "manual") return item;
+    let matches;
+    if (item.conferenceDeadlineId) {
+      matches = catalog.filter((entry) => entry.conferenceDeadlineId === item.conferenceDeadlineId);
+    } else if (item.conferenceId) {
+      matches = catalog.filter((entry) => entry.conferenceId === item.conferenceId && normalize(entry.title) === normalize(item.title));
+    } else {
+      const url = urlKey(item.url);
+      if (!url || typeof item.title !== "string") {
+        if (item.source === "ccfddl") unmatched++;
+        return item;
+      }
+      const hasYear = /\b(?:19|20|21)\d{2}\b/.test(item.title);
+      matches = catalog.filter((entry) => urlKey(entry.url) === url &&
+        (hasYear ? normalize(entry.title) === normalize(item.title) : withoutYear(entry.title) === normalize(item.title)));
+      if (!matches.length) {
+        // Older parsers used just "(abstract)" and omitted round comments.
+        // A bare stage can be recovered only if it is unique in that edition.
+        const parts = item.title.match(/^(.*?)(?:\s+\((abstract|rebuttal|decision)\))?$/i);
+        const stage = parts[2] ? `${parts[2].toLowerCase()}_deadline` : "deadline";
+        matches = catalog.filter((entry) => urlKey(entry.url) === url && entry.deadlineStage === stage &&
+          (hasYear ? normalize(entry.conferenceTitle) : withoutYear(entry.conferenceTitle)) === normalize(parts[1]));
+      }
+      // Without a year in old ICS titles, a reused series URL cannot identify
+      // an edition. Never pick the nearest date or silently switch years.
+    }
+    if (matches.length !== 1) { unmatched++; return item; }
+    const latest = matches[0];
+    if (!latest.conferenceDeadlineId || !Number.isFinite(Date.parse(latest.datetime))) { unmatched++; return item; }
+    const merged = { ...item, ...latest };
+    if (JSON.stringify(merged) !== JSON.stringify(item)) updated++;
+    return merged;
+  });
+  return { deadlines, updated, unmatched };
+}
+
+globalThis.CcfddlConferenceParser = { parseAllConfYaml, reconcileConferenceDeadlines };

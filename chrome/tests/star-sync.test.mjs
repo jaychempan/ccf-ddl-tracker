@@ -37,8 +37,14 @@ function harness(data = {}) {
   const stored = { deadlines: [], starSync: { enabled: true }, ...copy(data) };
   const remote = { user: { login: "alice" }, starred: ["cvpr99", "acl99"] };
   const calls = [];
-  const state = { stored, remote, calls, tabs: true, fail: false, catalog, hold: null, navigation: [] };
-  const context = vm.createContext({ URL, Date, setTimeout, clearTimeout, console,
+  const state = { stored, remote, calls, tabs: true, fail: false, catalog, hold: null, navigation: [], fetches: [], alarms: [] };
+  const context = vm.createContext({ URL, Date, AbortController, setTimeout, clearTimeout, console,
+    fetch: async (url, options) => {
+      state.fetches.push({ url, options });
+      if (state.fetchHold) await state.fetchHold;
+      if (state.fail) throw new Error("offline");
+      return { ok: state.httpOk !== false, text: async () => state.catalog };
+    },
     chrome: {
       storage: { local: {
         get: async (defaults) => copy({ ...defaults, ...stored }),
@@ -64,7 +70,7 @@ function harness(data = {}) {
         },
       },
       runtime: { onMessage: { addListener(fn) { state.listener = fn; } }, id: "test", getURL: (p) => `chrome-extension://test/${p}` },
-      alarms: { get: async () => ({}), create: async () => {}, clear: async () => {}, onAlarm: { addListener() {} } },
+      alarms: { get: async () => null, create: async (name, options) => { state.alarms.push({ name, options }); }, clear: async () => {}, onAlarm: { addListener(fn) { state.onAlarm = fn; } } },
     },
   });
   vm.runInContext(parser, context);
@@ -197,3 +203,72 @@ await signedOut.settle();
 assert.equal(signedOut.state.navigation[0].action, "update", "expired sessions open the website for sign-in");
 assert.equal(signedOut.stored.starSync.status, "sign_in");
 console.log("Star sync: parser, merge, deletion, offline retry, restart, account guard, invalid catalog, opt-in, concurrency and sender checks passed");
+
+// Public deadline refresh works without website tabs, login or star opt-in.
+const publicSync = harness({ starSync: { enabled: false }, deadlines: [parsed[1], parsed[2], manual] });
+publicSync.state.tabs = false;
+publicSync.state.catalog = catalog.replace("2099-11-08 23:59:59", "2099-11-21 23:59:59").replace("timezone: UTC-12", "timezone: UTC+8");
+const refreshed = await publicSync.api.handle({ action: "refreshDeadlines" });
+assert.equal(refreshed.updated, 2);
+assert.equal(publicSync.stored.deadlines[1].datetime, "2099-11-21T15:59:59.000Z");
+assert.deepEqual(publicSync.stored.deadlines[2], manual);
+assert.equal(publicSync.calls.length, 0, "public refresh never invokes the signed-in website bridge");
+assert.equal(publicSync.state.fetches[0].options.cache, "no-store");
+assert.equal(publicSync.state.fetches[0].options.credentials, "omit");
+assert.ok(publicSync.state.alarms.some(({ name, options }) => name === "ccfddl-deadline-sync" && options.periodInMinutes === 360));
+assert.equal((await publicSync.api.handle({ action: "refreshDeadlines" })).updated, 0, "repeat refresh is idempotent");
+assert.equal(publicSync.stored.deadlines.length, 3);
+const savedPublic = copy(publicSync.stored.deadlines);
+for (const failure of ["offline", "invalid", "http"]) {
+  publicSync.state.fail = failure === "offline";
+  publicSync.state.httpOk = failure !== "http";
+  publicSync.state.catalog = "not a conference catalog";
+  await assert.rejects(publicSync.api.handle({ action: "refreshDeadlines" }));
+  assert.deepEqual(publicSync.stored.deadlines, savedPublic, `${failure} retains saved dates`);
+}
+
+const reconcile = (items, entries = parsed) => copy(h.context.CcfddlConferenceParser.reconcileConferenceDeadlines(items, entries));
+const legacy = { title: parsed[2].title, url: parsed[2].url, datetime: "2099-10-01T00:00:00Z" };
+assert.equal(reconcile([legacy]).deadlines[0].datetime, parsed[2].datetime, "legacy matching does not depend on the stale date");
+assert.equal(reconcile([legacy]).deadlines[0].conferenceDeadlineId, parsed[2].conferenceDeadlineId);
+const oldIcs = { ...legacy, title: "CVPR (Main round)" };
+assert.equal(reconcile([oldIcs]).deadlines[0].conferenceId, "cvpr99", "unique yearless ICS import is linked");
+assert.equal(reconcile([{ ...legacy, title: "CVPR (abstract)" }]).deadlines[0].conferenceDeadlineId, parsed[1].conferenceDeadlineId, "old abstract titles without round labels are linked only to a unique stage");
+assert.equal(reconcile([{ ...legacy, title: "CVPR" }]).deadlines[0].conferenceDeadlineId, parsed[2].conferenceDeadlineId, "old bare titles are linked to a unique submission stage");
+const duplicateEdition = { ...parsed[2], title: "CVPR 2100 (Main round)", conferenceId: "cvpr00", conferenceDeadlineId: "cvpr00:0:deadline" };
+assert.deepEqual(reconcile([oldIcs], [...parsed, duplicateEdition]).deadlines[0], oldIcs, "reused URLs cannot choose a different edition");
+assert.deepEqual(reconcile([{ ...legacy, source: "manual" }]).deadlines[0], { ...legacy, source: "manual" });
+assert.deepEqual(reconcile([{ ...legacy, url: "" }]).deadlines[0], { ...legacy, url: "" }, "title alone cannot identify a legacy import");
+assert.deepEqual(reconcile([parsed[2]], [parsed[0]]).deadlines[0], parsed[2], "missing or TBD stages are retained");
+assert.deepEqual(reconcile([parsed[2]], [parsed[2], parsed[2]]).deadlines[0], parsed[2], "ambiguous IDs are retained");
+assert.equal(reconcile([parsed[2]], [{ ...parsed[2], datetime: "2000-01-01T00:00:00Z" }]).deadlines[0].datetime, "2000-01-01T00:00:00Z", "an advanced deadline is updated even if already past");
+
+const publicRace = harness({ starSync: { enabled: false }, deadlines: [parsed[1], parsed[2]] });
+let releasePublic;
+publicRace.state.fetchHold = new Promise((resolve) => { releasePublic = resolve; });
+const firstRefresh = publicRace.api.handle({ action: "refreshDeadlines" });
+const secondRefresh = publicRace.api.handle({ action: "refreshDeadlines" });
+await new Promise((resolve) => setImmediate(resolve));
+await publicRace.api.handle({ action: "remove", item: parsed[1] });
+await publicRace.api.handle({ action: "add", item: manual });
+releasePublic();
+await Promise.all([firstRefresh, secondRefresh]);
+assert.equal(publicRace.state.fetches.length, 1, "concurrent refreshes share a request");
+assert.deepEqual(publicRace.stored.deadlines, [parsed[2], manual], "late catalog cannot restore deleted stages or lose new cards");
+
+const reimport = harness({ starSync: { enabled: false }, deadlines: [{ ...parsed[2], datetime: "2099-10-01T00:00:00Z" }] });
+await reimport.api.handle({ action: "addMany", items: [parsed[2]] });
+assert.equal(reimport.stored.deadlines.length, 1);
+assert.equal(reimport.stored.deadlines[0].datetime, parsed[2].datetime, "reimport updates an existing card's old deadline");
+const migratingStars = harness({ starSync: { enabled: true, account: "alice" }, deadlines: [legacy] });
+migratingStars.remote.starred = [];
+await migratingStars.api.handle({ action: "refreshDeadlines" });
+assert.equal(migratingStars.stored.starSync.pending.cvpr99, true, "legacy linking preserves local selection for star sync");
+await migratingStars.settle();
+assert.ok(migratingStars.remote.starred.includes("cvpr99"));
+assert.ok(migratingStars.stored.deadlines.some((item) => item.conferenceDeadlineId === parsed[2].conferenceDeadlineId), "subsequent star sync cannot delete the migrated card");
+const scheduled = harness({ starSync: { enabled: false }, deadlines: [{ ...parsed[2], datetime: "2099-10-01T00:00:00Z" }] });
+scheduled.state.onAlarm({ name: "ccfddl-deadline-sync" });
+await new Promise((resolve) => setImmediate(resolve));
+assert.equal(scheduled.stored.deadlines[0].datetime, parsed[2].datetime, "background alarm refreshes without a popup or website tab");
+console.log("Public deadline sync: rescheduling, timezone, legacy migration, manual isolation, offline retention, alarm and concurrent mutations passed");

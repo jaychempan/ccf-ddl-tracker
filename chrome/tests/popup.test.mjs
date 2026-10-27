@@ -757,6 +757,35 @@ END:VCALENDAR`;
     assert.equal(h.getElement("deadline-list").children.length, 1);
   });
 
+  await check("official deadline sync starts after local render and the refresh button works without star sync", async () => {
+    const h = createPopupHarness(source, { deadlines: [sample] });
+    const requests = [];
+    let finish;
+    h.runtime.sendMessage = (message) => {
+      requests.push(message);
+      return new Promise((resolve) => { finish = resolve; });
+    };
+    await h.runTimers(0);
+    assert.equal(h.getElement("deadline-list").children.length, 1, "network does not delay saved cards");
+    assert.equal(h.evaluate("isPopupReady"), true);
+    assert.equal(requests[0].action, "refreshDeadlines");
+    h.getElement("refresh-deadlines").listeners.get("click")[0]();
+    assert.equal(requests.length, 1, "repeated refresh shares in-flight sync");
+    finish({ ok: true, unmatched: 0 });
+    await h.settle();
+    assert.equal(h.evaluate("deadlineSyncPromise"), null);
+    h.getElement("refresh-deadlines").listeners.get("click")[0]();
+    assert.equal(requests.length, 2);
+    finish({ ok: false });
+    await h.settle();
+    assert.equal(h.evaluate("deadlineSyncPromise"), null);
+    assert.equal(h.getElement("deadline-list").children.length, 1);
+    h.getElement("refresh-deadlines").listeners.get("click")[0]();
+    finish({ ok: true, unmatched: 1 });
+    await h.settle();
+    assert.equal(h.evaluate("deadlineSyncPromise"), null);
+  });
+
   return { passed: results.length, tests: results };
 }
 

@@ -44,7 +44,7 @@
       state.enabled && state.unavailable ? `${state.unavailable} ${text.unavailable}` : ""].filter(Boolean).join(" · ");
     refresh.classList.toggle("is-syncing", busy);
     refresh.setAttribute("aria-busy", String(busy));
-    const refreshLabel = state.enabled ? text.refresh : t("refresh_button");
+    const refreshLabel = state.enabled ? text.refresh : t("refresh_official");
     refresh.setAttribute("title", refreshLabel);
     refresh.setAttribute("aria-label", refreshLabel);
   }
