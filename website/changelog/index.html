@@ -77,6 +77,15 @@
                 This page records major product and interface changes across website and extension releases.
             </p>
 
+            <h2 data-i18n="changelog.v27.title">v2.7</h2>
+            <p data-i18n="changelog.v27.subtitle">Development preview: official deadline refresh for saved cards · October 25, 2026</p>
+            <ul>
+                <li data-i18n="changelog.v27.item1">Saved cards now refresh deadline dates and time zones from the official CCFDDL catalog when the popup opens, on Refresh, and every six hours in the background. No login or website tab is required.</li>
+                <li data-i18n="changelog.v27.item2">Legacy imports and ICS entries acquire edition/stage IDs when they uniquely match the catalog. Ambiguous or unavailable dates retain their saved values.</li>
+                <li data-i18n="changelog.v27.item3">Offline requests keep saved data. Concurrent additions and removals survive refresh; deleted stages are not restored. Re-adding a linked conference updates its saved dates.</li>
+                <li data-i18n="changelog.v27.item4">Kept deadline sync silent, refreshed recommendation caching, and regression coverage for rescheduling, time zones, legacy migration, offline recovery and real Chrome behavior.</li>
+            </ul>
+
             <h2 data-i18n="changelog.v26.title">v2.6</h2>
             <p data-i18n="changelog.v26.subtitle">Website-star sync, compact conference cards, and reliable save recovery · October 8, 2026</p>
             <ul>
@@ -172,6 +181,6 @@
         </div>
     </footer>
 
-    <script src="../script.js?v=078440f508c4"></script>
+    <script src="../script.js?v=4bc177d518ba"></script>
 </body>
 </html>

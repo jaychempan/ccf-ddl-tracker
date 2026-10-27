@@ -73,7 +73,7 @@
     <main class="site-main">
         <article class="article-shell">
             <h1 data-i18n="guide.title">Guide</h1>
-            <p data-i18n="guide.intro">A guide to CCF DDL Tracker v2.6: add conferences, connect website stars, and manage individual deadlines. Check your installed version when comparing features with the Chrome Web Store package.</p>
+            <p data-i18n="guide.intro">A guide to CCF DDL Tracker, including the v2.7 development preview: add conferences, sync official deadline changes, connect website stars, and manage individual deadlines. Official deadline refresh requires v2.7; check the version available from your installation channel.</p>
 
             <h2 data-i18n="guide.openPopup.title">Open the Popup</h2>
             <p data-i18n="guide.openPopup.body">Pin the extension to the toolbar and click its icon. You can also right-click the icon and choose Options to open the same tracker and saved data in a regular tab.</p>
@@ -90,6 +90,9 @@
 
             <h2 data-i18n="guide.import.title">Import Conferences from CCFDDL</h2>
             <p data-i18n="guide.import.body">Click the import search field to load CCFDDL conferences. Add conference saves the available dates for that edition together. Source time zones and official links are preserved. If the main dataset fails, either Chinese or English ICS feed can recover the import; each request has a 10-second timeout. ICS entries without an edition ID remain separate local entries.</p>
+
+            <h2 data-i18n="guide.deadlineSync.title">Keep saved deadlines up to date</h2>
+            <p data-i18n="guide.deadlineSync.body">Opening the popup, clicking Refresh beside My DDLs, and six-hour background checks update saved cards from the public CCFDDL catalog. No login or website tab is required. Deadline sync runs silently without adding messages above the cards. Uniquely matched legacy imports are linked automatically; ambiguous or unavailable dates and network failures retain saved values. Re-add an unmatched conference from the current catalog to link it. Newly created manual deadlines are not changed.</p>
 
             <h2 data-i18n="guide.cards.title">One Card per Conference Edition</h2>
             <p data-i18n="guide.cards.body">A conference card shows the next upcoming deadline and a compact countdown. Use the chevron to see all saved stages and submission rounds. Removing one stage hides it locally; Remove conference deletes all saved stages for the edition. Manual deadlines remain separate cards.</p>
@@ -141,6 +144,6 @@
         </div>
     </footer>
 
-    <script src="../script.js?v=078440f508c4"></script>
+    <script src="../script.js?v=4bc177d518ba"></script>
 </body>
 </html>
